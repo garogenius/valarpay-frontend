@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.valarpay.com
+
+# Sitemaps
+Sitemap: https://www.valarpay.com/sitemap.xml

@@ -1,0 +1,107 @@
+"use client";
+
+import { useRef, useState } from "react";
+import Accordion from "./Accordion";
+import { motion, useInView } from "framer-motion";
+import { fadeIn, textVariant } from "@/utils/motion";
+import { SectionWrapper } from "@/utils/hoc";
+
+const Faqs: React.FC = () => {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { amount: 0.25 });
+
+  const AccordionsData = [
+    {
+      title: "What is ValarPay?",
+      content:
+        "Experience seamless financial transactions with ValarPay, a leading financial service provider locally and globally. We make banking easy and convenient by allowing you to pay for multiple services in one place, access financial tools, and even earn through our agent program.",
+    },
+    {
+      title: "How can I download the ValarPay app?",
+      content:
+        "You can download the ValarPay app from the Google Play Store for Android or the Apple App Store for iOS. Install the app and enjoy seamless access to our features.",
+    },
+    {
+      title: "Is ValarPay secure?",
+      content:
+        "Your security is our priority. We use advanced encryption to protect your personal and payment information. We don’t store sensitive payment details and adhere to global compliance standards.",
+    },
+    {
+      title: "How do I create a ValarPay account?",
+      content:
+        "Creating an account is simple. Visit our platform, click 'Sign Up,' and provide the necessary details. Once registered, you can manage transactions, save frequent billers, and access our reseller program.",
+    },
+    {
+      title: "I forgot my password. How do I reset it?",
+      content:
+        "To reset your password, click 'Forgot Password' on the login page. Follow the instructions to receive a password reset link via email, and then set a new password.",
+    },
+    {
+      title: "What bills can I pay using ValarPay?",
+      content:
+        "ValarPay allows you to pay for a wide range of bills, including electricity, internet, cable TV, and mobile airtime. Visit our platform to see the full list of supported services.",
+    },
+    {
+      title: "What are virtual cards?",
+      content:
+        "Virtual cards are digital payment cards you can use for secure online transactions. They function like physical cards but exist only in digital form.",
+    },
+    {
+      title: "How do I create a virtual card?",
+      content:
+        "To create a virtual card, log into your ValarPay account, navigate to the 'Virtual Cards' section, and follow the on-screen instructions. You can customize your card for different purposes.",
+    },
+  ];
+
+  const handleAccordionToggle = (index: number) => {
+    setActiveIndex((prevIndex) => (prevIndex === index ? null : index));
+  };
+
+  return (
+    <div className="w-full flex justify-center">
+      <motion.div
+        ref={ref}
+        animate={isInView ? "show" : "hidden"}
+        initial="hidden"
+        className="w-[85%] lg:w-[72%] flex flex-col gap-10 lg:gap-20 items-center h-full py-12 sm:py-16 lg:py-20 dark:bg-dark-primary"
+      >
+        <div className="w-[90%] md:w-[80%] lg:w-[70%] flex flex-col items-center text-center">
+          <motion.span
+            variants={fadeIn("up", "spring", 0.05, 0.5)}
+            className="text-xs md:text-sm tracking-[0.2em] text-secondary font-semibold"
+          >
+            HAVE QUESTIONS?
+          </motion.span>
+          <motion.h2
+            variants={textVariant(0.1)}
+            className="mt-2 text-2xl sm:text-3xl md:text-4xl font-extrabold text-text-200 dark:text-text-400"
+          >
+            Frequently Asked Questions
+          </motion.h2>
+          <motion.p
+            variants={fadeIn("up", "spring", 0.15, 0.5)}
+            className="mt-2 text-text-1000 dark:text-text-400/80 text-sm md:text-base max-w-2xl"
+          >
+            See some of the frequently asked questions from our customers about
+            our services
+          </motion.p>
+        </div>
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+          {AccordionsData.map((item, index) => (
+            <Accordion
+              key={index}
+              title={item.title}
+              isOpen={activeIndex === index}
+              onToggle={() => handleAccordionToggle(index)}
+            >
+              {item.content}
+            </Accordion>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default SectionWrapper(Faqs, "faqs");
