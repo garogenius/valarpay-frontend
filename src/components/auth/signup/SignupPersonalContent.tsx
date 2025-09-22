@@ -360,7 +360,7 @@ const SignupPersonalContent = () => {
                     </div>
 
                     {currencyState && (
-                      <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+                      <div className="mt-2.5 sm:mt-0 sm:absolute sm:top-full sm:my-2.5 sm:z-10 px-1 py-2 overflow-y-auto overscroll-contain max-h-[70vh] w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md">
                         <SearchableDropdown
                           items={CurrencyOptions}
                           searchKey="value"
@@ -426,6 +426,7 @@ const SignupPersonalContent = () => {
                         />
                       </div>
                     )}
+
                   </div>
                 </>
               )}

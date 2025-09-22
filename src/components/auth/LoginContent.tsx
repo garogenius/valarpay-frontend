@@ -183,7 +183,7 @@ const LoginContent = () => {
 
       {/* Top-right call to action */}
       <div className="absolute top-4 right-4 z-20 flex items-center gap-3 text-sm">
-        <span className="text-text-200">Don't have an account?</span>
+        <span className="hidden sm:inline text-text-200">Don't have an account?</span>
         <Link href="/account-type" className="text-primary bg-primary/10 hover:bg-primary/20 transition-colors px-3 py-1.5 rounded-md">Get started</Link>
       </div>
 
@@ -195,7 +195,7 @@ const LoginContent = () => {
             transition={{ duration: 0.5, type: "tween" }}
             className="z-10 flex flex-col justify-start items-start w-[92%] xs:w-[86%] md:w-[72%] lg:w-[48%] xl:w-[40%] 2xl:w-[32%] bg-bg-600 dark:bg-bg-1100 dark:xs:border dark:border-border-600 rounded-2xl px-6 2xs:px-8 sm:px-10 py-2.5 2xs:py-4 sm:py-6 gap-6 2xs:gap-8 sm:gap-10 md:gap-12"
           >
-            <div className="text-white flex flex-col items-center justify-center w-full text-center">
+            <div className="text-white flex flex-col items-center justify-center w-full text-center gap-3">
               <Image
                 className="w-10 2xs:w-12 xs:w-16 "
                 src={images.logo}
