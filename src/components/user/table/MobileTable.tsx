@@ -14,7 +14,7 @@ const MobileTable: React.FC<CustomTableProps> = ({ data, columns }) => {
 
   return (
     <div className="w-full">
-      <div className="bg-bg-600 dark:bg-bg-1100 rounded-xl flex flex-col gap-6 py-4">
+      <div className="bg-dark-primary dark:bg-bg-1100 rounded-xl flex flex-col gap-6 py-4">
         {rows.map((row, rowIndex) => {
           prepareRow(row);
 

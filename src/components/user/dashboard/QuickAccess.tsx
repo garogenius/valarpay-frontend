@@ -50,7 +50,7 @@ const QuickAccess = () => {
         </h2>
       </div>
 
-      <div className="pb-10  w-full grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 justify-center items-center ">
+      <div className="pb-10  w-full grid grid-cols-2 xs:grid-cols-3 md:grid-cols-3 xl:grid-cols-6 2xl:grid-cols-6 gap-3 sm:gap-4 justify-center items-center ">
         {QuickAccessData.map((item, index) => (
           <div
             key={index}
@@ -64,7 +64,7 @@ const QuickAccess = () => {
                 navigate(item.path);
               }
             }}
-            className="cursor-pointer px-6 py-6 rounded-xl bg-bg-600 dark:bg-bg-1100 flex flex-col justify-center items-center gap-5"
+            className="shadow-sm cursor-pointer px-6 py-6 rounded-xl bg-white dark:bg-bg-1100 flex flex-col justify-center items-center gap-5"
           >
             <div className="flex justify-center items-center w-12 h-12 rounded-full bg-secondary text-text-900">
               <item.icon className="text-2xl" />

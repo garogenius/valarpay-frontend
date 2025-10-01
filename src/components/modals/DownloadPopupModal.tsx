@@ -25,7 +25,7 @@ const DownloadPopupModal: React.FC<DownloadPopupModalProps> = ({
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
           <div className="absolute inset-0 bg-black/80 dark:bg-black/60"></div>
         </div>
-        <div className="mx-2.5 2xs:mx-4 relative bg-bg-600 dark:bg-bg-1100 px-4 xs:px-8 md:px-16  w-full max-w-4xl max-h-[90%] rounded-2xl ">
+        <div className="mx-2.5 2xs:mx-4 relative bg-dark-primary dark:bg-bg-1100 px-4 xs:px-8 md:px-16  w-full max-w-4xl max-h-[90%] rounded-2xl ">
           <div
             className="absolute  inset-20 opacity-60 dark:opacity-40"
             style={{

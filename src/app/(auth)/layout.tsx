@@ -14,11 +14,14 @@ export default function HomeLayout({
     pathname === "/login" ||
     pathname === "/account-type" ||
     pathname === "/forgot-password" ||
+    pathname === "/verify-email" ||
+    pathname === "/validate-phoneNumber" ||
+    pathname === "/two-factor-auth" ||
     pathname.startsWith("/signup");
 
   return (
     <RootProtectionProvider>
-      <div className="flex flex-col min-h-screen h-full bg-bg-600 dark:bg-black">
+      <div className="flex flex-col min-h-screen h-full bg-dark-primary dark:bg-black">
         {!hideNavbar && <Navbar />}
         <div className="flex flex-1">{children}</div>
       </div>

@@ -20,6 +20,8 @@ import { useResend2faCode, useVerify2faCode } from "@/api/auth/auth.queries";
 import useUserStore from "@/store/user.store";
 import Cookies from "js-cookie";
 import images from "../../../public/images";
+import Link from "next/link";
+import AuthHeader from "./AuthHeader";
 
 const TwoFactorAuthContent = () => {
   const navigate = useNavigate();
@@ -162,115 +164,150 @@ const TwoFactorAuthContent = () => {
   const resendLoadingStatus = resend2faCodePending && !resend2faCodeError;
 
   return (
-    <div
-      className="relative w-full min-h-screen overflow-x-hidden"
-      style={{
-        backgroundImage: 'url("/images/home/landingPage/glassBuilding.jpg")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none z-10"
-        style={{ background: '#1C2E50CC' }}
-      />
+    <div className="relative w-full min-h-screen overflow-x-hidden">
+      {/* Left image section (desktop) */}
+      <div className="hidden md:block absolute inset-y-0 left-0 w-1/2">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'url("/images/home/landingPage/glassBuilding.jpg")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: '#1C2E50CC' }} />
 
-      {/* Top-left branding */}
-      <a href="/" className="absolute top-4 left-4 z-20 flex items-center gap-2">
-        <Image src={images.logo} alt="ValarPay logo" className="w-8 h-auto" />
-        <span className="text-white font-semibold text-lg tracking-wide">VALARPAY</span>
-      </a>
+        {/* Header on top of left section */}
+        <div className="absolute top-0 left-0 right-0 z-20">
+          <AuthHeader showCta={false} />
+        </div>
 
-      {/* Top-right call to action */}
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-3 text-sm">
-        <span className="text-text-200">Don't have an account?</span>
-        <a href="/account-type" className="text-primary bg-primary/10 hover:bg-primary/20 transition-colors px-3 py-1.5 rounded-md">Get started</a>
+        {/* Left content */}
+        <div className="relative z-20 h-full flex items-center">
+          <div className="pl-12 pr-8 max-w-2xl text-white space-y-6">
+            <div>
+              <h2 className="text-5xl font-bold mb-4 leading-tight text-primary">Secure Your Account</h2>
+              <p className="text-2xl opacity-95 mb-6 leading-relaxed">Two-factor authentication adds an extra layer of security to your account.</p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-start gap-4">
+                <div className="mt-1">
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-xl opacity-90">Enter the 6-digit code from your authenticator app</p>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="mt-1">
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-xl opacity-90">Or use a backup code if you have one</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Content */}
-      <div className="relative z-20 flex flex-col justify-center items-center w-full gap-8 mt-32 sm:mt-36 lg:mt-40 xl:mt-48 mb-12 sm:mb-14 lg:mb-16 xl:mb-20">
-        <motion.div
-          whileInView={{ opacity: [0, 1] }}
-          transition={{ duration: 0.5, type: "tween" }}
-          className=" z-10 flex flex-col justify-start items-start w-[92%] xs:w-[86%] md:w-[72%] lg:w-[48%] xl:w-[40%] 2xl:w-[32%] bg-bg-600 dark:bg-bg-1100 dark:border dark:border-border-600 rounded-2xl px-6 2xs:px-8 sm:px-10 py-8 2xs:py-10 sm:py-12 gap-6 2xs:gap-8 "
-        >
-          <div className="text-white flex flex-col items-center justify-center w-full text-center gap-2 sm:gap-4">
-            <div className="flex justify-center items-center p-3 rounded-full bg-bg-1200">
-              <Image
-                className="w-10 2xs:w-12 xs:w-16"
-                src={images.logo}
-                alt="logo"
-                onClick={() => {
-                  navigate("/");
-                }}
-              />
-            </div>
-            <div className="w-full 2xs:w-[90%] xs:w-[80%] sm:w-[70%]  flex flex-col justify-center items-center gap-0.5 sm:gap-2 text-text-700 dark:text-text-900">
-              <h2 className="text-xl xs:text-2xl xl:text-3xl font-semibold">
-                Two-Factor Authentication
-              </h2>
-              <p className="text-xs 2xs:text-sm xs:text-base dark:text-text-400">
-                Open your email address, we just sent a verification code to {authEmail}
-              </p>
-            </div>
+      {/* Right brand section */}
+      <div className="relative min-h-screen md:ml-[50%] bg-dark-primary flex items-center">
+        {/* Header on mobile */}
+        <div className="md:hidden absolute top-0 left-0 right-0 z-20">
+          <AuthHeader showCta={false} />
+        </div>
+
+        {/* Form */}
+        <div className="w-full flex justify-center px-4 sm:px-6 lg:px-12">
+          <motion.div
+            whileInView={{ opacity: [0, 1] }}
+            transition={{ duration: 0.5, type: "tween" }}
+            className="z-10 flex flex-col justify-center items-center w-full max-w-md bg-dark-primary dark:bg-bg-1100 dark:xs:border dark:border-border-600 rounded-2xl p-6 sm:p-8 gap-6"
+          >
+            <div className="text-white flex flex-col items-center justify-center w-full text-center gap-3">
+            <h2 className="text-2xl font-semibold text-text-200 dark:text-white">
+              Two-Factor Authentication
+            </h2>
           </div>
-          <div className="flex flex-col justify-center items-center w-full gap-4">
-            <div className="flex items-center justify-center  w-full ">
-              <OtpInput
-                value={token}
-                onChange={(props) => setToken(props)}
-                onPaste={handlePaste}
-                numInputs={6}
-                renderSeparator={<span className="w-2 2xs:w-3 xs:w-4"></span>}
-                containerStyle={{}}
-                skipDefaultStyles
-                inputType="number"
-                renderInput={(props) => (
-                  <input
-                    {...props}
-                    className="w-10 h-10 2xs:w-12 2xs:h-12 bg-transparent border-[1.03px] border-border-700  rounded-md text-base 2xs:text-lg text-text-700 dark:text-text-400 text-center font-medium outline-none"
-                  />
-                )}
-              />
+          <form 
+            className="flex flex-col justify-start items-start w-full gap-6"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleVerify();
+            }}
+          >
+            <p className="text-sm text-text-200 dark:text-text-400 mb-2">
+              We've sent a verification code to <span className="font-medium">{authEmail}</span>
+            </p>
+            
+            <div className="w-full">
+              <label className="block text-sm font-medium text-text-200 dark:text-text-400 mb-2">
+                Verification Code
+              </label>
+              <div className="flex justify-center w-full">
+                <OtpInput
+                  value={token}
+                  onChange={setToken}
+                  onPaste={handlePaste}
+                  numInputs={6}
+                  renderSeparator={<span className="w-3"></span>}
+                  containerStyle={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    maxWidth: '320px'
+                  }}
+                  skipDefaultStyles
+                  inputType="number"
+                  renderInput={(props) => (
+                    <input
+                      {...props}
+                      className="w-12 h-12 bg-bg-500 dark:bg-bg-900 border border-border-600 dark:border-border-700 rounded-lg text-base text-text-200 dark:text-white text-center font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  )}
+                />
+              </div>
             </div>
-            <div className=" my-1 sm:my-2.5 text-center w-[90%] xs:w-[80%] text-sm 2xs:text-base text-text-1000  font-medium">
+
+            <div className="w-full text-center mt-2">
               {resendTimer && resendTimer > 0 ? (
-                <>
-                  Didn't get the code?{" "}
-                  <span className="text-secondary">Resend</span> in{" "}
-                  <span className="text-secondary">
-                    {formatTimer(resendTimer)}
-                  </span>
-                </>
+                <p className="text-sm text-text-300 dark:text-text-500">
+                  Resend code in <span className="text-primary">{formatTimer(resendTimer)}</span>
+                </p>
               ) : (
-                <div className="flex items-center justify-center ">
-                  Didn't receive any code?
-                  <span
-                    className="cursor-pointer text-secondary ml-1"
-                    onClick={handleResendClick}
-                  >
-                    {resendLoadingStatus ? (
-                      <SpinnerLoader width={20} height={20} color="#D4B139" />
-                    ) : (
-                      "Resend"
-                    )}
-                  </span>
-                </div>
+                <button
+                  type="button"
+                  onClick={handleResendClick}
+                  disabled={resendLoadingStatus}
+                  className="text-sm text-primary hover:opacity-80 transition-opacity disabled:opacity-50"
+                >
+                  {resendLoadingStatus ? (
+                    <span className="flex items-center justify-center">
+                      <SpinnerLoader width={16} height={16} color="currentColor" className="mr-2" />
+                      Sending...
+                    </span>
+                  ) : (
+                    "Resend verification code"
+                  )}
+                </button>
               )}
             </div>
+
             <CustomButton
-              type="button"
+              type="submit"
               disabled={loadingStatus || !isValid}
               isLoading={loadingStatus}
-              onClick={handleVerify}
-              className="w-full 2xs:w-[90%] sm:w-[80%] border-2 border-primary text-black text-base 2xs:text-lg max-2xs:px-6 py-3.5 xs:py-4 mt-2 2xs:mt-4 xs:mt-6 sm:mt-8 mb-2"
+              className="w-full border-2 border-primary text-black text-base py-3.5 mt-4"
             >
-              Next{" "}
+              Verify Code
             </CustomButton>
-          </div>
-        </motion.div>
+          </form>
+          </motion.div>
+        </div>
       </div>
     </div>
   );

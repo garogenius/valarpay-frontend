@@ -9,7 +9,7 @@ const Sidebar = () => {
     <>
       <div
         className={cn(
-          "hidden lg:flex flex-col bg-bg-600 dark:bg-bg-1100 h-screen sticky z-50 transform transition-all duration-300 ease-in-out",
+          "hidden lg:flex flex-col  shadow-md bg-dark-primary dark:bg-bg-1100 h-screen sticky z-50 transform transition-all duration-300 ease-in-out",
           {
             "lg:w-[25%] xl:w-[22.5%] 2xl:w-[20%]": true,
           }
@@ -28,7 +28,7 @@ const Sidebar = () => {
       {/* Mobile Sidebar */}
       <div
         className={cn(
-          "lg:hidden fixed z-[99] flex flex-col bg-bg-600 dark:bg-bg-1100 h-screen transition-transform duration-300 ease-in-out",
+          "lg:hidden fixed z-[99] flex flex-col bg-dark-primary dark:bg-bg-1100 h-screen transition-transform duration-300 ease-in-out",
           {
             "translate-x-0 w-[80%] 2xs:w-[70%] xs:w-[60%] md:w-[50%]":
               isMenuOpen,

@@ -235,7 +235,7 @@ const SignupBusinessContent = () => {
           <motion.div
             whileInView={{ opacity: [0, 1] }}
             transition={{ duration: 0.5, type: 'tween' }}
-            className="bg-bg-600 dark:bg-bg-1100 dark:border dark:border-border-600 rounded-2xl p-5 sm:p-7 shadow-lg"
+            className="bg-dark-primary dark:bg-bg-1100 dark:border dark:border-border-600 rounded-2xl p-5 sm:p-7 shadow-lg"
           >
             <div className="text-white flex flex-col gap-1 mb-4">
               {/* <h2 className="text-xl xs:text-2xl lg:text-3xl text-text-200 dark:text-white font-semibold">Create New Account</h2>
@@ -375,7 +375,7 @@ const SignupBusinessContent = () => {
                     </div>
 
                     {currencyState && (
-                      <div className="mt-2.5 sm:mt-0 sm:absolute sm:top-full sm:my-2.5 sm:z-10 px-1 py-2 overflow-y-auto overscroll-contain max-h-[70vh] w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md">
+                      <div className="mt-2.5 sm:mt-0 sm:absolute sm:top-full sm:my-2.5 sm:z-10 px-1 py-2 overflow-y-auto overscroll-contain max-h-[70vh] w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md">
                         <SearchableDropdown
                           items={CurrencyOptions}
                           searchKey="value"
@@ -603,7 +603,7 @@ const SignupBusinessContent = () => {
                     </div>
                   </div>
                   {registeredState && (
-                    <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-40 w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+                    <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-40 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
                       {RegisteredOptions.map((option) => (
                         <div
                           key={option.label}

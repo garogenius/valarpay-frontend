@@ -49,7 +49,7 @@ const VerificationNav = ({
                   ${
                     showActiveStyle
                       ? "bg-primary border-primary"
-                      : "bg-bg-600 dark:bg-bg-1100 border-border-600"
+                      : "bg-dark-primary dark:bg-bg-1100 border-border-600"
                   }
                 `}
             >

@@ -183,9 +183,9 @@ const ProfileContent = () => {
   };
 
   return (
-    <div className="w-full h-full 2xs:bg-bg-600 2xs:dark:bg-bg-1100 py-4 md:py-8 px-1 2xs:px-5 lg:px-8 flex justify-center  rounded-xl sm:rounded-2xl">
+    <div className="w-full h-full bg-white  dark:bg-bg-1100 py-4 md:py-8 px-1 2xs:px-5 lg:px-8 flex justify-center  rounded-xl sm:rounded-2xl">
       <div className="flex flex-col gap-6 xs:gap-10  w-full xl:w-[80%] 2xl:w-[70%] bg-transparent lg:bg-bg-400 dark:bg-transparent lg:dark:bg-black rounded-lg sm:rounded-xl p-0 2xs:p-4 md:p-8">
-        <div className="flex self-center relative w-24 xs:w-28 xl:w-32 h-24 xs:h-28 xl:h-32 rounded-full bg-bg-600 2xs:bg-bg-400 lg:bg-bg-600 dark:bg-bg-1100 2xs:dark:bg-black lg:dark:bg-bg-1100">
+        <div className="flex self-center relative w-24 xs:w-28 xl:w-32 h-24 xs:h-28 xl:h-32 rounded-full bg-dark-primary 2xs:bg-bg-400 lg:bg-dark-primary dark:bg-bg-1100 2xs:dark:bg-black lg:dark:bg-bg-1100">
           {imgUrl ? (
             <Image
               src={imgUrl}
@@ -227,7 +227,7 @@ const ProfileContent = () => {
               >
                 Full Name{" "}
               </label>
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+              <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
                 <input
                   className="disabled:opacity-60 w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
                   placeholder="Full name"
@@ -250,7 +250,7 @@ const ProfileContent = () => {
               >
                 Username{" "}
               </label>
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+              <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
                 <input
                   className="disabled:opacity-60 w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
                   placeholder="Username"
@@ -274,7 +274,7 @@ const ProfileContent = () => {
               >
                 Email{" "}
               </label>
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+              <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
                 <input
                   className="disabled:opacity-60 w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
                   placeholder="Email"
@@ -298,7 +298,7 @@ const ProfileContent = () => {
               >
                 Phone Number{" "}
               </label>
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+              <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
                 <input
                   className="disabled:opacity-60 w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
                   placeholder="Phone Number"
@@ -367,7 +367,7 @@ const ProfileContent = () => {
               >
                 Referral Code{" "}
               </label>
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+              <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
                 <input
                   className="disabled:opacity-60 w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
                   placeholder="Referral Code"
@@ -391,7 +391,7 @@ const ProfileContent = () => {
               >
                 Account Type{" "}
               </label>
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+              <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
                 <input
                   className="disabled:opacity-60 w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
                   placeholder="Account type"
@@ -415,7 +415,7 @@ const ProfileContent = () => {
               >
                 Account Number{" "}
               </label>
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+              <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
                 <input
                   className="disabled:opacity-60 w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
                   placeholder="Account number"

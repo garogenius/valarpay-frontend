@@ -5,6 +5,9 @@ import UnverifiedDashboard from "./UnverifiedDashboard";
 import { TIER_LEVEL } from "@/constants/types";
 import VerifiedDashboard from "./VerifiedDashboard";
 import { useEffect, useState } from "react";
+import InvestCard from "../InvestCard";
+import QuickAccess from "./QuickAccess";
+import AccountNumberCard from "../AccountNumberCard";
 
 const DashboardContent = () => {
   const { user } = useUserStore();
@@ -25,13 +28,20 @@ const DashboardContent = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
         {user?.wallet &&
           user?.wallet?.map((wallet) => (
-            <BalanceCard
+            <div
               key={wallet.id}
-              currency={wallet.currency.toLowerCase()}
-              balance={wallet.balance}
-            />
+              className="sm:col-span-2 xl:col-span-2 2xl:col-span-2"
+            >
+              <BalanceCard
+                currency={wallet.currency.toLowerCase()}
+                balance={wallet.balance}
+              />
+            </div>
           ))}
+        <InvestCard />
       </div>
+      {/* <AccountNumberCard /> */}
+      <QuickAccess />
       {verificationStatus ? (
         <VerifiedDashboard />
       ) : (

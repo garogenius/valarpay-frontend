@@ -412,7 +412,7 @@ const ElectricityStageOne: React.FC<StageOneProps> = ({
             </div>
 
             {providerState && (
-              <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+              <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
                 <SearchableDropdown
                   items={electricityPlans}
                   searchKey="shortName"
@@ -513,7 +513,7 @@ const ElectricityStageOne: React.FC<StageOneProps> = ({
             </div>
 
             {planState && (
-              <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+              <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
                 <SearchableDropdown
                   items={variations}
                   searchKey="short_name"

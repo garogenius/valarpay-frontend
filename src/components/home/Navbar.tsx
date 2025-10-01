@@ -72,7 +72,7 @@ const Navbar = ({ bgColor, bgColorDark, ...props }: NavbarProps) => {
       <nav className="fixed top-0 z-50 w-full">
         <div
           className={`flex justify-center 
-    ${!bgColor && "bg-bg-400 md:bg-bg-600"} 
+    ${!bgColor && "bg-bg-400 md:bg-dark-primary"} 
     ${!bgColorDark && "dark:bg-dark-primary"} 
     text-text-200 py-3.5 w-full transition-all duration-300 ease-in-out ${scrolled ? "shadow-md" : ""}`}
           style={{

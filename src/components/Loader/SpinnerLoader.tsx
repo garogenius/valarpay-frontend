@@ -1,4 +1,11 @@
-const SpinnerLoader = ({ width = 24, height = 24, color = "#000000" }) => {
+type SpinnerLoaderProps = {
+  width?: number;
+  height?: number;
+  color?: string;
+  className?: string;
+};
+
+const SpinnerLoader = ({ width = 24, height = 24, color = "#000000", className = "" }: SpinnerLoaderProps) => {
   return (
     <svg
       version="1.1"
@@ -10,6 +17,7 @@ const SpinnerLoader = ({ width = 24, height = 24, color = "#000000" }) => {
       xmlSpace="preserve"
       width={width}
       height={height}
+      className={className}
     >
       <g
         strokeWidth="200"

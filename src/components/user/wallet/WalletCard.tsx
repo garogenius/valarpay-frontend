@@ -37,7 +37,7 @@ const WalletCard = ({
     <div
       style={bgStyles}
       className={`w-full rounded-xl px-4 py-4 2xs:py-5 flex items-start justify-between h-fit gap-1 ${
-        active ? "bg-primary" : "bg-bg-600 dark:bg-bg-1100"
+        active ? "bg-primary" : "bg-dark-primary dark:bg-bg-1100"
       }`}
       onClick={() => {
         setCurrency(currency);

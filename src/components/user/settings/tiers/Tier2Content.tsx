@@ -293,7 +293,7 @@ const Tier2Content = () => {
         </h2>
       </div>
 
-      <div className="w-full h-full 2xs:bg-bg-600 2xs:dark:bg-bg-1100 py-4 md:py-8 px-1 2xs:px-5 lg:px-8 flex justify-center rounded-xl sm:rounded-2xl">
+      <div className="w-full h-full bg-white  dark:bg-bg-1100 py-4 md:py-8 px-1 2xs:px-5 lg:px-8 flex justify-center rounded-xl sm:rounded-2xl">
         <div className="flex flex-col justify-center items-center gap-6 xs:gap-10 w-full xl:w-[80%] 2xl:w-[70%] bg-transparent lg:bg-bg-400 dark:bg-transparent lg:dark:bg-black rounded-lg sm:rounded-xl p-0 2xs:p-4 md:p-8">
           <h2 className="w-full xs:w-[80%] text-center text-xl xs:text-2xl text-text-200 dark:text-text-400 ">
             Input your National Identity Number (NIN) to verify your identity

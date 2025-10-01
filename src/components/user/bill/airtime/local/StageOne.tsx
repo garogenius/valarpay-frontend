@@ -227,7 +227,7 @@ const AirtimeStageOne: React.FC<StageOneProps> = ({
               >
                 Phone Number{" "}
               </label>
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+              <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
                 <input
                   className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
                   placeholder="Enter Phone Number"
@@ -298,7 +298,7 @@ const AirtimeStageOne: React.FC<StageOneProps> = ({
               // renderOption={RenderOptions}
               placeholder="Select Network Provider"
               isSearchable={false}
-              className="w-full bg-bg-2400 dark:bg-bg-2100 border outline-none border-border-600 rounded-lg text-base text-text-200 dark:text-white"
+              className="w-full bg-white dark:bg-bg-2100 border outline-none border-border-600 rounded-lg text-base text-text-200 dark:text-white"
               selectClassName={classNames({
                 "px-3": true,
                 "py-4": !selectedProvider,
@@ -316,7 +316,7 @@ const AirtimeStageOne: React.FC<StageOneProps> = ({
               Amount{" "}
             </label>
 
-            <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+            <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
               <input
                 className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-[#797B86] dark:placeholder:text-text-1000 placeholder:text-sm"
                 placeholder="&#8358;5,000"

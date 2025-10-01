@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { CURRENCY } from "@/constants/types";
+import Toggler from "../shared/Toggler";
 
 const Navbar = () => {
   const { user } = useUserStore();
@@ -82,18 +83,19 @@ const Navbar = () => {
   });
 
   return (
-    <div className="w-full z-40 xs:z-50 sticky top-0 flex justify-between items-center shadow gap-2 bg-bg-600 dark:bg-bg-2200 px-4 2xs:px-6 lg:px-8 py-6">
+    <div className="w-full z-40 xs:z-50 sticky top-0  shadow-md flex justify-between items-center shadow gap-2 bg-dark-primary dark:bg-bg-2200 px-4 2xs:px-6 lg:px-8 py-3">
       <div className="flex items-center gap-2.5 sm:gap-4">
         <FiMenu
           onClick={toggleMenu}
           className="lg:hidden text-2xl text-text-200 dark:text-text-400"
         />
-        <p className="text-xl sm:text-2xl font-semibold text-text-1000 dark:text-text-400">
+        <p className="text-xl sm:text-2xl font-semibold text-white dark:text-text-400">
           {Heading?.title}
         </p>
       </div>
 
       <div className="flex items-center gap-3 xs:gap-4 lg:gap-6 xl:gap-8">
+        <Toggler />
         <div className="flex items-center gap-2">
           <Link
             href="/user/settings/profile"
@@ -111,22 +113,20 @@ const Navbar = () => {
               <p> {user?.fullname.slice(0, 2)}</p>
             )}{" "}
           </Link>
-          <div className="max-lg:hidden flex flex-col text-text-1000 dark:text-text-800">
+          <div className="max-lg:hidden flex flex-col text-white dark:text-text-800">
             {user?.wallet ? (
               <>
                 <p className="capitalize text-base font-semibold mb-0.5">
                   Bal: ₦{" "}
                   {user?.wallet
                     .find((w) => w.currency === CURRENCY.NGN)
-                    ?.balance.toLocaleString()}
+                    ?.balance.toLocaleString() || "0.00"}
                 </p>
 
                 <p className="text-sm -mt-1.5">
                   Acc No:{" "}
-                  {
-                    user?.wallet.find((w) => w.currency === CURRENCY.NGN)
-                      ?.accountNumber
-                  }
+                  {user?.wallet.find((w) => w.currency === CURRENCY.NGN)
+                    ?.accountNumber || "-"}
                 </p>
               </>
             ) : (

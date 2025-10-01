@@ -21,7 +21,7 @@ const Table = ({
     });
 
   return (
-    <div className="flex justify-center md:justify-start flex-col w-full">
+    <div className="flex justify-center md:justify-start flex-col shadow-sm w-full">
       <div className="overflow-x-auto touch relative">
         <table
           className="border-separate border-spacing-y-3 w-full overflow-hidden"
@@ -36,7 +36,7 @@ const Table = ({
                   return (
                     <th
                       className={cn(
-                        "font-medium border-none px-2.5 sm:px-4 xl:px-6 py-2 sm:py-3 text-left text-xs text-text-1700"
+                        "bg-dark-primary dark:bg-bg-1100 font-medium border-none px-2.5 sm:px-4 xl:px-6 py-2 sm:py-3 text-left text-xs text-text-1700"
                       )}
                       {...column.getHeaderProps()}
                       key={column.id}
@@ -66,7 +66,7 @@ const Table = ({
                           {
                             "rounded-l-lg": isFirstCell,
                             "rounded-r-lg": isLastCell,
-                            "bg-bg-600 dark:bg-bg-1100": rowStyle === "primary",
+                            "bg-white dark:bg-bg-1100": rowStyle === "primary",
                             "bg-bg-400 dark:bg-black": rowStyle === "secondary",
                           }
                         )}

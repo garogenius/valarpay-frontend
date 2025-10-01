@@ -243,7 +243,7 @@ const TransferProcess = () => {
   });
 
   return (
-    <div className="w-full flex max-xl:flex-col 2xs:px-2 xs:px-4 sm:px-6 md:px-8 py-4 2xs:py-6 sm:py-10 bg-transparent xs:bg-bg-600 dark:xs:bg-bg-1100 gap-6 xs:gap-10 lg:gap-12 2xl:gap-16 rounded-xl">
+    <div className="w-full flex max-xl:flex-col 2xs:px-2 xs:px-4 sm:px-6 md:px-8 py-4 2xs:py-6 sm:py-10 bg-transparent bg-white shadow-sm dark:xs:bg-bg-1100 gap-6 xs:gap-10 lg:gap-12 2xl:gap-16 rounded-xl">
       <div className="w-full xl:w-[40%] flex flex-col gap-4 md:gap-6 lg:gap-8 2xl:gap-10">
         <h2 className="text-xl sm:text-2xl font-medium text-text-200 dark:text-text-400">
           Select Transfer Method
@@ -300,7 +300,7 @@ const TransferProcess = () => {
       </div>
       <div className="w-full xl:w-[60%] flex">
         {screen === 0 && (
-          <div className="w-full px-4 xs:px-6 md:px-8 lg:px-10 2xl:px-12 py-8 flex flex-col gap-8 items-center bg-bg-400 max-xs:bg-bg-600 dark:bg-black dark:max-xs:bg-bg-1100 rounded-xl ">
+          <div className="w-full px-4 xs:px-6 md:px-8 lg:px-10 2xl:px-12 py-8 flex flex-col gap-8 items-center bg-bg-400 max-xs:bg-dark-primary dark:bg-black dark:max-xs:bg-bg-1100 rounded-xl ">
             <h2 className="text-lg 2xs:text-xl sm:text-2xl font-medium text-text-200 dark:text-text-400 text-center">
               Enter {selectedType === "valarpay" ? "Valarpay" : "Bank"} Account
               Details{" "}
@@ -343,7 +343,7 @@ const TransferProcess = () => {
                 >
                   Enter Account Number{" "}
                 </label>
-                <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
                   <input
                     className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
                     placeholder={
@@ -430,7 +430,7 @@ const TransferProcess = () => {
                       </p>
                     )}
                     {bankState && (
-                      <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+                      <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
                         <SearchableDropdown
                           items={banks}
                           searchKey="name"
@@ -469,7 +469,7 @@ const TransferProcess = () => {
                       {bankData ? (
                         <div className="w-full flex flex-col gap-6">
                           <div className="flex flex-col gap-2">
-                            <div className="w-full flex flex-col gap-2 rounded-xl px-4 py-3 bg-bg-400 xs:bg-bg-600 dark:bg-black dark:xs:bg-bg-1100">
+                            <div className="w-full flex flex-col gap-2 rounded-xl px-4 py-3 bg-bg-400 xs:bg-dark-primary dark:bg-black dark:xs:bg-bg-1100">
                               <p className="text-sm text-text-200 dark:text-text-1000 font-semibold">
                                 Beneficiary{" "}
                               </p>
@@ -575,14 +575,14 @@ const TransferProcess = () => {
                         <>
                           {" "}
                           {selectedType === "bank" && watchedBankCode && (
-                            <div className="w-full flex flex-col justify-center items-center gap-2 rounded-xl px-6 py-8 bg-bg-600 dark:bg-black dark:xs:bg-bg-1100">
+                            <div className="w-full flex flex-col justify-center items-center gap-2 rounded-xl px-6 py-8 bg-dark-primary dark:bg-black dark:xs:bg-bg-1100">
                               <p className="text-sm text-text-200 dark:text-text-400 font-semibold">
                                 Bank Account Not Found
                               </p>
                             </div>
                           )}
                           {selectedType === "valarpay" && (
-                            <div className="w-full flex flex-col justify-center items-center gap-2 rounded-xl px-6 py-8 bg-bg-600 dark:bg-black dark:xs:bg-bg-1100">
+                            <div className="w-full flex flex-col justify-center items-center gap-2 rounded-xl px-6 py-8 bg-dark-primary dark:bg-black dark:xs:bg-bg-1100">
                               <p className="text-sm text-text-200 dark:text-text-400 font-semibold">
                                 Valarpay Account Number Not Found
                               </p>

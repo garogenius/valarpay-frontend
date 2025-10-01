@@ -7,6 +7,7 @@ import * as yup from "yup";
 import { useLogin } from "@/api/auth/auth.queries";
 import { motion } from "framer-motion";
 import images from "../../../public/images";
+import AuthHeader from "./AuthHeader";
 import Image from "next/image";
 import AuthInput from "./AuthInput";
 import CustomButton from "@/components/shared/Button";
@@ -160,54 +161,81 @@ const LoginContent = () => {
   };
 
   return (
-    <div
-      className="relative w-full min-h-screen overflow-x-hidden"
-      style={{
-        backgroundImage: 'url("/images/home/landingPage/glassBuilding.jpg")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none z-10"
-        style={{ background: '#1C2E50CC' }}
-      />
+    <div className="relative w-full min-h-screen overflow-x-hidden">
+      {/* Left image section (desktop) */}
+      <div className="hidden md:block absolute inset-y-0 left-0 w-1/2">
+        {/* Background image */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'url("/images/home/landingPage/glassBuilding.jpg")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+        {/* Image overlay */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: '#1C2E50CC' }} />
 
-      {/* Top-left branding */}
-      <Link href="/" className="absolute top-4 left-4 z-20 flex items-center gap-2">
-        <Image src={images.logo} alt="ValarPay logo" className="w-8 h-auto" />
-        <span className="text-white font-semibold text-lg tracking-wide">VALARPAY</span>
-      </Link>
+        {/* Header on top of left section */}
+        <div className="absolute top-0 left-0 right-0 z-20">
+          <AuthHeader />
+        </div>
 
-      {/* Top-right call to action */}
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-3 text-sm">
-        <span className="hidden sm:inline text-text-200">Don't have an account?</span>
-        <Link href="/account-type" className="text-primary bg-primary/10 hover:bg-primary/20 transition-colors px-3 py-1.5 rounded-md">Get started</Link>
+        {/* Left content */}
+        <div className="relative z-20 h-full flex items-center">
+          <div className="pl-12 pr-8 max-w-2xl text-white space-y-6">
+            <div>
+              <h2 className="text-5xl font-bold mb-4 leading-tight text-primary">Welcome to ValarPay</h2>
+              <p className="text-2xl opacity-95 mb-6 leading-relaxed">Your trusted partner in seamless digital payments and financial solutions.</p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-start gap-4">
+                <div className="mt-1">
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-xl opacity-90">Secure and instant money transfers</p>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="mt-1">
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-xl opacity-90">24/7 Customer Support</p>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="mt-1">
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-xl opacity-90">Competitive exchange rates</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Your content here */}
-      <div className="relative z-20">
-        <div className="flex flex-col justify-center items-center w-full gap-8 mt-32 sm:mt-36 lg:mt-40 xl:mt-48 mb-12 sm:mb-14 lg:mb-16 xl:mb-20">
+      {/* Right brand section */}
+      <div className="relative min-h-screen md:ml-[50%] bg-dark-primary flex items-center">
+        {/* Header on mobile */}
+        <div className="md:hidden absolute top-0 left-0 right-0 z-20">
+          <AuthHeader />
+        </div>
+
+        {/* Login form */}
+        <div className="w-full flex justify-center px-4 sm:px-6 lg:px-12">
           <motion.div
             whileInView={{ opacity: [0, 1] }}
             transition={{ duration: 0.5, type: "tween" }}
-            className="z-10 flex flex-col justify-start items-start w-[92%] xs:w-[86%] md:w-[72%] lg:w-[48%] xl:w-[40%] 2xl:w-[32%] bg-bg-600 dark:bg-bg-1100 dark:xs:border dark:border-border-600 rounded-2xl px-6 2xs:px-8 sm:px-10 py-2.5 2xs:py-4 sm:py-6 gap-6 2xs:gap-8 sm:gap-10 md:gap-12"
+            className="z-10 flex flex-col justify-center items-center w-full max-w-md bg-dark-primary dark:bg-bg-1100 dark:xs:border dark:border-border-600 rounded-2xl p-6 sm:p-8 gap-6"
           >
-            <div className="text-white flex flex-col items-center justify-center w-full text-center gap-3">
-              <Image
-                className="w-10 2xs:w-12 xs:w-16 "
-                src={images.logo}
-                alt="logo"
-                onClick={() => {
-                  navigate("/");
-                }}
-              />{" "}
-              <h2 className="text-xl xs:text-2xl lg:text-3xl text-text-200 dark:text-white font-semibold">
-                Welcome Back{" "}
-              </h2>
-            </div>
             <form
               className="flex flex-col justify-start items-start w-full gap-7"
               onSubmit={handleSubmit(onSubmit)}

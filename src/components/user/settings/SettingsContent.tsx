@@ -60,14 +60,14 @@ const SettingsContent = () => {
 
   return (
     <>
-      <div className="w-full  bg-transparent 2xs:bg-bg-600 2xs:dark:bg-bg-1100 py-4 md:py-8 px-0 2xs:px-5 md:px-10 flex flex-col gap-4 xs:gap-6 rounded-xl sm:rounded-2xl">
+      <div className="w-full  bg-transparent bg-white  dark:bg-bg-1100 py-4 md:py-8 px-0 2xs:px-5 md:px-10 flex flex-col gap-4 xs:gap-6 rounded-xl sm:rounded-2xl">
         {/* <h2 className="text-xl sm:text-2xl font-bold text-text-200 dark:text-text-400 ">
           Settings
         </h2> */}
 
         <div className="flex flex-col rounded-lg gap-4">
           <div
-            className={`w-full bg-bg-600  dark:bg-bg-1100 2xs:bg-bg-400 2xs:dark:bg-bg-2200 text-text-200 dark:text-text-800 flex flex-col xl:flex-row items-center justify-start xl:justify-between gap-4  xl:gap-2.5 py-4 sm:py-6 px-4 xs:px-6 2xl:px-8 rounded-2xl`}
+            className={`w-full bg-dark-primary  dark:bg-bg-1100 2xs:bg-bg-400 2xs:dark:bg-bg-2200 text-text-200 dark:text-text-800 flex flex-col xl:flex-row items-center justify-start xl:justify-between gap-4  xl:gap-2.5 py-4 sm:py-6 px-4 xs:px-6 2xl:px-8 rounded-2xl`}
           >
             <div className="w-full  xl:w-[50%] 2xl:w-full flex flex-col gap-3 sm:gap-2.5">
               <div className="w-full flex flex-col-reverse xs:flex-row xs:items-center gap-2">

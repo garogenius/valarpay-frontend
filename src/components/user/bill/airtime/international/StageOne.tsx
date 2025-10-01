@@ -223,7 +223,7 @@ const InternationalAirtimeStageOne: React.FC<StageOneProps> = ({
               >
                 Phone Number{" "}
               </label>
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+              <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
                 <input
                   className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
                   placeholder="Enter Phone Number"
@@ -325,7 +325,7 @@ const InternationalAirtimeStageOne: React.FC<StageOneProps> = ({
                   : ""}
               </label>
 
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+              <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
                 <input
                   className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-[#797B86] dark:placeholder:text-text-1000 placeholder:text-sm"
                   placeholder={`Enter amount  ${
@@ -378,7 +378,7 @@ const InternationalAirtimeStageOne: React.FC<StageOneProps> = ({
                   : ""}
               </label>
 
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+              <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
                 <select
                   className="w-full bg-transparent p-0 border-none outline-none dark:bg-bg-2100 text-base text-text-200 dark:text-white placeholder:text-[#797B86] dark:placeholder:text-text-1000 placeholder:text-sm"
                   {...register("amount")}

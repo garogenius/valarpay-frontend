@@ -55,7 +55,7 @@ const Services = () => {
                 variants={scaleVariants}
                 whileInView={scaleVariants.whileInView as any}
                 key={index}
-                className={`flex items-center gap-2 2xs:gap-3 xl:gap-4 rounded-lg bg-bg-600 dark:bg-tertiary px-3 2xs:px-3.5 lg:px-4 py-4 2xs:py-5 lg:py-6 2xl:py-8 ${item.title === "Other Bills" ? "sm:col-span-2" : ""}`}
+                className={`flex items-center gap-2 2xs:gap-3 xl:gap-4 rounded-lg bg-dark-primary dark:bg-tertiary px-3 2xs:px-3.5 lg:px-4 py-4 2xs:py-5 lg:py-6 2xl:py-8 ${item.title === "Other Bills" ? "sm:col-span-2" : ""}`}
               >
                 <div className="rounded-full flex justify-center items-center p-2 xs:p-2.5 bg-bg-1200 overflow-hidden">
                   <Image

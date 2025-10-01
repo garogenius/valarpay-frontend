@@ -263,7 +263,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
               </div>
 
               {currencyState && (
-                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
                   <SearchableDropdown
                     items={allCurrencies}
                     searchKey="countryName"
@@ -348,7 +348,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
               </div>
 
               {categoryState && (
-                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
                   <SearchableDropdown
                     items={categories}
                     searchKey="name"
@@ -450,7 +450,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
               </div>
 
               {productState && (
-                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
                   <SearchableDropdown
                     items={products?.filter(
                       (product) => product.category.name === watchedCategory
@@ -613,7 +613,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
               </div>
 
               {priceState && (
-                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
                   <SearchableDropdown
                     items={prices}
                     searchKey="price"

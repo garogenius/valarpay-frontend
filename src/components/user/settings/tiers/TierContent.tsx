@@ -44,7 +44,7 @@ const TierContent = () => {
   ];
 
   return (
-    <div className="w-full h-full 2xs:bg-bg-600 2xs:dark:bg-bg-1100 py-4 md:py-8 px-1 2xs:px-5 lg:px-8 flex justify-center  rounded-xl sm:rounded-2xl">
+    <div className="w-full h-full bg-white  dark:bg-bg-1100 py-4 md:py-8 px-1 2xs:px-5 lg:px-8 flex justify-center  rounded-xl sm:rounded-2xl">
       <div className="flex flex-col justify-center items-center gap-6 xs:gap-8  w-full 2xl:w-[90%] bg-transparent p-0 2xs:p-4 md:p-8">
         <div className="pt-6 w-[90%] flex flex-col gap-1.5 justify-center items-center text-center text-text-200 dark:text-text-400">
           <h2 className="text-xl 2xs:text-2xl sm:text-3xl font-bold ">
@@ -101,7 +101,7 @@ const TierCard = ({
   return (
     <div
       className={cn(
-        "bg-bg-600 2xs:bg-bg-400 dark:bg-bg-1100 2xs:dark:bg-black text-base text-text-200 dark:text-text-400 rounded-xl px-6 xl:px-8 py-6 xl:py-8 flex flex-col  gap-2 sm:gap-3 ",
+        "bg-dark-primary 2xs:bg-bg-400 dark:bg-bg-1100 2xs:dark:bg-black text-base text-text-200 dark:text-text-400 rounded-xl px-6 xl:px-8 py-6 xl:py-8 flex flex-col  gap-2 sm:gap-3 ",
         {
           " shadow-[0_4px_20px_0_rgba(241,181,0,0.6)]": active,
           "border-none": !active,

@@ -48,7 +48,7 @@ const TransferNgnProcess = () => {
   )?.accountName;
   const isLoading = isPending && !isError;
   return (
-    <div className="w-full flex max-xl:flex-col 2xs:px-2 xs:px-4 sm:px-6 md:px-8 py-4 2xs:py-6 sm:py-10 bg-transparent xs:bg-bg-600 dark:xs:bg-bg-1100 gap-6 xs:gap-10 lg:gap-12 2xl:gap-16 rounded-xl">
+    <div className="w-full flex max-xl:flex-col 2xs:px-2 xs:px-4 sm:px-6 md:px-8 py-4 2xs:py-6 sm:py-10 bg-transparent xs:bg-dark-primary dark:xs:bg-bg-1100 gap-6 xs:gap-10 lg:gap-12 2xl:gap-16 rounded-xl">
       <div className="w-full xl:w-[40%] flex flex-col gap-4 md:gap-6 lg:gap-8 2xl:gap-10">
         <h2 className="text-xl sm:text-2xl font-medium text-text-200 dark:text-text-400">
           Select Method{" "}
@@ -104,7 +104,7 @@ const TransferNgnProcess = () => {
       </div>
       <div className="w-full xl:w-[60%] flex">
         {selectedType === "bank" && (
-          <div className="w-full px-4 xs:px-6 md:px-8 lg:px-10 2xl:px-12 py-8 flex flex-col gap-8 items-center bg-bg-400 max-xs:bg-bg-600 dark:bg-black dark:max-xs:bg-bg-1100 rounded-xl ">
+          <div className="w-full px-4 xs:px-6 md:px-8 lg:px-10 2xl:px-12 py-8 flex flex-col gap-8 items-center bg-bg-400 max-xs:bg-dark-primary dark:bg-black dark:max-xs:bg-bg-1100 rounded-xl ">
             <h2 className="text-lg 2xs:text-xl sm:text-2xl font-medium text-text-200 dark:text-text-400 text-center">
               Bank Transfer{" "}
             </h2>
@@ -152,7 +152,7 @@ const TransferNgnProcess = () => {
         )}
 
         {selectedType === "qrCode" && (
-          <div className="w-full px-4 xs:px-6 md:px-8 lg:px-10 2xl:px-12 py-8 flex flex-col gap-8 items-center bg-bg-400 max-xs:bg-bg-600 dark:bg-black dark:max-xs:bg-bg-1100 rounded-xl ">
+          <div className="w-full px-4 xs:px-6 md:px-8 lg:px-10 2xl:px-12 py-8 flex flex-col gap-8 items-center bg-bg-400 max-xs:bg-dark-primary dark:bg-black dark:max-xs:bg-bg-1100 rounded-xl ">
             <h2 className="text-lg 2xs:text-xl sm:text-2xl font-medium text-text-200 dark:text-text-400 text-center">
               Fund with QR Code{" "}
             </h2>

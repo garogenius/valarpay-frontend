@@ -88,7 +88,7 @@ const TransactionsFilter = ({ onFilterChange }: FilterProps) => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          " bg-bg-600 dark:bg-bg-1100 text-text-200 dark:text-text-400  flex items-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 px-3 sm:px-4 border rounded-lg",
+          " bg-white dark:bg-bg-1100 text-text-200 dark:text-text-400  flex items-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 px-3 sm:px-4 border rounded-lg",
           {
             " border-transparent":
               !selectedFilters.category && !selectedFilters.status,
@@ -102,7 +102,7 @@ const TransactionsFilter = ({ onFilterChange }: FilterProps) => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-bg-600 dark:bg-bg-2200 text-text-200 dark:text-text-400 rounded-lg shadow-xl border border-transparent z-50">
+        <div className="absolute right-0 mt-2 w-80 bg-dark-primary dark:bg-bg-2200 text-text-200 dark:text-text-400 rounded-lg shadow-xl border border-transparent z-50">
           <div className="p-4">
             <div className="flex justify-between items-center mb-4">
               <p className="text-base font-medium">Filter By</p>

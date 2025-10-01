@@ -35,7 +35,7 @@ const RecentTransactions = () => {
           Recent transactions{" "}
         </h2>
         <Link
-          className="px-5 py-2 rounded-lg text-text-1000 font-medium text-sm border border-border-800"
+          className="px-5 py-2 rounded-lg bg-dark-primary text-text-1200 font-medium text-sm border border-border-800"
           href={"/user/transactions"}
         >
           View all

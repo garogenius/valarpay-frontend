@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 const ComingSoon = () => {
   const router = useRouter();
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-bg-600 dark:bg-bg-1100 text-text-200 dark:text-text-400 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-dark-primary dark:bg-bg-1100 text-text-200 dark:text-text-400 p-4">
       <div className="w-full text-center max-w-2xl mx-auto flex flex-col justify-center items-center">
         {/* Logo/Icon */}
         <FiClock className="text-6xl lg:text-7xl mx-auto mb-4 sm:mb-6 animate-pulse" />

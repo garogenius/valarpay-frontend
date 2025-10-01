@@ -86,7 +86,7 @@ const StatsContent = () => {
   return (
     <div className="w-full flex flex-col gap-2 mt-2 overflow-x-hidden">
       <div className="w-full flex max-lg:flex-col gap-4">
-        <div className="max-sm:hidden  w-full lg:w-[50%] flex flex-col bg-bg-600 dark:bg-bg-1100 px-4 xs:px-6 py-4 xs:py-6 2xl:py-8 rounded-lg sm:rounded-xl">
+        <div className="max-sm:hidden  w-full lg:w-[50%] flex flex-col bg-white dark:bg-bg-1100 px-4 xs:px-6 py-4 xs:py-6 2xl:py-8 rounded-lg sm:rounded-xl">
           <h2 className="text-text-200 dark:text-text-400 text-lg md:text-xl font-semibold mb-4">
             My Portfolio
           </h2>
@@ -107,7 +107,7 @@ const StatsContent = () => {
                 )}
           </div>
         </div>
-        <div className="w-full lg:w-[50%] flex flex-col items-center bg-bg-600 dark:bg-bg-1100 px-4 xs:px-6 py-4 xs:py-6 2xl:py-8 rounded-lg sm:rounded-xl">
+        <div className="w-full lg:w-[50%] flex flex-col items-center bg-white dark:bg-bg-1100 px-4 xs:px-6 py-4 xs:py-6 2xl:py-8 rounded-lg sm:rounded-xl">
           <StatsFilter sort={sort} setSort={setSort} />
           {isLoading
             ? renderChartSkeleton()

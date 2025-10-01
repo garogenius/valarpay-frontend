@@ -21,6 +21,7 @@ import {
   useVerifyEmail,
 } from "@/api/auth/auth.queries";
 import images from "../../../public/images";
+import AuthHeader from "./AuthHeader";
 
 const VerifyEmailContent = () => {
   const navigate = useNavigate();
@@ -158,55 +159,85 @@ const VerifyEmailContent = () => {
     resendVerificationCodePending && !resendVerificationCodeError;
 
   return (
-    <div className="relative flex justify-center items-center w-full bg-bg-400 dark:bg-black"
+    <div className="relative w-full min-h-screen overflow-x-hidden">
+      {/* Left image section (desktop) */}
+      <div className="hidden md:block absolute inset-y-0 left-0 w-1/2">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'url("/images/home/landingPage/care.jpg")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center right',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'rgba(23, 51, 102, 0.8)' }} />
 
-      style={{
-        backgroundImage: 'url("/images/home/landingPage/glassBuilding.jpg")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}>
+        {/* Header on top of left section */}
+        <div className="absolute top-0 left-0 right-0 z-20">
+          <AuthHeader showCta={false} />
+        </div>
 
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none z-10"
-        style={{ background: '#1C2E50CC' }}
-      />
+        {/* Left content */}
+        <div className="relative z-20 h-full flex items-center">
+          <div className="pl-12 pr-8 max-w-2xl text-white space-y-6">
+            <div>
+              <h2 className="text-5xl font-bold mb-4 leading-tight text-primary">Verify your email</h2>
+              <p className="text-2xl opacity-95 mb-6 leading-relaxed">Enter the 6-digit code sent to your email to continue.</p>
+            </div>
 
-      {/* Top-left branding */}
-      <a href="/" className="absolute top-4 left-4 z-20 flex items-center gap-2">
-        <Image src={images.logo} alt="ValarPay logo" className="w-8 h-auto" />
-        <span className="text-white font-semibold text-lg tracking-wide">VALARPAY</span>
-      </a>
+            <div className="space-y-4">
+              <div className="flex items-start gap-4">
+                <div className="mt-1">
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-xl opacity-90">Code expires soon for security</p>
+              </div>
 
-      {/* Top-right call to action */}
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-3 text-sm">
-        <span className="text-text-200">Don't have an account?</span>
-        <a href="/account-type" className="text-primary bg-primary/10 hover:bg-primary/20 transition-colors px-3 py-1.5 rounded-md">Get started</a>
+              <div className="flex items-start gap-4">
+                <div className="mt-1">
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-xl opacity-90">You can request a new code when the timer ends</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col justify-center items-center w-full gap-8 mt-32 sm:mt-36 lg:mt-40 xl:mt-48 mb-12 sm:mb-14 lg:mb-16 xl:mb-20">
-        <motion.div
-          whileInView={{ opacity: [0, 1] }}
-          transition={{ duration: 0.5, type: "tween" }}
-          className=" z-10 flex flex-col justify-start items-start w-[92%] xs:w-[86%] md:w-[72%] lg:w-[48%] xl:w-[40%] 2xl:w-[32%] bg-bg-600 dark:bg-bg-1100 dark:border dark:border-border-600 rounded-2xl px-6 2xs:px-8 sm:px-10 py-8 2xs:py-10 sm:py-12 gap-6 2xs:gap-8 "
-        >
-          <div className="text-white flex flex-col items-center justify-center w-full text-center gap-2 sm:gap-4">
+      {/* Right brand section */}
+      <div className="relative min-h-screen md:ml-[50%] bg-dark-primary flex items-center">
+        {/* Header on mobile */}
+        <div className="md:hidden absolute top-0 left-0 right-0 z-20">
+          <AuthHeader showCta={false} />
+        </div>
 
-            <Image
+        <div className="w-full flex justify-center px-4 sm:px-6 lg:px-12">
+          <motion.div
+            whileInView={{ opacity: [0, 1] }}
+            transition={{ duration: 0.5, type: "tween" }}
+            className="z-10 flex flex-col justify-start items-start w-full max-w-md bg-dark-primary dark:bg-bg-1100 dark:border dark:border-border-600 rounded-2xl px-6 2xs:px-8 sm:px-10 py-8 2xs:py-10 sm:py-12 gap-6 2xs:gap-8"
+          >
+            <div className="text-white flex flex-col items-center justify-center w-full text-center gap-2 sm:gap-4">
+
+            {/* <Image
               className="w-10 2xs:w-12 xs:w-16"
               src={images.logo}
               alt="logo"
               onClick={() => {
                 navigate("/");
               }}
-            />
+            /> */}
             <div className="w-full 2xs:w-[90%] xs:w-[80%] sm:w-[70%] md:w-[60%] flex flex-col justify-center items-center gap-0.5 sm:gap-2 text-text-700 dark:text-text-900">
-              <h2 className="text-xl xs:text-2xl xl:text-3xl font-semibold">
+              {/* <h2 className="text-xl xs:text-2xl xl:text-3xl font-semibold">
                 Confirm Your Email Address{" "}
-              </h2>
+              </h2> */}
               <p className="text-xs 2xs:text-sm xs:text-base dark:text-text-400">
-                Open your email address, we just sent a verification code to{" "}
+ we just sent a verification code to{" "}
                 {authEmail}
               </p>
             </div>
@@ -265,24 +296,9 @@ const VerifyEmailContent = () => {
               Next{" "}
             </CustomButton>
           </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
-      <div
-        className=" absolute bottom-0 left-0 inset-[40rem] opacity-60"
-        style={{
-          background: `
-                radial-gradient(
-                  circle at bottom left,
-                  rgba(212, 177, 57, 0.4) 0%,
-                  rgba(212, 177, 57, 0.2) 40%,
-                  rgba(212, 177, 57, 0.1) 60%,
-                  rgba(212, 177, 57, 0) 80%
-                )
-              `,
-          filter: "blur(60px)",
-          transform: "scale(1.1)",
-        }}
-      />
     </div>
   );
 };

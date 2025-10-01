@@ -54,7 +54,7 @@ const TransactionsContent = () => {
         All Transactions{" "}
       </h2>
       <div className="w-full flex items-center justify-between gap-3">
-        <div className="w-[80%] xs:w-[60%] sm:w-[50%] md:w-[40%] 2xl:w-[30%] flex items-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 px-3 sm:px-4 border border-transparent rounded-lg bg-bg-600 dark:bg-bg-1100">
+        <div className="w-[80%] xs:w-[60%] sm:w-[50%] md:w-[40%] 2xl:w-[30%] flex items-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 px-3 sm:px-4 border border-transparent rounded-lg bg-white dark:bg-bg-1100">
           <FiSearch className="text-text-700 text-base sm:text-lg" />
           <input
             type="text"
@@ -67,7 +67,7 @@ const TransactionsContent = () => {
         <TransactionsFilter onFilterChange={handleFilterChange} />
       </div>
       <div className="pb-10  w-full flex flex-col justify-center items-center gap-8 xs:gap-10">
-        <div className="w-full bg-bg-600 dark:bg-bg-1100 rounded-xl p-4">
+        <div className="w-full bg-white dark:bg-bg-1100 rounded-xl p-4">
           {tableLoading ? (
             <div className="flex flex-col gap-3 py-4">
               {[...Array(4)].map((_, index) => (

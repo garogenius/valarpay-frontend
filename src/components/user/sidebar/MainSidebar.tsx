@@ -25,15 +25,24 @@ const MainSidebar = () => {
 
   return (
     <div className={`w-full h-full overflow-auto relative no-scrollbar`}>
-      <div className="w-full flex justify-center items-center py-2">
-        <Image
-          alt="logo"
-          src={images.logo}
-          className="cursor-pointer w-24"
+      <div className="w-full flex justify-center items-center py-3">
+        <div
+          className="flex items-center gap-2 cursor-pointer select-none"
           onClick={() => {
             navigate("/", "push");
           }}
-        />
+        >
+          <Image
+            alt="Valarpay logo"
+            src={images.logo}
+            width={28}
+            height={28}
+            className="w-7 h-7"
+          />
+          <span className="text-xl font-semibold text-text-1100 dark:text-text-1000">
+            Valarpay
+          </span>
+        </div>
       </div>
 
       <div className="flex flex-col w-full divide-y divide-border-600 pb-40 xs:pb-20">
@@ -72,12 +81,7 @@ const MainSidebar = () => {
                     } else if (item.path === "/logout") {
                       navigate(item.path);
                     } else {
-                      ErrorToast({
-                        title: "This feature is not available yet",
-                        descriptions: [
-                          "Complete your verification to access this feature",
-                        ],
-                      });
+                      navigate(item.path);
                     }
                   }}
                   style={{
@@ -86,8 +90,8 @@ const MainSidebar = () => {
                       : "transparent",
                   }}
                   className={`${isActive
-                    ? "text-text-1100 dark:text-secondary border-r-[5.5px] border-secondary dark:border-primary font-semibold"
-                    : "text-text-1000 font-medium"
+                    ? "text-white dark:text-secondary border-r-[5.5px] border-secondary dark:border-primary font-semibold"
+                    : "text-white font-medium"
                     } rounded-r-md cursor-pointer flex items-center gap-2.5 py-3.5 pl-4`}
                 >
                   <item.icon className="text-2xl" />

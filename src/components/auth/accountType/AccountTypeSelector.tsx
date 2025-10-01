@@ -13,7 +13,7 @@ const AccountTypeSelector = () => {
 
   return (
     <div className="w-full h-full flex flex-col gap-4">
-      <label className="relative flex items-center px-4 2xs:px-5 py-4 2xs:py-5 bg-bg-600 dark:bg-bg-1100 rounded-lg sm:rounded-xl cursor-pointer hover:opacity-80">
+      <label className="relative flex items-center px-4 2xs:px-5 py-4 2xs:py-5 bg-dark-primary dark:bg-bg-1100 rounded-lg sm:rounded-xl cursor-pointer hover:opacity-80">
         <input
           type="radio"
           name="accountType"
@@ -45,7 +45,7 @@ const AccountTypeSelector = () => {
         </div>
       </label>
 
-      <label className="relative flex items-center px-4 2xs:px-5 py-4 2xs:py-5  bg-bg-600 dark:bg-bg-1100 rounded-lg sm:rounded-xl cursor-pointer hover:opacity-80">
+      <label className="relative flex items-center px-4 2xs:px-5 py-4 2xs:py-5  bg-dark-primary dark:bg-bg-1100 rounded-lg sm:rounded-xl cursor-pointer hover:opacity-80">
         <input
           type="radio"
           name="accountType"

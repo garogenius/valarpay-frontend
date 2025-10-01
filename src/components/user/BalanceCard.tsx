@@ -29,7 +29,7 @@ const BalanceCard = ({
   };
 
   return (
-    <div className="bg-bg-600 dark:bg-bg-1100 rounded-xl px-4 py-7 2xs:py-8 flex items-center gap-4 sm:gap-6">
+    <div className="shadow-sm bg-white dark:bg-bg-1100 rounded-xl px-4 py-7 2xs:py-8 flex items-center gap-4 sm:gap-6">
       <Image
         src={getCurrencyIconByString(currency) || ""}
         alt="currency"
@@ -37,23 +37,22 @@ const BalanceCard = ({
       />
       <div className="flex flex-col gap-0 sm:gap-1 font-semibold">
         <div className="flex items-center gap-2">
-          <p className="text-text-200 dark:text-text-800 text-base sm:text-lg ">
+          <p className="text-dark-200 dark:text-text-800 text-base sm:text-lg ">
             My Balance
           </p>
           {isBalanceVisible ? (
             <FiEyeOff
               onClick={toggleBalanceVisibility}
-              className="cursor-pointer text-text-200 dark:text-text-800 text-lg"
+              className="cursor-pointer text-dark-200 dark:text-text-800 text-lg"
             />
           ) : (
             <FiEye
               onClick={toggleBalanceVisibility}
-              className="cursor-pointer text-text-200 dark:text-text-800 text-lg"
+              className="cursor-pointer text-dark-200 dark:text-text-800 text-lg"
             />
           )}
         </div>
-        <p className="text-text-400 text-2xl sm:text-3xl">
-          {" "}
+        <p className="text-dark-400 dark:text-white text-2xl sm:text-3xl">
           {isBalanceVisible ? `₦ ${balance?.toLocaleString() || 0.0}` : "---"}
         </p>
       </div>

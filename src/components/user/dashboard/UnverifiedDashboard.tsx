@@ -57,8 +57,6 @@ const UnverifiedDashboard = ({
     }
   };
 
-  console.log(bvnDetails);
-
   const handleComplete = (step: number) => {
     setSteps((prevSteps) =>
       prevSteps.map((s) => (s.value === step ? { ...s, completed: true } : s))
@@ -75,7 +73,7 @@ const UnverifiedDashboard = ({
   };
 
   return (
-    <div className="bg-bg-600 dark:bg-bg-1100 rounded-xl h-full w-full flex flex-col px-4">
+    <div className="bg-white dark:bg-bg-1100 rounded-xl h-full w-full flex flex-col px-4">
       {verificationStatus === false ? (
         <div className="py-40 flex flex-col justify-center items-center gap-6 sm:gap-8">
           <div className="p-5 rounded-full bg-bg-2300">

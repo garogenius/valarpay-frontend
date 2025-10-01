@@ -91,7 +91,7 @@ const Bills = [
 const BillsPaymentContent = () => {
   const navigate = useNavigate();
   return (
-    <div className="w-full flex max-xl:flex-col 2xs:px-2 xs:px-4 sm:px-6 md:px-8 py-4 2xs:py-6 sm:py-10 bg-transparent xs:bg-bg-600 dark:xs:bg-bg-1100 gap-6 xs:gap-10 lg:gap-12 2xl:gap-16 rounded-xl">
+    <div className="w-full flex max-xl:flex-col 2xs:px-2 xs:px-4 sm:px-6 md:px-8 py-4 2xs:py-6 sm:py-10 bg-transparent bg-white dark:bg-bg-1100 gap-6 xs:gap-10 lg:gap-12 2xl:gap-16 rounded-xl">
       <div className="w-full grid grid-cols-1 2xs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
         {Bills.map((item, index) => (
           <div
@@ -114,9 +114,9 @@ const BillsPaymentContent = () => {
               }
             }}
             key={index}
-            className="cursor-pointer flex px-4 py-5 flex-col gap-2.5 justify-center bg-bg-600 dark:bg-bg-1100 rounded-xl border border-border-600"
+            className="shadow-sm cursor-pointer flex px-4 py-5 flex-col gap-2.5 justify-center items-center bg-white dark:bg-bg-1100 rounded-xl border border-border-600"
           >
-            <div className="w-fit rounded-full p-3 flex justify-center items-center bg-bg-2700 dark:bg-bg-1200">
+            <div className="w-fit rounded-full p-3 flex justify-center items-center bg-dark-primary dark:bg-bg-1200">
               <item.icon className="text-secondary text-xl" />
             </div>
             <p className="text-base font-medium text-text-200 dark:text-text-400">
