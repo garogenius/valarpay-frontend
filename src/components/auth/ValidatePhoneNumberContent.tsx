@@ -16,6 +16,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Controller } from "react-hook-form";
 import AuthHeader from "./AuthHeader";
+import { IValidatePhoneNumber } from "@/api/user/user.types";
 
 const schema = yup.object().shape({
   phoneNumber: yup
@@ -86,7 +87,7 @@ const ValidatePhoneNumberContent = () => {
     validatePhoneNumberPending && !validatePhoneNumberError;
 
   const onSubmit = async (data: ValidatePhoneNumberFormData) => {
-    validatePhoneNumber(data);
+    validatePhoneNumber(data as IValidatePhoneNumber);
   };
 
   return (
