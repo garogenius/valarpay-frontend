@@ -93,7 +93,7 @@ const VerifyPhoneNumberContent = () => {
   const handleVerify = async () => {
     if (user?.email) {
       verifyPhoneNumber({
-        email: user?.email,
+        username: user?.email,
         otp: token,
       });
     }
@@ -102,7 +102,6 @@ const VerifyPhoneNumberContent = () => {
   const handleResendClick = async () => {
     if (resendTimer === 0 && user?.email) {
       resendVerificationCode({
-        email: user?.email,
         phoneNumber: authPhoneNumber,
       });
     }
