@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import CustomButton from "@/components/shared/Button";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
@@ -92,7 +89,7 @@ const VerifyEmailContent = () => {
   const handleVerify = async () => {
     if (authEmail) {
       verifyEmail({
-        email: authEmail,
+        username: authEmail,
         otpCode: token,
       });
     }
@@ -100,7 +97,7 @@ const VerifyEmailContent = () => {
 
   const handleResendClick = async () => {
     if (resendTimer === 0) {
-      resendVerificationCode({ email: authEmail });
+      resendVerificationCode({ username: authEmail });
     }
   };
 

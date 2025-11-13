@@ -40,11 +40,10 @@ export interface ITier3Verification {
 }
 
 export interface IVerifyPhoneNumber {
-  email: string;
+  username: string;
   otp: string;
 }
 
 export interface IValidatePhoneNumber {
-  email: string;
   phoneNumber: string;
 }

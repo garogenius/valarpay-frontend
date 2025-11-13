@@ -36,7 +36,7 @@ export default function DeveloperHeader({ right }: HeaderProps) {
           {/* Logo and Company Name */}
           <Link href="/" className="flex items-center gap-3">
             <img
-              src="/images/logo.svg"
+              src="/images/logo.png"
               alt="ValarPay Logo"
               className="h-8 w-auto"
             />

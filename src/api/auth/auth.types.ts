@@ -1,5 +1,5 @@
 export interface ILogin {
-  email: string;
+  username: string;
   password: string;
   ipAddress: string;
   deviceName: string;
@@ -20,20 +20,20 @@ export interface IRegister {
 }
 
 export interface IVerifyEmail {
-  email: string;
+  username: string;
   otpCode: string;
 }
 
 export interface IResendVerificationCode {
-  email: string;
+  username: string;
 }
 
 export interface IForgotPassword {
-  email: string;
+  username: string;
 }
 
 export interface IResetPassword {
-  email: string;
+  username: string;
   password: string;
   confirmPassword: string;
 }

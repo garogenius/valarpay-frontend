@@ -5,9 +5,6 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { motion } from "framer-motion";
-import images from "../../../public/images";
-import Image from "next/image";
-import Link from "next/link";
 import AuthInput from "./AuthInput";
 import CustomButton from "@/components/shared/Button";
 import ErrorToast from "@/components/toast/ErrorToast";
@@ -21,7 +18,6 @@ import { Controller } from "react-hook-form";
 import AuthHeader from "./AuthHeader";
 
 const schema = yup.object().shape({
-  email: yup.string().email("Invalid email").required("Email is required"),
   phoneNumber: yup
     .string()
     .required("Phone number is required")
@@ -38,7 +34,6 @@ const ValidatePhoneNumberContent = () => {
   const { authEmail } = useAuthEmailStore();
   const form = useForm<ValidatePhoneNumberFormData>({
     defaultValues: {
-      email: authEmail,
       phoneNumber: "",
     },
     resolver: yupResolver(schema),
@@ -61,7 +56,6 @@ const ValidatePhoneNumberContent = () => {
   };
 
   const onSuccess = () => {
-    setAuthEmail(form.getValues("email"));
     setAuthPhoneNumber(form.getValues("phoneNumber"));
     SuccessToast({
       title: "Phone number validated!",
@@ -102,13 +96,17 @@ const ValidatePhoneNumberContent = () => {
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: 'url("/images/home/landingPage/glassBuilding.jpg")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
+            backgroundImage:
+              'url("/images/home/landingPage/glassBuilding.jpg")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
           }}
         />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: '#1C2E50CC' }} />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "#1C2E50CC" }}
+        />
 
         {/* Header on top of left section */}
         <div className="absolute top-0 left-0 right-0 z-20">
@@ -119,8 +117,12 @@ const ValidatePhoneNumberContent = () => {
         <div className="relative z-20 h-full flex items-center">
           <div className="pl-12 pr-8 max-w-2xl text-white space-y-6">
             <div>
-              <h2 className="text-5xl font-bold mb-4 leading-tight text-primary">Validate your phone</h2>
-              <p className="text-2xl opacity-95 mb-6 leading-relaxed">Enter your phone number to receive a verification code.</p>
+              <h2 className="text-5xl font-bold mb-4 leading-tight text-primary">
+                Validate your phone
+              </h2>
+              <p className="text-2xl opacity-95 mb-6 leading-relaxed">
+                Enter your phone number to receive a verification code.
+              </p>
             </div>
           </div>
         </div>
@@ -139,44 +141,44 @@ const ValidatePhoneNumberContent = () => {
             transition={{ duration: 0.5, type: "tween" }}
             className="z-10 flex flex-col justify-start items-start w-full max-w-md bg-dark-primary dark:bg-bg-1100 dark:xs:border dark:border-border-600 rounded-2xl px-6 2xs:px-8 sm:px-10 py-6 sm:py-8 gap-6"
           >
-          <div className="text-white flex flex-col items-center justify-center w-full text-center">
-            <h2 className="text-xl xs:text-2xl lg:text-3xl text-text-200 dark:text-white font-semibold">
-              Validate Phone Number
-            </h2>
-          </div>
-          <form
-            className="flex flex-col justify-start items-start w-full gap-7"
-            onSubmit={handleSubmit(onSubmit)}
-            noValidate
-          >
-            <Controller
-              name="phoneNumber"
-              control={form.control}
-              render={({ field }) => (
-                <AuthInput
-                  id="phoneNumber"
-                  label="Phone Number"
-                  type="phone"
-                  maxLength={10}
-                  value={field.value}
-                  onChange={(val: any) => {
-                    field.onChange(val);
-                    console.log("Phone input value:", val);
-                  }}
-                  error={errors.phoneNumber?.message}
-                />
-              )}
-            />
-
-            <CustomButton
-              type="submit"
-              disabled={!isValid || validatePhoneNumberLoading}
-              isLoading={validatePhoneNumberLoading}
-              className="mb-4  w-full  border-2 border-primary text-black text-base 2xs:text-lg max-2xs:px-6 py-3.5 xs:py-4"
+            <div className="text-white flex flex-col items-center justify-center w-full text-center">
+              <h2 className="text-xl xs:text-2xl lg:text-3xl text-text-200 dark:text-white font-semibold">
+                Validate Phone Number
+              </h2>
+            </div>
+            <form
+              className="flex flex-col justify-start items-start w-full gap-7"
+              onSubmit={handleSubmit(onSubmit)}
+              noValidate
             >
-              Validate Phone Number{" "}
-            </CustomButton>
-          </form>
+              <Controller
+                name="phoneNumber"
+                control={form.control}
+                render={({ field }) => (
+                  <AuthInput
+                    id="phoneNumber"
+                    label="Phone Number"
+                    type="phone"
+                    maxLength={10}
+                    value={field.value}
+                    onChange={(val: any) => {
+                      field.onChange(val);
+                      console.log("Phone input value:", val);
+                    }}
+                    error={errors.phoneNumber?.message}
+                  />
+                )}
+              />
+
+              <CustomButton
+                type="submit"
+                disabled={!isValid || validatePhoneNumberLoading}
+                isLoading={validatePhoneNumberLoading}
+                className="mb-4  w-full  border-2 border-primary text-black text-base 2xs:text-lg max-2xs:px-6 py-3.5 xs:py-4"
+              >
+                Validate Phone Number{" "}
+              </CustomButton>
+            </form>
           </motion.div>
         </div>
       </div>

@@ -20,12 +20,12 @@ import { useTheme } from "@/store/theme.store";
 import useAuthEmailStore from "@/store/authEmail.store";
 import { useEffect } from "react";
 import { User } from "@/constants/types";
+import { ILogin } from "@/api/auth/auth.types";
 
 const schema = yup.object().shape({
-  email: yup
+  username: yup
     .string()
-    .email("Email format is not valid")
-    .required("Email is required"),
+    .required("Username is required"),
 
   password: yup
     .string()
@@ -38,7 +38,7 @@ const schema = yup.object().shape({
 });
 
 interface LoginFormData {
-  email: string;
+  username: string;
   password: string;
   ipAddress?: string;
   deviceName?: string;
@@ -52,7 +52,7 @@ const LoginContent = () => {
 
   const form = useForm<LoginFormData>({
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
       ipAddress: "",
       deviceName: "",
@@ -112,7 +112,7 @@ const LoginContent = () => {
       : [errorMessage];
 
     if (descriptions.includes("Email not verified")) {
-      setAuthEmail(form.getValues("email"));
+      setAuthEmail(form.getValues("username"));
       navigate("/verify-email");
     } else {
       ErrorToast({
@@ -149,15 +149,14 @@ const LoginContent = () => {
   const loginLoading = loginPending && !loginError;
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log({ isValid, data, errors });
-
+    console.log('data:',data)
     login({
-      email: data.email.toLowerCase(),
+      username: data.username.toLowerCase(),
       password: data.password,
       ipAddress: data.ipAddress || "",
       deviceName: data.deviceName || "",
       operatingSystem: data.operatingSystem || "",
-    });
+    } as ILogin);
   };
 
   return (
@@ -242,11 +241,11 @@ const LoginContent = () => {
               noValidate
             >
               <AuthInput
-                id="email"
-                label="Email"
-                type="email"
-                htmlFor="email"
-                placeholder="Email"
+                id="username"
+                label="Email or Phone Number"
+                type="text"
+                htmlFor="username"
+                placeholder="Username"
                 icon={
                   <Image
                     src={
@@ -254,12 +253,12 @@ const LoginContent = () => {
                         ? icons.authIcons.mailDark
                         : icons.authIcons.mail
                     }
-                    alt="email"
+                    alt="username"
                     className="w-5 h-5 sm:w-6 sm:h-6"
                   />
                 }
-                error={errors.email?.message}
-                {...register("email")}
+                error={errors.username?.message}
+                {...register("username")}
               />
 
               <AuthInput

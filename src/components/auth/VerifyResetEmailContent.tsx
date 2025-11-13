@@ -15,7 +15,6 @@ import useAuthEmailStore from "@/store/authEmail.store";
 import useTimerStore from "@/store/timer.store";
 import { useRouter } from "next/navigation";
 import SpinnerLoader from "../Loader/SpinnerLoader";
-import icons from "../../../public/icons";
 import {
   useResendVerificationCode,
   useVerifyResetEmail,
@@ -93,7 +92,7 @@ const VerifyResetEmailContent = () => {
   const handleVerify = async () => {
     if (authEmail) {
       verifyEmail({
-        email: authEmail,
+        username: authEmail,
         otpCode: token,
       });
     }
@@ -101,7 +100,7 @@ const VerifyResetEmailContent = () => {
 
   const handleResendClick = async () => {
     if (resendTimer === 0) {
-      resendVerificationCode({ email: authEmail });
+      resendVerificationCode({ username: authEmail });
     }
   };
 

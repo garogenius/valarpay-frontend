@@ -6,7 +6,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useForgotPassword } from "@/api/auth/auth.queries";
 import { motion } from "framer-motion";
-import images from "../../../public/images";
 import Image from "next/image";
 import AuthInput from "./AuthInput";
 import CustomButton from "@/components/shared/Button";
@@ -20,10 +19,9 @@ import useAuthEmailStore from "@/store/authEmail.store";
 import AuthHeader from "./AuthHeader";
 
 const schema = yup.object().shape({
-  email: yup
+  username: yup
     .string()
-    .email("Email format is not valid")
-    .required("Email is required"),
+    .required("Username is required"),
 });
 
 type ForgotPasswordFormData = yup.InferType<typeof schema>;
@@ -35,7 +33,7 @@ const ForgotPasswordContent = () => {
 
   const form = useForm<ForgotPasswordFormData>({
     defaultValues: {
-      email: "",
+      username: "",
     },
     resolver: yupResolver(schema),
     mode: "onChange",
@@ -57,11 +55,11 @@ const ForgotPasswordContent = () => {
   };
 
   const onSuccess = () => {
-    setAuthEmail(form.getValues("email"));
+    setAuthEmail(form.getValues("username"));
     SuccessToast({
       title: "Password reset otp sent!",
       description:
-        "Check your email for verification code to continue with reseting your password",
+        "Check your email or phone number for verification code to continue with reseting your password",
     });
     navigate("/verify-reset-email");
   };
@@ -158,20 +156,20 @@ const ForgotPasswordContent = () => {
               noValidate
             >
               <AuthInput
-                id="email"
-                label="Email"
-                type="email"
-                htmlFor="email"
-                placeholder="Email"
+                id="username"
+                label="Email or Phone Number"
+                type="username"
+                htmlFor="username"
+                placeholder="Username"
                 icon={
                   <Image
                     src={theme === "dark" ? icons.authIcons.mailDark : icons.authIcons.mail}
-                    alt="email"
+                    alt="username"
                     className="w-5 h-5 sm:w-6 sm:h-6"
                   />
                 }
-                error={errors.email?.message}
-                {...register("email")}
+                error={errors.username?.message}
+                {...register("username")}
               />
 
               <p className="w-full flex justify-center items-center gap-1 text-sm sm:text-base text-text-200 dark:text-white ">

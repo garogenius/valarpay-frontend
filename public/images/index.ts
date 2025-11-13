@@ -1,4 +1,4 @@
-import logo from "./logo.svg";
+import logo from "./logo.png";
 import singleLogo from "./single-logo.png";
 
 import heroImage from "./home/landingPage/heroImage.png";

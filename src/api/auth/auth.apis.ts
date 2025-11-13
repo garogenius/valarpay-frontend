@@ -9,20 +9,25 @@ import {
 } from "./auth.types";
 
 export const registerRequest = async (formdata: IRegister) => {
-  return request({ url: "/auth/register", method: "post", data: formdata });
+  return request({ url: "/user/register", method: "post", data: formdata });
 };
+
+export const registerBusiness = async (formdata: IRegister) => {
+  return request({ url: "/user/register-business", method: "post", data: formdata });
+};
+
 
 export const loginRequest = async (formdata: ILogin) => {
   return request({ url: "/auth/login", method: "post", data: formdata });
 };
 
 export const verifyEmailRequest = async (formdata: IVerifyEmail) => {
-  return request({ url: "/auth/verify-email", method: "post", data: formdata });
+  return request({ url: "/user/verify-email", method: "post", data: formdata });
 };
 
 export const verifyResetEmailRequest = async (formdata: IVerifyEmail) => {
   return request({
-    url: "/auth/verify-forgot-password",
+    url: "/user/verify-email",
     method: "post",
     data: formdata,
   });
@@ -32,7 +37,7 @@ export const resendVerificationCodeRequest = async (
   formdata: IResendVerificationCode
 ) => {
   return request({
-    url: "/auth/resend-verify-email",
+    url: "/auth/resend-2fa",
     method: "post",
     data: formdata,
   });
@@ -40,7 +45,7 @@ export const resendVerificationCodeRequest = async (
 
 export const verify2faCodeRequest = async (formdata: IVerifyEmail) => {
   return request({
-    url: "/auth/verify-2fa-code",
+    url: "/auth/verify-2fa",
     method: "post",
     data: formdata,
   });
@@ -50,7 +55,7 @@ export const resend2faCodeRequest = async (
   formdata: IResendVerificationCode
 ) => {
   return request({
-    url: "/auth/resend-2fa-email",
+    url: "/auth/resend-2fa",
     method: "post",
     data: formdata,
   });
@@ -58,7 +63,7 @@ export const resend2faCodeRequest = async (
 
 export const forgotPasswordRequest = async (formdata: IForgotPassword) => {
   return request({
-    url: "/auth/forgot-password",
+    url: "/user/forgot-password",
     method: "post",
     data: formdata,
   });
@@ -66,7 +71,7 @@ export const forgotPasswordRequest = async (formdata: IForgotPassword) => {
 
 export const resetPasswordRequest = async (formdata: IResetPassword) => {
   return request({
-    url: "/auth/reset-password",
+    url: "/user/reset-password",
     method: "post",
     data: formdata,
   });

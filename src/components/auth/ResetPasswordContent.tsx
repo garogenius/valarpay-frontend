@@ -85,7 +85,7 @@ const ResetPasswordContent = () => {
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     resetPassword({
-      email: authEmail,
+      username: authEmail,
       ...data,
     });
   };
