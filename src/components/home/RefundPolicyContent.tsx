@@ -143,7 +143,7 @@ const RefundPolicyContent = () => {
 
                 <p>
                   Contact Support: <strong>support@valarpay.com</strong> or{" "}
-                  <strong>+2349029852374</strong>.
+                  <strong>02013309609</strong>.
                 </p>
 
                 <p>
@@ -244,7 +244,7 @@ const RefundPolicyContent = () => {
                   For further assistance, contact:
                   <br />
                   <strong>support@valarpay.com</strong> |{" "}
-                  <strong>+2349029852374</strong>
+                  <strong>02013309609</strong>
                   <br />
                   Address: 23, OGAGIFO STREET, OFF DBS ROAD, BEFORE GQ SUITES,
                   ASABA, DELTA STATE.

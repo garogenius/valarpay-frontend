@@ -236,7 +236,7 @@ const PrivacyPolicyContent = () => {
                 <p>
                   To exercise any rights, contact us at{" "}
                   <strong>support@valarpay.com</strong> or call{" "}
-                  <strong>+2349029852374</strong>.
+                  <strong>02013309609</strong>.
                 </p>
               </div>
 
@@ -296,7 +296,7 @@ const PrivacyPolicyContent = () => {
                   Email: <strong>support@valarpay.com</strong>
                 </p>
                 <p>
-                  Phone: <strong>+2349029852374</strong>
+                  Phone: <strong>02013309609</strong>
                 </p>
               </div>
             </div>

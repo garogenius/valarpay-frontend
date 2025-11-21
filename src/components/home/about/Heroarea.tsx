@@ -48,7 +48,7 @@ const Heroarea = () => {
               className="text-dark-primary dark:text-text-400 flex flex-col gap-3"
             >
               <p className="text-sm xs:text-base lg:text-lg leading-relaxed">
-             NATTY GROUP UK LIMITED. is a registered Fin Tech company
+             VALAR GLOBAL SERVICES LIMITED. is a registered Fin Tech company
                 in Nigeria, committed to revolutionizing local and global
                 financial services by providing innovative, secure, and
                 user-friendly solutions that cater to the diverse needs of our
@@ -75,7 +75,7 @@ const Heroarea = () => {
               </h1>
 
               <p className="text-sm xs:text-base lg:text-lg leading-[1.6rem] xs:leading-[1.8rem]">
-                At NATTY GROUP UK LIMITED, the Story is passionate and
+                At VALAR GLOBAL SERVICES LIMITED, the Story is passionate and
                 determined, driven by the desire to bring high-quality and standard
                 financial services to individuals locally and globally. As VGSL
                 flourished in Onitsha, its influence expanded beyond. Branches

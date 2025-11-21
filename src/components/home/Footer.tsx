@@ -160,7 +160,7 @@ const Footer = () => {
                   }}
                   className="cursor-pointer"
                 >
-                  +2349029852374
+                  02013309609
                 </p>
                 <p
                   onClick={() => {

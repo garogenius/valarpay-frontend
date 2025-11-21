@@ -8,7 +8,7 @@ const FraudMonitoringAndUserSecurityPolicyContent = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { amount: 0.1 });
 
-  
+
   return (
     <div className="w-full relative z-0 bg-white dark:bg-dark-primary overflow-hidden flex flex-col">
       <div className="relative w-full flex justify-center">
@@ -180,7 +180,7 @@ const FraudMonitoringAndUserSecurityPolicyContent = () => {
                     Email: <strong>support@valarpay.com</strong>
                   </li>
                   <li>
-                    Phone: <strong>+2349029852374</strong>
+                    Phone: <strong>02013309609</strong>
                   </li>
                   <li>In-app report button (where applicable)</li>
                 </ul>
@@ -274,7 +274,7 @@ const FraudMonitoringAndUserSecurityPolicyContent = () => {
                 </p>
 
                 <p>Email: support@valarpay.com</p>
-                <p>Phone: +2349029852374</p>
+                <p>Phone: 02013309609</p>
               </div>
             </div>
           </div>

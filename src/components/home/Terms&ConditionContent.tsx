@@ -576,7 +576,7 @@ const TermsAndConditionContent = () => {
                     </a>
                   </p>
                   <p>
-                    <span className="font-semibold">Phone:</span> +2349029852374
+                    <span className="font-semibold">Phone:</span> 02013309609
                   </p>
                   <p>
                     <span className="font-semibold">Head Office Address:</span>{" "}

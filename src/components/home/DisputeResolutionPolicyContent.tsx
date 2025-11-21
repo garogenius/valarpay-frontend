@@ -117,7 +117,7 @@ const DisputeResolutionPolicyContent = () => {
                     Email: <strong>support@valarpay.com</strong>
                   </li>
                   <li>
-                    Phone: <strong>+2349029852374</strong>
+                    Phone: <strong>02013309609</strong>
                   </li>
                   <li>In-app support chat</li>
                   <li>Website support portal</li>
@@ -252,7 +252,7 @@ const DisputeResolutionPolicyContent = () => {
                   DELTA STATE.
                 </p>
                 <p>Email: support@valarpay.com</p>
-                <p>Phone: +2349029852374</p>
+                <p>Phone: 02013309609</p>
               </div>
             </div>
           </div>

@@ -206,7 +206,7 @@ const NonBankDisclosureContent = () => {
                 <p><strong>VALAR GLOBAL SERVICES LIMITED</strong></p>
                 <p>23, OGAGIFO STREET, OFF DBS ROAD, BEFORE GQ SUITES, ASABA, DELTA STATE.</p>
                 <p>Email: support@valarpay.com</p>
-                <p>Phone: +2349029852374</p>
+                <p>Phone: 02013309609</p>
               </div>
 
             </div>

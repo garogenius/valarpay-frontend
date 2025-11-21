@@ -42,8 +42,8 @@ const Contact = () => {
                   <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#2D7FF9]/15 text-[#2D7FF9]">
                     <FaPhone />
                   </span>
-                  <a href="tel:+2349029852374" className="text-sm sm:text-base hover:underline">
-                    +2349029852374
+                  <a href="tel:02013309609" className="text-sm sm:text-base hover:underline">
+                    02013309609
                   </a>
                 </div>
 

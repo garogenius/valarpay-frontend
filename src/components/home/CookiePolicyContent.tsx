@@ -161,7 +161,7 @@ const CookiePolicyContent = () => {
                   ASABA, DELTA STATE.
                 </p>
                 <p>Email: support@valarpay.com</p>
-                <p>Phone: +2349029852374</p>
+                <p>Phone: 02013309609</p>
               </div>
             </div>
           </div>

@@ -251,7 +251,7 @@ const TermsOfUseContent = () => {
                   Email: <strong>support@valarpay.com</strong>
                 </p>
                 <p>
-                  Phone: <strong>+2349029852374</strong>
+                  Phone: <strong>02013309609</strong>
                 </p>
                 <p>
                   Address:{" "}

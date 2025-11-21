@@ -154,7 +154,7 @@ const AccountDeletionContent = () => {
                   className="cursor-pointer flex items-center gap-1 "
                 >
                   <FaPhone className="text-xl text-text-1000" />
-                  <p className="">+2349029852374</p>
+                  <p className="">02013309609</p>
                 </div>
                 <div
                   onClick={() => {
