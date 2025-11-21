@@ -8,6 +8,7 @@ const FraudMonitoringAndUserSecurityPolicyContent = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { amount: 0.1 });
 
+  
   return (
     <div className="w-full relative z-0 bg-white dark:bg-dark-primary overflow-hidden flex flex-col">
       <div className="relative w-full flex justify-center">
