@@ -17,6 +17,7 @@ const RefundPolicyContent = () => {
           initial="hidden"
           className="relative w-full flex flex-col justify-center h-full gap-8 2xs:gap-10 sm:gap-12 pb-20 sm:pb-28 md:pb-32 "
         >
+          {/* ================= HEADER ================= */}
           <div className="relative ">
             <div className="z-30 bg-[#FDE0CC] dark:bg-[#322127] w-full relative inset-0 mx-auto flex flex-col justify-center items-center pb-10 pt-32 sm:pb-12 sm:pt-36 md:pb-14 md:pt-40">
               <motion.div
@@ -24,16 +25,17 @@ const RefundPolicyContent = () => {
                 className="w-[95%] 2xs:w-[90%] lg:w-[85%] 2xl:w-[70%] flex flex-col gap-2 xs:gap-3 sm:gap-4 lg:gap-6 text-center py-4"
               >
                 <h1 className="text-text-200 dark:text-white text-2xl xs:text-3xl md:text-4xl xl:text-5xl font-bold xs:leading-[2.4rem] md:leading-[2.8rem] xl:leading-[3.8rem]">
-                  NATTY GROUP UK LIMITED{" "}
+                  VALAR GLOBAL SERVICES LIMITED
                 </h1>
                 <p className="text-text-200 dark:text-white text-2xl lg:text-3xl xl:text-4xl font-medium ">
-                  Refund Policy{" "}
+                  Refund Policy
                 </p>
                 <p className="text-sm xs:text-base sm:text-xl text-text-200 dark:text-white font-medium">
                   Last Updated: 10th November 2024
                 </p>
               </motion.div>
             </div>
+
             <div
               className="absolute -inset-20 -bottom-40 opacity-40"
               style={{
@@ -52,129 +54,201 @@ const RefundPolicyContent = () => {
             />
           </div>
 
-          <div className=" flex flex-col items-center gap-12">
+          {/* ================= CONTENT ================= */}
+          <div className="flex flex-col items-center gap-12">
             <div className="w-[90%] lg:w-[88%] flex flex-col gap-10 text-base xs:text-lg text-text-200 dark:text-text-900">
+              {/* ================= INTRO ================= */}
               <div className="flex flex-col gap-4">
-                <h4 className="">
-                  At NATTY GROUP UK LIMITED
+                <h4>
+                  At VALAR GLOBAL SERVICES LIMITED (“ValarPay”), we are
+                  committed to providing transparent, secure, and reliable
+                  financial technology services. This Refund Policy outlines how
+                  refund requests are handled for transactions carried out
+                  through the ValarPay platform.
                 </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    We are committed to providing transparent and reliable
-                    financial services. This Refund Policy outlines the
-                    conditions under which refunds may be issued to ensure
-                    clarity for our customers.
-                  </p>
-                </div>
+
+                <p>
+                  Please read this policy carefully to understand the conditions
+                  under which refunds may be approved, processed, or declined.
+                </p>
               </div>
+
+              {/* ================= 1. ELIGIBILITY ================= */}
               <div className="flex flex-col gap-4">
                 <h4 className="text-primary font-bold">
-                  1. Eligibility for Refunds{" "}
+                  1. Eligibility for Refunds
                 </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    Refunds will only be processed under the following
-                    circumstances:
-                  </p>
-                  <p className="">
-                    Unauthorized Transactions: If you identify a transaction on
-                    your account that you did not authorize, please report it to
-                    us immediately. Upon verification, a refund will be
-                    processed as per regulatory guidelines.
-                    <br />
-                    Service Errors: If there is a technical or operational error
-                    on our part that results in an incorrect charge, we will
-                    investigate and issue a refund if deemed appropriate.
-                    Cancellation of Subscription Services: If you cancel a
-                    subscription within the allowed grace period (as specified
-                    in the subscription terms), a prorated or full refund may be
-                    issued depending on the policy.
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col gap-4">
-                <h4 className="text-primary font-bold">
-                  2. Refund Request Process{" "}
-                </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    To request a refund, Contact our Support Team at
-                    Support@Valarpay.com or Call+2349029852374 within 24hour day
-                    of the transaction.
-                    <br />
-                    Provide the following details:
-                    <br />
-                    Full name and registered account details.
-                    <br />
-                    Transaction ID and date.
-                    <br />
-                    Reason for the refund request.
-                    <br />
-                    We will acknowledge your request within 24hour and may
-                    require additional documentation or evidence for
+                <p>The following situations may qualify for a refund:</p>
+
+                <ul className="list-disc list-inside flex flex-col gap-1">
+                  <li>
+                    <strong>Unauthorized Transactions:</strong> If you detect a
+                    transaction that you did not authorize, report it to us
+                    immediately. Upon investigation and confirmation, a refund
+                    or reversal will be processed based on regulatory
+                    guidelines.
+                  </li>
+
+                  <li>
+                    <strong>Failed or Reversed Transactions:</strong> If your
+                    account was debited but the transaction failed or the
+                    beneficiary did not receive value, a refund will be
+                    initiated automatically or upon confirmation from our
+                    partner financial institutions.
+                  </li>
+
+                  <li>
+                    <strong>Duplicate Transactions:</strong> If you are charged
+                    more than once for the same transaction, the excess charge
+                    will be refunded once verified.
+                  </li>
+
+                  <li>
+                    <strong>Service Errors:</strong> If an error occurs due to
+                    system, processing, or operational failure on ValarPay or
+                    our partners’ part, a refund will be issued after
                     verification.
-                  </p>
-                </div>
+                  </li>
+
+                  <li>
+                    <strong>Subscription Cancellations:</strong> Refunds for
+                    subscription services (where applicable) may be prorated or
+                    fully refunded based on the terms of the subscription.
+                  </li>
+                </ul>
               </div>
 
-              <div className="flex flex-col gap-4">
-                <h4 className="text-primary font-bold">3. Non-Refundable </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    Transactions of certain amounts are non-refundable,
-                    including:
-                  </p>
-
-                  <p className="">
-                    Transactions where the service or product has already been
-                    delivered as agreed. Situations where a refund request is
-                    made beyond the stipulated timeline. Fees or charges
-                    explicitly stated as non-refundable in the terms of service.{" "}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                <h4 className="text-primary font-bold">4. Processing Time </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    Approved refunds will be processed within 24hours  Depending
-                    on your payment method, it may take additional time for the
-                    refund to appear in your account.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                <h4 className="text-primary font-bold">5. Fraud Prevention </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    Refunds will only be processed after thorough verification
-                    to prevent fraudulent claims. If any suspicious activity is
-                    detected, we reserve the right to deny the refund request
-                    and take further action if necessary.{" "}
-                  </p>
-                </div>
-              </div>
-
+              {/* ================= 2. REQUEST PROCESS ================= */}
               <div className="flex flex-col gap-4">
                 <h4 className="text-primary font-bold">
-                  6. Amendments to This Policy{" "}
+                  2. Refund Request Process
                 </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    We may update this Refund Policy periodically. Any changes
-                    will be communicated to users via [email/website/app
-                    notification]. Please review this policy regularly for
-                    updates.
-                  </p>
-                  <p className="">
-                    For further assistance, please reach out to our support
-                    team: Support@Valarpay.com or Call: +2349029852374
-                    <br />
-                    Head office: 23, OGAGIFO STREET OFF DBS ROAD BEFORE GQ SUITES , ASABA, DELTA STATE
-                  </p>
-                </div>
+
+                <p>
+                  Refund requests should be submitted within{" "}
+                  <strong>24 hours</strong> of the transaction or immediately
+                  after the issue is discovered.
+                </p>
+
+                <p>Please provide:</p>
+
+                <ul className="list-disc list-inside flex flex-col gap-1">
+                  <li>
+                    Your full name and registered ValarPay account details
+                  </li>
+                  <li>Transaction ID, amount, and date</li>
+                  <li>A clear explanation of the issue</li>
+                  <li>Supporting evidence (if required)</li>
+                </ul>
+
+                <p>
+                  Contact Support: <strong>support@valarpay.com</strong> or{" "}
+                  <strong>+2349029852374</strong>.
+                </p>
+
+                <p>
+                  Our support team will acknowledge receipt of your request
+                  within
+                  <strong> 24 hours</strong> and may request additional
+                  documentation during verification.
+                </p>
+              </div>
+
+              {/* ================= 3. NON-REFUNDABLE ================= */}
+              <div className="flex flex-col gap-4">
+                <h4 className="text-primary font-bold">
+                  3. Non-Refundable Transactions
+                </h4>
+
+                <p>The following situations are not eligible for refunds:</p>
+
+                <ul className="list-disc list-inside flex flex-col gap-1">
+                  <li>
+                    Transactions where value has already been delivered to the
+                    beneficiary
+                  </li>
+                  <li>
+                    Airtime, data, electricity tokens, gift cards, or bill
+                    payments already processed
+                  </li>
+                  <li>
+                    Refund requests made after the allowable dispute window
+                  </li>
+                  <li>Fees or charges clearly stated as non-refundable</li>
+                  <li>
+                    Situations where the issue is caused by the customer (e.g.,
+                    wrong account number entry)
+                  </li>
+                </ul>
+              </div>
+
+              {/* ================= 4. PROCESSING TIME ================= */}
+              <div className="flex flex-col gap-4">
+                <h4 className="text-primary font-bold">4. Processing Time</h4>
+
+                <p>
+                  Approved refunds will be processed within{" "}
+                  <strong>24 hours</strong> by ValarPay. However, depending on
+                  the payment channel, bank, biller, or partner institution:
+                </p>
+
+                <ul className="list-disc list-inside flex flex-col gap-1">
+                  <li>Refunds to bank accounts may take 1–3 business days</li>
+                  <li>
+                    Refunds to virtual accounts may reflect instantly or within
+                    24 hours
+                  </li>
+                  <li>
+                    Card refunds may take 3–7 business days depending on card
+                    issuer policies
+                  </li>
+                </ul>
+              </div>
+
+              {/* ================= 5. FRAUD PREVENTION ================= */}
+              <div className="flex flex-col gap-4">
+                <h4 className="text-primary font-bold">
+                  5. Fraud Prevention & Verification
+                </h4>
+
+                <p>
+                  To protect users and the platform, all refund requests undergo
+                  strict security and fraud checks. ValarPay reserves the right
+                  to:
+                </p>
+
+                <ul className="list-disc list-inside flex flex-col gap-1">
+                  <li>Deny refund requests that appear fraudulent</li>
+                  <li>Block or restrict accounts pending investigation</li>
+                  <li>
+                    Report confirmed fraud cases to regulatory and law
+                    enforcement authorities
+                  </li>
+                </ul>
+              </div>
+
+              {/* ================= 6. AMENDMENTS ================= */}
+              <div className="flex flex-col gap-4">
+                <h4 className="text-primary font-bold">
+                  6. Amendments to This Policy
+                </h4>
+
+                <p>
+                  We may update this Refund Policy anytime to reflect changes in
+                  regulatory requirements, partner institution policies, or
+                  operational needs. Updates will be communicated via the app,
+                  website, or email where applicable.
+                </p>
+
+                <p>
+                  For further assistance, contact:
+                  <br />
+                  <strong>support@valarpay.com</strong> |{" "}
+                  <strong>+2349029852374</strong>
+                  <br />
+                  Address: 23, OGAGIFO STREET, OFF DBS ROAD, BEFORE GQ SUITES,
+                  ASABA, DELTA STATE.
+                </p>
               </div>
             </div>
           </div>

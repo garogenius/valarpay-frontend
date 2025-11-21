@@ -17,8 +17,8 @@ const TermsOfUseContent = () => {
           initial="hidden"
           className="relative w-full flex flex-col justify-center h-full gap-8 2xs:gap-10 sm:gap-12 pb-20 sm:pb-28 md:pb-32 "
         >
+          {/* ================= HEADER SECTION ================= */}
           <div className="relative ">
-it to team & condition, 
             <div className="absolute inset-0" aria-hidden>
               <div
                 className="w-full h-full"
@@ -37,13 +37,14 @@ it to team & condition,
                 <path d="M0,50 C240,80 480,0 720,20 C960,40 1200,80 1440,30 L1440,80 L0,80 Z" />
               </svg>
             </div>
+
             <div className="z-30 w-full relative inset-0 mx-auto flex flex-col justify-center items-center pb-10 pt-32 sm:pb-12 sm:pt-36 md:pb-14 md:pt-40">
               <motion.div
                 variants={textVariant(0.1)}
                 className="w-[95%] 2xs:w-[90%] lg:w-[85%] 2xl:w-[70%] flex flex-col gap-3 xs:gap-1 text-center py-4"
               >
                 <h1 className="text-dark-primary dark:text-text-400 text-2xl xs:text-3xl md:text-4xl xl:text-5xl font-medium xs:leading-[2.4rem] md:leading-[2.8rem] xl:leading-[3.8rem]">
-                  Terms of Use{" "}
+                  Terms of Use
                 </h1>
 
                 <p className="text-sm xs:text-base sm:text-xl text-dark-primary dark:text-text-700 font-medium">
@@ -51,195 +52,214 @@ it to team & condition,
                 </p>
               </motion.div>
             </div>
-            <div
-              className="absolute -inset-20 -bottom-40 opacity-40"
-            // style={{
-            //   background: `
-            //   radial-gradient(
-            //     circle at center,
-            //     rgba(212, 177, 57, 0.4) 0%,
-            //     rgba(212, 177, 57, 0.2) 40%,
-            //     rgba(212, 177, 57, 0.1) 60%,
-            //     rgba(212, 177, 57, 0) 80%
-            //   )
-            // `,
-            //   filter: "blur(60px)",
-            //   transform: "scale(1.1)",
-            // }}
-            />
           </div>
 
-          <div className=" flex flex-col items-center gap-12">
+          {/* ================= CONTENT ================= */}
+          <div className="flex flex-col items-center gap-12">
             <div className="w-[90%] lg:w-[88%] flex flex-col gap-10 text-base xs:text-lg text-text-200 dark:text-text-900">
+              {/* ================= 1. Acceptance of Terms ================= */}
               <div className="flex flex-col gap-4">
                 <h4 className="text-primary font-bold">
                   1. Acceptance of Terms
                 </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    By accessing or using personal account, Business account,
-                    Bill Payments, creation of USD card, NGN card, International
-                    transactions, investment, savings and other financial
-                    services (the &ldquo;Service&rdquo;), you agree to comply
-                    with and be bound by these Terms of Use (the
-                    &ldquo;Terms&rdquo;) and our Privacy Policy. If you do not
-                    agree with any part of these Terms, you must not use the
-                    Service by Cook Island Trust.
-                  </p>
-                </div>
+                <p>
+                  By accessing or using the ValarPay mobile application,
+                  website, virtual account services, transfers, withdrawals,
+                  bill payments, airtime and data purchases, utilities, gift
+                  cards, and all related fintech features (the “Service”), you
+                  agree to be bound by these Terms of Use (“Terms”) and our
+                  Privacy Policy.
+                </p>
+                <p>
+                  If you do not agree with these Terms, you must discontinue use
+                  of the Service immediately.
+                </p>
               </div>
 
-              <div className="flex flex-col gap-4">
-                <h4 className="text-primary font-bold">2. Modifications  </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    We reserve the right to modify or update these Terms at any
-                    time. Any changes will be effective immediately upon posting
-                    to our site, and you agree to be bound by any modifications
-                    by continuing to use the Service.{" "}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                <h4 className="text-primary font-bold">3. Eligibility </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    You must be at least 18 years old to use our Service. By
-                    using the Service, you represent and warrant that you meet
-                    this requirement.
-                  </p>
-                </div>
-              </div>
-
+              {/* ================= 2. About ValarPay ================= */}
               <div className="flex flex-col gap-4">
                 <h4 className="text-primary font-bold">
-                  4. Account Registration
+                  2. About ValarPay (Important Notice)
                 </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    You may need to create an account to access certain
-                    features. You agree to provide accurate, complete
-                    information and to keep your account details up to date. You
-                    are responsible for maintaining the confidentiality of your
-                    account and password. You are liable for any activities
-                    under your account.
-                  </p>
-                </div>
+                <p>
+                  ValarPay is a digital financial technology platform owned and
+                  operated by <strong>VALAR GLOBAL SERVICES LIMITED</strong>, a
+                  company incorporated in Nigeria.
+                </p>
+                <p>
+                  <strong>ValarPay is not a bank</strong> and does not hold a
+                  Central Bank of Nigeria (CBN) banking license. All banking,
+                  payment processing, virtual accounts, settlement, and
+                  regulated services made available through the ValarPay app are
+                  powered by licensed microfinance banks, payment providers,
+                  switches, and other regulated financial institutions (“Partner
+                  Institutions”).
+                </p>
+                <p>
+                  Your funds are held with these licensed institutions, and
+                  ValarPay acts solely as a technology provider facilitating
+                  access to their regulated services.
+                </p>
               </div>
 
+              {/* ================= 3. Modifications ================= */}
+              <div className="flex flex-col gap-4">
+                <h4 className="text-primary font-bold">3. Modifications</h4>
+                <p>
+                  We may update or modify these Terms at any time. Changes
+                  become effective once published on the app or website.
+                  Continued use of the Service signifies your acceptance of the
+                  updated Terms.
+                </p>
+              </div>
+
+              {/* ================= 4. Eligibility ================= */}
+              <div className="flex flex-col gap-4">
+                <h4 className="text-primary font-bold">4. Eligibility</h4>
+                <p>You must be at least 18 years old to use the Service.</p>
+                <p>
+                  By using the Service, you represent that all information you
+                  provide is accurate and that you are legally capable of
+                  entering into binding agreements.
+                </p>
+              </div>
+
+              {/* ================= 5. Account Registration ================= */}
               <div className="flex flex-col gap-4">
                 <h4 className="text-primary font-bold">
-                  5. Use of the Service{" "}
+                  5. Account Registration
                 </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    You agree to use the Service only for lawful purposes and in
-                    a way that does not infringe upon the rights of others.
-                    Prohibited activities include, but are not limited
-                    to:Uploading, sharing, or transmitting any illegal content
-                    <br />
-                    Engaging in harassment or discrimination
-                    <br />
-                    Impersonating others or misrepresenting your identity
-                    <br />
-                    Attempting to hack or gain unauthorized access to our
-                    systems
-                  </p>
-                </div>
+                <p>
+                  To access certain features, you must create a ValarPay account
+                  and complete identity verification (KYC) as required by
+                  Nigerian regulations.
+                </p>
+                <p>
+                  You are responsible for maintaining the security of your login
+                  credentials and all activities carried out under your account.
+                </p>
               </div>
 
+              {/* ================= 6. Use of Service ================= */}
               <div className="flex flex-col gap-4">
                 <h4 className="text-primary font-bold">
-                  6. Intellectual Property{" "}
+                  6. Use of the Service
                 </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    All content on the Service, including text, graphics, logos,
-                    and software, is the property of NATTY GROUP UK LIMITED and is protected by intellectual property
-                    laws. You may not use, copy, or distribute any content from
-                    the Service without explicit permission from NATTY GROUP UK LIMITED 
-                    (VALARPAY)
-                  </p>
-                </div>
+                <p>
+                  You agree not to misuse the Service. Prohibited activities
+                  include:
+                </p>
+                <ul className="list-disc list-inside flex flex-col gap-1">
+                  <li>Submitting false or misleading information</li>
+                  <li>Fraud, money laundering, or illegal transactions</li>
+                  <li>Harassment or abuse of other users</li>
+                  <li>
+                    Attempting to hack, reverse-engineer, or disrupt the Service
+                  </li>
+                  <li>Unauthorized access to accounts or systems</li>
+                </ul>
               </div>
 
+              {/* ================= 7. Intellectual Property ================= */}
               <div className="flex flex-col gap-4">
                 <h4 className="text-primary font-bold">
-                  7. User-Generated Content{" "}
+                  7. Intellectual Property
                 </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    By submitting content to the Service (e.g., posts, comments,
-                    reviews), you grant us a worldwide, royalty-free, perpetual
-                    license to use, display, reproduce, and distribute your
-                    content. You agree not to submit any content that is
-                    unlawful or infringes upon others’ rights.
-                  </p>
-                </div>
+                <p>
+                  All content, design, trademarks, and software within the
+                  Service are the property of{" "}
+                  <strong>VALAR GLOBAL SERVICES LIMITED</strong>.
+                </p>
+                <p>
+                  You may not copy, reproduce, or distribute any part of the
+                  Service without our express written permission.
+                </p>
               </div>
 
-              <div className="flex flex-col gap-4">
-                <h4 className="text-primary font-bold">8. Disclaimers</h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    The Service is provided “as is” and “as available.” We make
-                    no warranties, express or implied, about the accuracy or
-                    reliability of the Service. We do not guarantee that the
-                    Service will be error-free or uninterrupted.
-                  </p>
-                </div>
-              </div>
-
+              {/* ================= 8. User Generated Content ================= */}
               <div className="flex flex-col gap-4">
                 <h4 className="text-primary font-bold">
-                  9. Limitation of Liability
+                  8. User-Generated Content
                 </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    To the fullest extent permitted by law, NATTY GROUP UK LIMITED and its affiliates are not
-                    liable for any indirect, incidental, or consequential
-                    damages arising out of your use of the Service.
-                  </p>
-                </div>
+                <p>
+                  By submitting any content (reviews, comments, uploads), you
+                  grant us a global, royalty-free license to use and display
+                  such content. You agree not to upload illegal, harmful, or
+                  infringing material.
+                </p>
               </div>
 
+              {/* ================= 9. Disclaimers ================= */}
               <div className="flex flex-col gap-4">
-                <h4 className="text-primary font-bold">10. Termination  </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    We reserve
-                    <br />
-                    the right to suspend or terminate your account or access to
-                    the Service at our discretion, without notice, if we
-                    determine that you have violated these Terms.
-                  </p>
-                </div>
+                <h4 className="text-primary font-bold">9. Disclaimers</h4>
+                <p>
+                  The Service is provided “as is” and “as available.” We do not
+                  guarantee uninterrupted, error-free service.
+                </p>
+                <p>
+                  ValarPay does not control the uptime or performance of banks,
+                  payment channels, card providers, billers, telecom operators,
+                  or third-party platforms connected to the Service.
+                </p>
               </div>
 
-              <div className="flex flex-col gap-4">
-                <h4 className="text-primary font-bold">11. Governing Law </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    These Terms are governed by the laws of Cook Island Trust
-                    and any disputes will be resolved in the courts of Cook
-                    Island Trust
-                  </p>
-                </div>
-              </div>
-
+              {/* ================= 10. Limitation of Liability ================= */}
               <div className="flex flex-col gap-4">
                 <h4 className="text-primary font-bold">
-                  12. Contact Information {" "}
+                  10. Limitation of Liability
                 </h4>
-                <div className="flex flex-col gap-4">
-                  <p className="">
-                    If you have any questions or concerns about these Terms,
-                    please contact us at
-                  </p>
-                  <p>Email : support@valarpay.com</p>
-                  <p>Call:+2349029852374</p>
-                </div>
+                <p>
+                  To the maximum extent permitted by law, VALAR GLOBAL SERVICES
+                  LIMITED shall not be liable for any indirect, incidental,
+                  consequential, or punitive damages arising from your use of
+                  the Service.
+                </p>
+              </div>
+
+              {/* ================= 11. Termination ================= */}
+              <div className="flex flex-col gap-4">
+                <h4 className="text-primary font-bold">11. Termination</h4>
+                <p>
+                  We may suspend or terminate your account without prior notice
+                  if you violate these Terms or if required by law or regulatory
+                  partners.
+                </p>
+                <p>
+                  You may close your account by contacting support, provided all
+                  outstanding obligations are settled.
+                </p>
+              </div>
+
+              {/* ================= 12. Governing Law ================= */}
+              <div className="flex flex-col gap-4">
+                <h4 className="text-primary font-bold">12. Governing Law</h4>
+                <p>
+                  These Terms are governed by the laws of the Federal Republic
+                  of Nigeria. Any disputes shall be resolved in Nigerian courts
+                  of competent jurisdiction.
+                </p>
+              </div>
+
+              {/* ================= 13. Contact ================= */}
+              <div className="flex flex-col gap-4">
+                <h4 className="text-primary font-bold">
+                  13. Contact Information
+                </h4>
+                <p>If you have any questions or concerns, please contact:</p>
+
+                <p>
+                  Email: <strong>support@valarpay.com</strong>
+                </p>
+                <p>
+                  Phone: <strong>+2349029852374</strong>
+                </p>
+                <p>
+                  Address:{" "}
+                  <strong>
+                    23, OGAGIFO STREET, OFF DBS ROAD, BEFORE GQ SUITES, ASABA,
+                    DELTA STATE, NIGERIA.
+                  </strong>
+                </p>
               </div>
             </div>
           </div>

@@ -79,6 +79,12 @@ const Footer = () => {
                 >
                   Contact Us
                 </Link>
+                <Link
+                  href="/account-deletion"
+                  className="transition-all duration-300 cursor-pointer hover:pl-2"
+                >
+                  Account Deletion
+                </Link>
               </div>
             </div>
 
@@ -106,6 +112,30 @@ const Footer = () => {
                   Privacy Policy{" "}
                 </Link>
                 <Link
+                  href="/dataprotectionpolicy"
+                  className="transition-all duration-300 cursor-pointer hover:pl-2"
+                >
+                  Data Protection Policy
+                </Link>
+                <Link
+                  href="/cookiepolicy"
+                  className="transition-all duration-300 cursor-pointer hover:pl-2"
+                >
+                  Cookies Policy
+                </Link>
+                <Link
+                  href="/disputeresolutionpolicy"
+                  className="transition-all duration-300 cursor-pointer hover:pl-2"
+                >
+                  Dispute & Complaint Handling
+                </Link>
+                <Link
+                  href="/fraudmonitoringandusersecuritypolicy"
+                  className="transition-all duration-300 cursor-pointer hover:pl-2"
+                >
+                  Fraud Monitoring & User Security
+                </Link>
+                <Link
                   href="/refundPolicy"
                   className="transition-all duration-300 cursor-pointer hover:pl-2"
                 >
@@ -120,8 +150,8 @@ const Footer = () => {
               </h3>
               <div className="flex flex-col gap-1.5 xs:gap-2 ">
                 <a className="">
-                  Head office: 23, OGAGIFO STREET OFF DBS ROAD BEFORE GQ SUITES , ASABA, DELTA STATE
-
+                  Head office: 23, OGAGIFO STREET OFF DBS ROAD BEFORE GQ SUITES
+                  , ASABA, DELTA STATE
                 </a>
 
                 <p
@@ -160,15 +190,15 @@ const Footer = () => {
               <Image src={icons.socialIcons.facebookIcon} alt="facebook" />
             </Link>
             <Link
-                href="/coming-soon"
+              href="/coming-soon"
               // href="https://www.instagram.com/valarpays?igsh=MWYxdW9iY2M1bzVmbg=="
-             
+
               className=" "
             >
               <Image src={icons.socialIcons.instagramIcon} alt="instagram" />
             </Link>
             <Link
-                href="/coming-soon"
+              href="/coming-soon"
               // href="https://www.tiktok.com/@valarpayglobal?_t=ZM-8tjAVR0cYQ1&_r=1"
               // target="_blank"
               // rel="noopener noreferrer"
@@ -177,7 +207,7 @@ const Footer = () => {
               <Image src={icons.socialIcons.tiktokIcon} alt="tiktok" />
             </Link>
             <Link
-                href="/coming-soon"
+              href="/coming-soon"
               // href="https://youtube.com/@valarpayglobal?si=9LyF8iMK1pwnGX8P"
               // target="_blank"
               // rel="noopener noreferrer"
@@ -187,7 +217,7 @@ const Footer = () => {
             </Link>
 
             <Link
-                href="/coming-soon"
+              href="/coming-soon"
               // href="https://www.snapchat.com/add/valarpayglobal"
               // target="_blank"
               // rel="noopener noreferrer"
@@ -197,7 +227,7 @@ const Footer = () => {
             </Link>
 
             <Link
-                href="/coming-soon"
+              href="/coming-soon"
               // href="https://twitter.com/Valarpays"
               // target="_blank"
               // rel="noopener noreferrer"
