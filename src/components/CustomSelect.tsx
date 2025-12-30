@@ -82,7 +82,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           className="w-9 h-9 rounded-full"
         />
       )}
-      <span>{option.label}</span>
+      <span className="text-white">{option.label}</span>
     </div>
   );
 
@@ -97,7 +97,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           className="w-9 h-9 rounded-full"
         />
       )}
-      <span className="text-sm">{option.label}</span>
+      <span className="text-sm text-white">{option.label}</span>
     </div>
   );
 
@@ -140,15 +140,15 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       </button>
 
       {isOpen && !disabled && (
-        <div className="absolute w-full mt-1 dark:bg-[#141414] dark:border-none bg-white border rounded-lg shadow-lg z-50">
+        <div className="absolute w-full mt-1 bg-[#1C1C1E] border border-gray-800 rounded-lg shadow-lg z-50">
           {isSearchable && (
-            <div className="p-2 border-b">
+            <div className="p-2 border-b border-gray-800">
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-1.5 text-sm bg-[#1C1C1E] border border-gray-800 rounded-md text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FF6B2C]"
                 autoFocus
               />
             </div>
@@ -160,7 +160,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             }`}
           >
             {filteredOptions.length === 0 ? (
-              <div className="px-4 py-2 text-sm text-gray-500 text-center">
+              <div className="px-4 py-2 text-sm text-gray-400 text-center">
                 No options found
               </div>
             ) : (
@@ -168,7 +168,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 <button
                   key={option.value}
                   onClick={() => handleSelect(option)}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50  dark:hover:text-black flex items-center transition-colors"
+                  className="w-full px-4 py-2 text-left text-sm text-white hover:bg-[#2C2C2E] flex items-center transition-colors"
                 >
                   {renderOptionFn(option)}
                 </button>

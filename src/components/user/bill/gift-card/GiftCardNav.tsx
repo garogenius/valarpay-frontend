@@ -25,7 +25,7 @@ const navItems = [
   },
 ];
 
-const GiftCardNav = () => {
+const GiftCardNav: React.FC<{ onSelectPath?: (path: string) => void }> = ({ onSelectPath }) => {
   const navigate = useNavigate();
   const pathname = usePathname();
   return (
@@ -41,6 +41,7 @@ const GiftCardNav = () => {
               });
               return;
             }
+            if (onSelectPath) return onSelectPath(item.path);
             navigate(item.path);
           }}
           className={classNames({

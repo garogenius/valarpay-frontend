@@ -187,3 +187,21 @@ export const shortenReference = ({
 export const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
   e.target.value = e.target.value.replace(/[^0-9+]/g, "");
 };
+
+// Format currency with symbol
+export const formatCurrency = (amount: number, currency: string = "NGN"): string => {
+  const currencySymbols: Record<string, string> = {
+    NGN: "₦",
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+  };
+
+  const symbol = currencySymbols[currency] || currency;
+  const formattedAmount = new Intl.NumberFormat("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+
+  return `${symbol}${formattedAmount}`;
+};

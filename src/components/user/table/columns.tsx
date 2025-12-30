@@ -9,15 +9,21 @@ import {
   Transaction,
   TRANSACTION_CATEGORY,
   TRANSACTION_STATUS,
+  TRANSACTION_TYPE,
 } from "@/constants/types";
 import { handleCopy, shortenReference } from "@/utils/utilityFunctions";
 import useNavigate from "@/hooks/useNavigate";
 import useTransactionStore from "@/store/useTransaction.store";
 
-const statusStyles: Record<string, string> = {
-  success: "text-green-500",
-  pending: "text-yellow-500",
-  failed: "text-red-500",
+const statusPills: Record<string, string> = {
+  success: "bg-green-500/15 text-green-400 border-green-700/40",
+  pending: "bg-yellow-500/15 text-yellow-400 border-yellow-700/40",
+  failed: "bg-red-500/15 text-red-400 border-red-700/40",
+};
+
+const typeAmountStyle: Record<string, string> = {
+  credit: "text-green-400",
+  debit: "text-red-400",
 };
 
 export const GenerateColumns = () => {
@@ -25,7 +31,7 @@ export const GenerateColumns = () => {
   const { setTransaction } = useTransactionStore();
   return [
     {
-      Header: "Trx. Ref",
+      Header: "Transaction ID",
       accessor: "transactionRef",
       Cell: ({ value }: { value: string }) => {
         return (
@@ -49,14 +55,17 @@ export const GenerateColumns = () => {
       },
     },
     {
-      Header: "Category",
+      Header: "Type",
       accessor: "category",
       Cell: ({ value }: { value: TRANSACTION_CATEGORY }) => {
+        if (value === TRANSACTION_CATEGORY.TRANSFER) return <span>Intra-bank Transfer</span>;
+        if (value === TRANSACTION_CATEGORY.DEPOSIT) return <span>Deposit</span>;
+        if (value === TRANSACTION_CATEGORY.BILL_PAYMENT) return <span>Bill Payment</span>;
         return <span>{value}</span>;
       },
     },
     {
-      Header: "Details",
+      Header: "Narration",
       id: "details",
       accessor: "category",
       Cell: ({
@@ -71,17 +80,24 @@ export const GenerateColumns = () => {
 
           return (
             <span>
-              To {transferDetails?.beneficiaryAccountNumber} -{" "}
-              {transferDetails?.beneficiaryBankName} (
-              {transferDetails?.beneficiaryName})
+              Transfer{" "}
+              {transferDetails?.beneficiaryName
+                ? `to ${transferDetails.beneficiaryName}`
+                : transferDetails?.beneficiaryAccountNumber
+                  ? `to ${transferDetails.beneficiaryAccountNumber}`
+                  : ""}
             </span>
           );
         } else if (value === TRANSACTION_CATEGORY.DEPOSIT) {
           const depositDetails = row.original?.depositDetails;
           return (
             <span>
-              From {depositDetails?.senderAccountNumber} -{" "}
-              {depositDetails?.senderBankName} ({depositDetails?.senderName})
+              Deposit{" "}
+              {depositDetails?.senderName
+                ? `from ${depositDetails.senderName}`
+                : depositDetails?.senderAccountNumber
+                  ? `from ${depositDetails.senderAccountNumber}`
+                  : ""}
             </span>
           );
         } else if (value === TRANSACTION_CATEGORY.BILL_PAYMENT) {
@@ -102,7 +118,7 @@ export const GenerateColumns = () => {
       Header: "Date & Time",
       accessor: "createdAt",
       Cell: ({ value }: { value: string }) => {
-        return <span>{format(new Date(value), "yyyy-MM-dd '|' h:mm a")}</span>;
+        return <span>{format(new Date(value), "MM-dd-yyyy h:mm a")}</span>;
       },
     },
     // {
@@ -128,15 +144,17 @@ export const GenerateColumns = () => {
       id: "amountPaid",
       accessor: "category",
       Cell: ({ value, row }: { value: string; row: Row<Transaction> }) => {
+        const ttype = String((row.original as any)?.type || "").toLowerCase() as keyof typeof typeAmountStyle;
+        const sign = ttype === "debit" ? "-" : ttype === "credit" ? "+" : "";
         if (value === TRANSACTION_CATEGORY.TRANSFER) {
           const transferDetails = row.original?.transferDetails;
-          return <span>₦{transferDetails?.amountPaid} </span>;
+          return <span className={typeAmountStyle[ttype] || ""}>{sign}₦{transferDetails?.amountPaid} </span>;
         } else if (value === TRANSACTION_CATEGORY.DEPOSIT) {
           const depositDetails = row.original?.depositDetails;
-          return <span>₦{depositDetails?.amountPaid}</span>;
+          return <span className={typeAmountStyle[ttype] || ""}>{sign}₦{depositDetails?.amountPaid}</span>;
         } else if (value === TRANSACTION_CATEGORY.BILL_PAYMENT) {
           const billDetails = row.original?.billDetails;
-          return <span>₦{billDetails?.amountPaid}</span>;
+          return <span className={typeAmountStyle[ttype] || ""}>{sign}₦{billDetails?.amountPaid}</span>;
         }
         return <span>N/A</span>;
       },
@@ -145,36 +163,17 @@ export const GenerateColumns = () => {
       Header: "Status",
       accessor: "status",
       Cell: ({ value }: { value: TRANSACTION_STATUS }) => {
-        const status = value.toLowerCase() as keyof typeof statusStyles;
-
+        const status = value.toLowerCase() as keyof typeof statusPills;
+        const cls = statusPills[status] || "bg-white/5 text-gray-300 border-gray-800";
+        const label = status === "success" ? "Completed" : status === "pending" ? "Processing" : "Failed";
         return (
-          <span
-            className={`font-medium capitalize ${statusStyles[status] || ""}`}
-          >
-            {status}
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium border ${cls}`}>
+            {label}
           </span>
         );
       },
     },
 
-    {
-      Header: "Receipt",
-      accessor: "",
-      Cell: ({ row }: { row: Row<Transaction> }) => {
-        const transaction = row.original;
-
-        return (
-          <span
-            onClick={() => {
-              setTransaction(transaction);
-              navigate(`/user/receipt`);
-            }}
-            className={`cursor-pointer`}
-          >
-            View
-          </span>
-        );
-      },
-    },
+    // Receipt column intentionally hidden for Transaction History UI (row details live in receipt page)
   ];
 };

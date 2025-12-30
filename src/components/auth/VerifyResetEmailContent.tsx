@@ -92,7 +92,7 @@ const VerifyResetEmailContent = () => {
   const handleVerify = async () => {
     if (authEmail) {
       verifyEmail({
-        username: authEmail,
+        email: authEmail,
         otpCode: token,
       });
     }
@@ -100,7 +100,7 @@ const VerifyResetEmailContent = () => {
 
   const handleResendClick = async () => {
     if (resendTimer === 0) {
-      resendVerificationCode({ username: authEmail });
+      resendVerificationCode({ email: authEmail });
     }
   };
 

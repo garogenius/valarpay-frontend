@@ -1,80 +1,102 @@
-import useNavigate from "@/hooks/useNavigate";
-import React from "react";
-import toast from "react-hot-toast";
-import { FaTowerCell } from "react-icons/fa6";
-import { IoIosOptions } from "react-icons/io";
-import { IoWalletOutline } from "react-icons/io5";
-import { LiaMoneyBillWaveSolid, LiaPiggyBankSolid } from "react-icons/lia";
-import { LuSmartphone } from "react-icons/lu";
+import React, { useState } from "react";
+import { FaMoneyBillTransfer, FaWifi } from "react-icons/fa6";
+import { BiMoneyWithdraw } from "react-icons/bi";
+import { MdOutlinePayment } from "react-icons/md";
+import SendMoneyModal from "@/components/modals/SendMoneyModal";
+import AddMoneyModal from "@/components/modals/AddMoneyModal";
+import WithdrawMoneyModal from "@/components/modals/WithdrawMoneyModal";
+import InternetModal from "@/components/modals/InternetModal";
 
 const QuickAccessData = [
   {
     title: "Send Money",
-    icon: IoWalletOutline,
-    path: "/user/send-money",
+    icon: FaMoneyBillTransfer,
+    action: "sendMoney",
   },
   {
-    title: "Buy Airtime",
-    icon: LuSmartphone,
-    path: "/user/airtime",
+    title: "Add Money",
+    icon: MdOutlinePayment,
+    action: "addMoney",
   },
   {
-    title: "Mobile Data",
-    icon: FaTowerCell,
-    path: "/user/internet/mobile-data",
+    title: "Withdraw",
+    icon: BiMoneyWithdraw,
+    action: "withdraw",
   },
   {
-    title: "Bills Payment",
-    icon: LiaMoneyBillWaveSolid,
-    path: "/user/bills",
-  },
-  {
-    title: "My Savings",
-    icon: LiaPiggyBankSolid,
-    path: "/",
-  },
-  {
-    title: "My Portfolio",
-    icon: IoIosOptions,
-    path: "/",
+    title: "Internet",
+    icon: FaWifi,
+    action: "internet",
   },
 ];
 
 const QuickAccess = () => {
-  const navigate = useNavigate();
+  const [isSendMoneyModalOpen, setIsSendMoneyModalOpen] = useState(false);
+  const [isAddMoneyModalOpen, setIsAddMoneyModalOpen] = useState(false);
+  const [isWithdrawMoneyModalOpen, setIsWithdrawMoneyModalOpen] = useState(false);
+  const [isInternetModalOpen, setIsInternetModalOpen] = useState(false);
+
+  const handleQuickAccessClick = (action: string) => {
+    switch (action) {
+      case "sendMoney":
+        setIsSendMoneyModalOpen(true);
+        break;
+      case "addMoney":
+        setIsAddMoneyModalOpen(true);
+        break;
+      case "withdraw":
+        setIsWithdrawMoneyModalOpen(true);
+        break;
+      case "internet":
+        setIsInternetModalOpen(true);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-4">
-      <div className="w-full flex items-center justify-between gap-4">
-        <h2 className="text-text-200 dark:text-text-800 text-xl sm:text-2xl font-semibold">
-          Quick Access{" "}
+    <div className="w-full bg-transparent rounded-xl border border-gray-800 p-4 sm:p-6">
+      <div className="w-full mb-4 sm:mb-5">
+        <h2 className="text-base sm:text-lg font-semibold text-white">
+          Quick Access
         </h2>
       </div>
 
-      <div className="pb-10  w-full grid grid-cols-2 xs:grid-cols-3 md:grid-cols-3 xl:grid-cols-6 2xl:grid-cols-6 gap-3 sm:gap-4 justify-center items-center ">
+      <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
         {QuickAccessData.map((item, index) => (
           <div
             key={index}
-            onClick={() => {
-              if (["My Savings", "My Portfolio"].includes(item.title)) {
-                toast.dismiss();
-                toast.error("Unavailable at the moment", {
-                  duration: 3000,
-                });
-              } else {
-                navigate(item.path);
-              }
-            }}
-            className="shadow-sm cursor-pointer px-6 py-6 rounded-xl bg-white dark:bg-bg-1100 flex flex-col justify-center items-center gap-5"
+            onClick={() => handleQuickAccessClick(item.action)}
+            className="cursor-pointer rounded-xl bg-[#2C2C2E] hover:bg-[#3A3A3C] transition-colors p-4 sm:p-5 flex flex-col items-center justify-center gap-2 sm:gap-3"
           >
-            <div className="flex justify-center items-center w-12 h-12 rounded-full bg-secondary text-text-900">
-              <item.icon className="text-2xl" />
+            <div className="flex justify-center items-center w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-[#3A3A3C] text-[#FF6B2C]">
+              <item.icon className="text-base sm:text-lg" />
             </div>
-            <p className="text-base text-center text-black dark:text-white">
+            <p className="text-[11px] sm:text-xs font-medium text-white text-center">
               {item.title}
             </p>
           </div>
         ))}
       </div>
+
+      {/* Modals */}
+      <SendMoneyModal
+        isOpen={isSendMoneyModalOpen}
+        onClose={() => setIsSendMoneyModalOpen(false)}
+      />
+      <AddMoneyModal
+        isOpen={isAddMoneyModalOpen}
+        onClose={() => setIsAddMoneyModalOpen(false)}
+      />
+      <WithdrawMoneyModal
+        isOpen={isWithdrawMoneyModalOpen}
+        onClose={() => setIsWithdrawMoneyModalOpen(false)}
+      />
+      <InternetModal
+        isOpen={isInternetModalOpen}
+        onClose={() => setIsInternetModalOpen(false)}
+      />
     </div>
   );
 };

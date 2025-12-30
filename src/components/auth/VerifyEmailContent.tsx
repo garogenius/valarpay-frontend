@@ -89,7 +89,7 @@ const VerifyEmailContent = () => {
   const handleVerify = async () => {
     if (authEmail) {
       verifyEmail({
-        username: authEmail,
+        email: authEmail,
         otpCode: token,
       });
     }
@@ -97,7 +97,7 @@ const VerifyEmailContent = () => {
 
   const handleResendClick = async () => {
     if (resendTimer === 0) {
-      resendVerificationCode({ username: authEmail });
+      resendVerificationCode({ email: authEmail });
     }
   };
 
@@ -258,18 +258,18 @@ const VerifyEmailContent = () => {
                 )}
               />
             </div>
-            <p className=" my-1 sm:my-2.5 text-center w-[90%] xs:w-[80%] text-sm 2xs:text-base text-text-1000  font-medium">
+            <div className=" my-1 sm:my-2.5 text-center w-[90%] xs:w-[80%] text-sm 2xs:text-base text-text-1000  font-medium">
               {resendTimer && resendTimer > 0 ? (
                 <>
-                  Didn’t get the code?{" "}
+                  Didn't get the code?{" "}
                   <span className="text-secondary">Resend</span> in{" "}
                   <span className="text-secondary">
                     {formatTimer(resendTimer)}
                   </span>
                 </>
               ) : (
-                <div className="flex items-center justify-center ">
-                  Didn’t receive any code?
+                <span className="flex items-center justify-center ">
+                  Didn't receive any code?
                   <span
                     className="cursor-pointer text-secondary ml-1"
                     onClick={handleResendClick}
@@ -280,9 +280,9 @@ const VerifyEmailContent = () => {
                       "Resend"
                     )}
                   </span>
-                </div>
+                </span>
               )}
-            </p>
+            </div>
             <CustomButton
               type="button"
               disabled={loadingStatus || !isValid}

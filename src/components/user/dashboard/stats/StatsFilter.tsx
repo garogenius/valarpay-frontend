@@ -8,9 +8,11 @@ import { MdFilterListAlt, MdKeyboardArrowDown } from "react-icons/md";
 const StatsFilter = ({
   sort,
   setSort,
+  title = "Insight",
 }: {
   sort: string;
   setSort: Dispatch<SetStateAction<string>>;
+  title?: string;
 }) => {
   const [sortModalState, setSortModalState] = useState(false);
 
@@ -20,7 +22,7 @@ const StatsFilter = ({
   return (
     <div className="w-full flex items-center justify-between gap-2 mb-8">
       <p className="text-text-200 dark:text-text-400 font-semibold text-lg xs:text-xl">
-        Insight{" "}
+        {title}{" "}
       </p>
       <div ref={sortModalStateRef} className="flex flex-col relative">
         <p

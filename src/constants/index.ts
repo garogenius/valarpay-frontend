@@ -1,5 +1,5 @@
 import images from "../../public/images";
-import { IoSettingsOutline, IoWalletOutline } from "react-icons/io5";
+import { IoNotificationsOutline, IoSettingsOutline, IoWalletOutline } from "react-icons/io5";
 import { RxDashboard } from "react-icons/rx";
 import { PiCellSignalFullBold, PiHandWithdraw } from "react-icons/pi";
 import { FaWifi } from "react-icons/fa6";
@@ -9,6 +9,11 @@ import { TfiList } from "react-icons/tfi";
 import { CiCreditCard1 } from "react-icons/ci";
 import { GiSettingsKnobs } from "react-icons/gi";
 import { FiLogOut } from "react-icons/fi";
+import { MdOutlinePayment } from "react-icons/md";
+import { HiOutlineCurrencyDollar } from "react-icons/hi2";
+import { TbTrendingUp } from "react-icons/tb";
+import { MdAccountBalance } from "react-icons/md";
+import { MdSupportAgent } from "react-icons/md";
 import { BENEFICIARY_TYPE, BeneficiaryProps, NETWORK } from "./types";
 
 export const statusStyles = {
@@ -193,47 +198,72 @@ export const SidebarData = [
       },
       {
         id: 2,
-        title: "Send Money",
-        path: "/user/send-money",
-        icon: IoWalletOutline,
+        title: "Payment",
+        path: "/user/payment",
+        icon: MdOutlinePayment,
       },
       {
         id: 3,
-        title: "Withdraw",
-        path: "/user/withdraw",
-        icon: PiHandWithdraw,
+        title: "Finance",
+        path: "/user/finance",
+        icon: HiOutlineCurrencyDollar,
       },
       {
         id: 4,
-        title: "Airtime",
-        path: "/user/airtime",
-        icon: PiCellSignalFullBold,
+        title: "Accounts",
+        path: "/user/accounts",
+        icon: MdAccountBalance,
       },
-
       {
         id: 5,
-        title: "Internet",
-        path: "/user/internet/mobile-data",
-        icon: FaWifi,
+        title: "Investment",
+        path: "/user/investment",
+        icon: TbTrendingUp,
       },
+     
+      // {
+      //   id: 6,
+      //   title: "Send Money",
+      //   path: "/user/send-money",
+      //   icon: IoWalletOutline,
+      // },
+      // {
+      //   id: 7,
+      //   title: "Withdraw",
+      //   path: "/user/withdraw",
+      //   icon: PiHandWithdraw,
+      // },
+      // {
+      //   id: 8,
+      //   title: "Airtime",
+      //   path: "/user/airtime",
+      //   icon: PiCellSignalFullBold,
+      // },
+
+      // {
+      //   id: 9,
+      //   title: "Internet",
+      //   path: "/user/internet/mobile-data",
+      //   icon: FaWifi,
+      // },
     ],
   },
   {
     id: 2,
     data: [
-      {
-        id: 1,
-        title: "Bills Payment",
-        path: "/user/bills",
-        icon: LiaMoneyBillWaveSolid,
-      },
+      // {
+      //   id: 1,
+      //   title: "Bills Payment",
+      //   path: "/user/bills",
+      //   icon: LiaMoneyBillWaveSolid,
+      // },
 
-      {
-        id: 2,
-        title: "Wallet",
-        path: "/user/wallet",
-        icon: LuTicket,
-      },
+      // {
+      //   id: 2,
+      //   title: "Wallet",
+      //   path: "/user/wallet",
+      //   icon: LuTicket,
+      // },
       {
         id: 3,
         title: "Transactions",
@@ -250,33 +280,28 @@ export const SidebarData = [
     ],
   },
   {
-    id: 3,
-    data: [
-      {
-        id: 1,
-        title: "Savings",
-        path: "/user/savings",
-        icon: LiaPiggyBankSolid,
-      },
-      {
-        id: 2,
-        title: "Invest",
-        path: "/user/invest",
-        icon: GiSettingsKnobs,
-      },
-    ],
-  },
-  {
     id: 4,
     data: [
       {
         id: 1,
+        title: "Notifications",
+        path: "/user/notifications",
+        icon: IoNotificationsOutline,
+      },
+      {
+        id: 2,
+        title: "Support",
+        path: "/user/settings/support",
+        icon: MdSupportAgent,
+      },
+      {
+        id: 3,
         title: "Settings",
         path: "/user/settings",
         icon: IoSettingsOutline,
       },
       {
-        id: 2,
+        id: 4,
         title: "Logout",
         path: "/logout",
         icon: FiLogOut,
@@ -298,7 +323,7 @@ export const DashboardSortList = [
   },
   {
     id: 3,
-    label: "Last 7 days",
+    label: "This Week",
     value: "week",
   },
   {

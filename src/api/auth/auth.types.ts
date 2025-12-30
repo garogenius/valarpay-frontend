@@ -13,19 +13,21 @@ export interface IRegister {
   fullname: string;
   referralCode?: string;
   dateOfBirth: string;
-  countryCode: string;
+  phoneNumber: string;
+  currency: string;
+  accountType?: string;
+  countryCode?: string;
   isBusinessRegistered?: boolean;
   businessName?: string;
-  currency?: string;
 }
 
 export interface IVerifyEmail {
-  username: string;
+  email: string;
   otpCode: string;
 }
 
 export interface IResendVerificationCode {
-  username: string;
+  email: string;
 }
 
 export interface IForgotPassword {

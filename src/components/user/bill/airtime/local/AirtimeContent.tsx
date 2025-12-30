@@ -13,7 +13,7 @@ import AirtimeNav from "../AirtimeNav";
 import { IoChevronBack } from "react-icons/io5";
 import { BILL_TYPE } from "@/constants/types";
 
-const AirtimeContent = () => {
+const AirtimeContent: React.FC<{ onSelectPath?: (path: string) => void }> = ({ onSelectPath }) => {
   const [stage, setStage] = useState<"one" | "two" | "three">("one");
   const [phone, setPhone] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
@@ -49,7 +49,7 @@ const AirtimeContent = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      {stage === "one" && <AirtimeNav />}
+      {stage === "one" && <AirtimeNav onSelectPath={onSelectPath} />}
       {stage === "two" && (
         <div
           onClick={() => {

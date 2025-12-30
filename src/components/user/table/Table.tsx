@@ -24,7 +24,7 @@ const Table = ({
     <div className="flex justify-center md:justify-start flex-col shadow-sm w-full">
       <div className="overflow-x-auto touch relative">
         <table
-          className="border-separate border-spacing-y-3 w-full overflow-hidden"
+          className="w-full overflow-hidden"
           cellPadding="0"
           cellSpacing="0"
           {...getTableProps()}
@@ -36,7 +36,7 @@ const Table = ({
                   return (
                     <th
                       className={cn(
-                        "bg-dark-primary dark:bg-bg-1100 font-medium border-none px-2.5 sm:px-4 xl:px-6 py-2 sm:py-3 text-left text-xs text-text-1700"
+                        "bg-[#0A0A0A] font-medium border-none px-3 sm:px-4 py-3 text-left text-xs text-gray-400"
                       )}
                       {...column.getHeaderProps()}
                       key={column.id}
@@ -54,20 +54,14 @@ const Table = ({
               prepareRow(row);
 
               return (
-                <tr {...row.getRowProps()} key={row.id}>
+                <tr {...row.getRowProps()} key={row.id} className="border-t border-gray-800">
                   {row.cells.map((cell: any, cellIndex: number) => {
-                    const isLastCell = cellIndex === row.cells.length - 1;
-                    const isFirstCell = cellIndex === 0;
-
                     return (
                       <td
                         className={cn(
-                          "text-text-200 dark:text-text-400 px-2.5 sm:px-4 xl:px-6 py-5 sm:py-6 text-left text-xs ",
+                          "text-white px-3 sm:px-4 py-4 text-left text-xs whitespace-nowrap",
                           {
-                            "rounded-l-lg": isFirstCell,
-                            "rounded-r-lg": isLastCell,
-                            "bg-white dark:bg-bg-1100": rowStyle === "primary",
-                            "bg-bg-400 dark:bg-black": rowStyle === "secondary",
+                            "bg-[#0A0A0A]": rowStyle === "primary" || rowStyle === "secondary",
                           }
                         )}
                         {...cell.getCellProps()}

@@ -91,10 +91,10 @@ const VerifyPhoneNumberContent = () => {
   );
 
   const handleVerify = async () => {
-    if (user?.email) {
+    if (authPhoneNumber) {
       verifyPhoneNumber({
-        username: user?.email,
-        otp: token,
+        phoneNumber: authPhoneNumber,
+        otpCode: token,
       });
     }
   };

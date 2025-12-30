@@ -9,6 +9,7 @@ import {
 } from "./auth.types";
 
 export const registerRequest = async (formdata: IRegister) => {
+  // baseURL already includes /api/v1, so use /user/register
   return request({ url: "/user/register", method: "post", data: formdata });
 };
 

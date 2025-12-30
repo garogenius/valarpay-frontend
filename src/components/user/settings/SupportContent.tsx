@@ -1,195 +1,167 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+
+import { useMemo, useState } from "react";
+import ReportScamModal from "@/components/modals/ReportScamModal";
+import { FiChevronDown, FiChevronRight } from "react-icons/fi";
+import { MdEmail, MdPhone, MdReportProblem } from "react-icons/md";
+import Link from "next/link";
+
 import ErrorToast from "@/components/toast/ErrorToast";
-import SuccessToast from "@/components/toast/SuccessToast";
-import { useReportScam } from "@/api/user/user.queries";
-import CustomButton from "@/components/shared/Button";
-import { FaPaperclip } from "react-icons/fa6";
-import { useState } from "react";
-import toast from "react-hot-toast";
 
-const schema = yup.object().shape({
-  title: yup.string().required("Title is required"),
-  description: yup.string().required("Description is required"),
-});
+const SUPPORT_EMAIL = "support@valarpay.com";
+const SUPPORT_PHONE_DISPLAY = "+234-800-VALARPAY";
+// We have one numeric phone in the codebase (used on receipt).
+const SUPPORT_PHONE_TEL = "+2348134146906";
 
-type FormData = yup.InferType<typeof schema>;
+type FaqItem = { q: string; a: string };
+
+const FAQS: FaqItem[] = [
+  {
+    q: "How do I reset my password?",
+    a: 'Go to Settings > Security > Change Password, or tap "Forgot Password" on the login screen and follow the instructions sent to your email or phone.',
+  },
+  {
+    q: "What should I do if a transaction fails but I'm debited?",
+    a: "Most reversals happen automatically within a few minutes. If it doesn’t reverse, contact support with the transaction reference and screenshot.",
+  },
+  {
+    q: "Can I have more than one account on ValarPay?",
+    a: "No, each user can only have one verified account tied to their BVN and ID for security reasons.",
+  },
+  {
+    q: "Can I schedule payments ahead of time?",
+    a: "Yes, under Schedule Payments, you can set automatic airtime, bills, or transfers at specific dates or intervals.",
+  },
+  {
+    q: "What if my transfer is delayed?",
+    a: "Transfers may be delayed due to bank downtime or network issues. If it remains pending for too long, contact support with the reference.",
+  },
+  {
+    q: "How long does it take for support to respond?",
+    a: "Email responses take 24–48 hours, while live chat and phone support are usually instant during business hours.",
+  },
+];
 
 const SupportContent = () => {
-  const [file, setFile] = useState<File | null>(null);
+  const [activeFaq, setActiveFaq] = useState<number | null>(0);
+  const [reportOpen, setReportOpen] = useState(false);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files?.[0]) {
-      setFile(event.target.files[0]);
-    }
-  };
+  const cardClass =
+    "rounded-2xl bg-[#0F0F10] border border-gray-800 p-5 hover:bg-white/5 transition-colors text-left w-full";
 
-  const handleRemoveFile = () => {
-    setFile(null);
-  };
-
-  const form = useForm<FormData>({
-    defaultValues: {
-      title: "",
-      description: "",
-    },
-    resolver: yupResolver(schema),
-    mode: "onChange",
-  });
-
-  const { register, handleSubmit, formState, reset } = form;
-  const { errors, isValid } = formState;
-
-  const onSuccess = () => {
-    SuccessToast({
-      title: "Message sent",
-      description: "Your message has been successfully sent.",
-    });
-    reset();
-    setFile(null);
-  };
-
-  const onError = (error: any) => {
-    const errorMessage =
-      (error as { response?: { data?: { message?: string | string[] } } })
-        ?.response?.data?.message ?? "Something went wrong";
-
-    ErrorToast({
-      title: "Error sending message",
-      descriptions: Array.isArray(errorMessage) ? errorMessage : [errorMessage],
-    });
-  };
-
-  const {
-    mutate: sendMessage,
-    isPending: sendingPending,
-    isError: sendingError,
-  } = useReportScam(onError, onSuccess);
-
-  const onSubmit = async (data: yup.InferType<typeof schema>) => {
-    const formData = new FormData();
-    formData.append("title", data.title);
-    formData.append("description", data.description);
-
-    if (file) {
-      formData.append("screenshot", file);
-      sendMessage(formData);
-    } else {
-      toast.error("Add attachment", {
-        duration: 3000,
-      });
-    }
-  };
+  const quickLinks = useMemo(
+    () => [
+      { title: "Terms & Conditions", subtitle: "Understand the rules that guide your use of ValarPay", href: "/terms&condition" },
+      { title: "Privacy Policy", subtitle: "See how we protect and manage your personal information", href: "/privacyPolicy" },
+      { title: "About ValarPay", subtitle: "Learn more about who we are and what we do", href: "/about" },
+    ],
+    []
+  );
 
   return (
-    <div className="w-full h-full bg-white  dark:bg-bg-1100 py-4 md:py-8 px-1 2xs:px-5 lg:px-8 flex justify-center rounded-xl sm:rounded-2xl">
-      <div className="flex flex-col gap-6 xs:gap-10 w-full xl:w-[80%] 2xl:w-[70%] bg-transparent lg:bg-bg-400 dark:bg-transparent lg:dark:bg-black rounded-lg sm:rounded-xl p-0 2xs:p-4 md:p-8">
-        <h2 className="text-xl xs:text-2xl text-text-200 dark:text-text-400">
-          Report Scam
-        </h2>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="w-full flex flex-col gap-10 md:gap-12"
+    <div className="w-full max-w-6xl">
+      {/* Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-white text-lg font-semibold">Support Center</p>
+          <p className="text-gray-400 text-xs mt-1">Get help, report issues, and find answers to your questions</p>
+        </div>
+        <button
+          type="button"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-[#FF6B2C] text-black font-semibold text-sm px-4 py-2.5 hover:bg-[#FF7A3D] transition-colors"
+          onClick={() => window.open(`mailto:${SUPPORT_EMAIL}?subject=Support%20Live%20Chat%20Request`, "_blank")}
         >
-          <div className="w-full grid grid-cols-1 gap-4 md:gap-6">
-            {/* Title Input */}
-            <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
-              <label
-                className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start"
-                htmlFor="title"
-              >
-                Title
-              </label>
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
-                <input
-                  id="title"
-                  className="disabled:opacity-60 w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
-                  placeholder="Enter Title"
-                  type="text"
-                  {...register("title")}
-                />
-              </div>
-              {errors.title && (
-                <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
-                  {errors.title.message}
-                </p>
-              )}
-            </div>
-
-            {/* Description Input */}
-            <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
-              <label
-                className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start"
-                htmlFor="description"
-              >
-                Description
-              </label>
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
-                <textarea
-                  id="description"
-                  className="resize-y disabled:opacity-60 w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
-                  placeholder="Enter Description"
-                  {...register("description")}
-                />
-              </div>
-              {errors.description && (
-                <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
-
-            {/* File Upload */}
-            <div className="p-4 border border-border-600 bg-dark-primary dark:bg-bg-1100 rounded-lg">
-              <label
-                htmlFor="file-upload"
-                className="cursor-pointer flex items-center text-primary"
-              >
-                <FaPaperclip className="mr-2" />
-                <span>{file ? "Replace Attachment" : "Add Attachment"}</span>
-              </label>
-              <input
-                id="file-upload"
-                type="file"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-              {file && (
-                <div className="mt-4 flex items-center justify-between p-2  bg-bg-400 dark:bg-black rounded-md">
-                  <span className="text-sm text-text-200 dark:text-text-400">
-                    {file.name.length > 20
-                      ? file.name.slice(0, 10) + "..." + file.name.slice(-7)
-                      : file.name}
-                  </span>{" "}
-                  <button
-                    type="button"
-                    onClick={handleRemoveFile}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <div className="w-full flex">
-            <CustomButton
-              type="submit"
-              disabled={!isValid || (sendingPending && !sendingError)}
-              isLoading={sendingPending}
-              className="w-full border-2 dark:text-black dark:font-bold border-primary text-white text-base 2xs:text-lg max-2xs:px-6 py-3"
-            >
-              Report
-            </CustomButton>
-          </div>
-        </form>
+          Start Live Chat
+        </button>
       </div>
+
+      {/* Cards */}
+      <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+        <button
+          type="button"
+          className={cardClass}
+          onClick={() => window.open(`mailto:${SUPPORT_EMAIL}`, "_blank")}
+        >
+          <div className="w-10 h-10 rounded-full bg-[#1C1C1E] flex items-center justify-center text-[#FF6B2C] mb-3">
+            <MdEmail className="text-xl" />
+          </div>
+          <p className="text-white text-sm font-semibold">Email Support</p>
+          <p className="text-gray-400 text-xs mt-1">Reach our support team anytime via email for quick help and inquiries</p>
+        </button>
+
+        <button
+          type="button"
+          className={cardClass}
+          onClick={() => window.open(`tel:${SUPPORT_PHONE_TEL}`, "_self")}
+        >
+          <div className="w-10 h-10 rounded-full bg-[#1C1C1E] flex items-center justify-center text-[#FF6B2C] mb-3">
+            <MdPhone className="text-xl" />
+          </div>
+          <p className="text-white text-sm font-semibold">Phone Support</p>
+          <p className="text-gray-400 text-xs mt-1">
+            Speak directly with our support team for faster assistance
+          </p>
+          <p className="text-gray-500 text-[11px] mt-2">{SUPPORT_PHONE_DISPLAY}</p>
+        </button>
+
+        <button type="button" className={cardClass} onClick={() => setReportOpen(true)}>
+          <div className="w-10 h-10 rounded-full bg-[#1C1C1E] flex items-center justify-center text-[#FF6B2C] mb-3">
+            <MdReportProblem className="text-xl" />
+          </div>
+          <p className="text-white text-sm font-semibold">Report Scam</p>
+          <p className="text-gray-400 text-xs mt-1">Report any suspicious activity or fraudulent transaction</p>
+        </button>
+      </div>
+
+      {/* FAQs */}
+      <div className="mt-6 rounded-2xl border border-gray-800 bg-[#0A0A0A] overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-800">
+          <p className="text-white text-sm font-semibold">Frequently Asked Questions</p>
+        </div>
+        <div className="divide-y divide-gray-800">
+          {FAQS.map((item, idx) => {
+            const open = activeFaq === idx;
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setActiveFaq((v) => (v === idx ? null : idx))}
+                className="w-full text-left px-5 py-4 hover:bg-white/5 transition-colors"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-white text-sm font-medium">{item.q}</p>
+                  <FiChevronDown className={`text-gray-500 transition-transform ${open ? "rotate-180" : ""}`} />
+                </div>
+                {open ? <p className="text-gray-400 text-xs mt-2 leading-relaxed">{item.a}</p> : null}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Quick Links */}
+      <div className="mt-6 rounded-2xl border border-gray-800 bg-[#0A0A0A] overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-800">
+          <p className="text-white text-sm font-semibold">Quick Links</p>
+        </div>
+        <div className="divide-y divide-gray-800">
+          {quickLinks.map((l) => (
+            <Link key={l.href} href={l.href} className="block px-5 py-4 hover:bg-white/5 transition-colors">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-white text-sm font-medium">{l.title}</p>
+                  <p className="text-gray-400 text-xs mt-0.5">{l.subtitle}</p>
+                </div>
+                <FiChevronRight className="text-gray-500" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <ReportScamModal isOpen={reportOpen} onClose={() => setReportOpen(false)} />
     </div>
   );
 };

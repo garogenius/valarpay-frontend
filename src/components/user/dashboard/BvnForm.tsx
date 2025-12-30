@@ -52,12 +52,8 @@ const BvnForm = ({
 
   const onSuccess = (data: any) => {
     SuccessToast({
-      title: "BVN Verification Initiated",
-      description: data?.data?.message,
-    });
-    setBvnDetails({
-      bvn: data?.data?.data?.bvn,
-      verificationId: data?.data?.data?.verificationId,
+      title: "Account created",
+      description: data?.data?.message || "Your NGN virtual account has been created successfully.",
     });
     handleComplete(1);
     reset();
@@ -72,6 +68,8 @@ const BvnForm = ({
   const bvnLoading = bvnPending && !bvnError;
 
   const onSubmit = async (data: EnterBvnFormData) => {
+    // keep BVN available for later steps even though OTP is no longer required
+    setBvnDetails({ bvn: data.bvn, verificationId: "" });
     initiateBvn(data);
   };
 

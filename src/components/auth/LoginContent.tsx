@@ -126,16 +126,13 @@ const LoginContent = () => {
     const user: User = data?.data?.user;
     setAuthEmail(user?.email);
 
-    if (user?.isPhoneVerified) {
-      SuccessToast({
-        title: "Login successful!",
-        description:
-          "Check your email for verification code to continue with your two-factor authentication.",
-      });
-      navigate("/two-factor-auth");
-    } else {
-      navigate("/validate-phoneNumber");
-    }
+    // After login, always go to 2FA verification
+    SuccessToast({
+      title: "Login successful!",
+      description:
+        "Check your email for verification code to continue with your two-factor authentication.",
+    });
+    navigate("/two-factor-auth");
 
     reset();
   };

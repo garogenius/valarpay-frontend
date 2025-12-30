@@ -14,7 +14,7 @@ import useNavigate from "@/hooks/useNavigate";
 import { usePayForElectricity } from "@/api/electricity/electricity.queries";
 import { BILL_TYPE } from "@/constants/types";
 
-const ElectricityContent = () => {
+const ElectricityContent: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
   const navigate = useNavigate();
   const [stage, setStage] = useState<"one" | "two" | "three">("one");
   const [billerNumber, setBillerNumber] = useState<string>("");
@@ -58,6 +58,7 @@ const ElectricityContent = () => {
       {stage === "one" && (
         <div
           onClick={() => {
+            if (onExit) return onExit();
             navigate("/user/bills");
           }}
           className="flex items-center gap-2 cursor-pointer text-text-200 dark:text-text-400"

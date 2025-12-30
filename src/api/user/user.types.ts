@@ -40,8 +40,8 @@ export interface ITier3Verification {
 }
 
 export interface IVerifyPhoneNumber {
-  username: string;
-  otp: string;
+  phoneNumber: string;
+  otpCode: string;
 }
 
 export interface IValidatePhoneNumber {

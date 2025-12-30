@@ -9,9 +9,9 @@ const Sidebar = () => {
     <>
       <div
         className={cn(
-          "hidden lg:flex flex-col  shadow-md bg-dark-primary dark:bg-bg-1100 h-screen sticky z-50 transform transition-all duration-300 ease-in-out",
+          "hidden lg:flex flex-col bg-[#0A0A0A] h-screen sticky z-50 transform transition-all duration-300 ease-in-out border-r border-gray-900",
           {
-            "lg:w-[25%] xl:w-[22.5%] 2xl:w-[20%]": true,
+            "lg:w-[240px] xl:w-[260px]": true,
           }
         )}
       >

@@ -14,7 +14,7 @@ import useNavigate from "@/hooks/useNavigate";
 import { usePayForCable } from "@/api/cable/cable.queries";
 import { BILL_TYPE } from "@/constants/types";
 
-const CableContent = () => {
+const CableContent: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
   const navigate = useNavigate();
   const [stage, setStage] = useState<"one" | "two" | "three">("one");
   const [billerNumber, setBillerNumber] = useState<string>("");
@@ -59,6 +59,7 @@ const CableContent = () => {
       {stage === "one" && (
         <div
           onClick={() => {
+            if (onExit) return onExit();
             navigate("/user/bills");
           }}
           className="flex items-center gap-2 cursor-pointer text-text-200 dark:text-text-400"

@@ -1,7 +1,7 @@
-import SettingsContent from "@/components/user/settings/SettingsContent";
+import ProfileSettingsContent from "@/components/user/settings/ProfileSettingsContent";
 
 const SettingsPage = () => {
-  return <SettingsContent />;
+  return <ProfileSettingsContent />;
 };
 
 export default SettingsPage;

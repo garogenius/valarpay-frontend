@@ -13,7 +13,7 @@ import { IoChevronBack } from "react-icons/io5";
 import InternetNav from "../InternetNav";
 import { BILL_TYPE } from "@/constants/types";
 
-const MobileDataContent = () => {
+const MobileDataContent: React.FC<{ onSelectPath?: (path: string) => void }> = ({ onSelectPath }) => {
   const [stage, setStage] = useState<"one" | "two" | "three">("one");
   const [phone, setPhone] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
@@ -52,7 +52,7 @@ const MobileDataContent = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      {stage === "one" && <InternetNav />}
+      {stage === "one" && <InternetNav onSelectPath={onSelectPath} />}
       {stage === "two" && (
         <div
           onClick={() => {

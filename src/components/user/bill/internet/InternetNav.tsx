@@ -18,7 +18,7 @@ const navItems = [
   },
 ];
 
-const InternetNav = () => {
+const InternetNav: React.FC<{ onSelectPath?: (path: string) => void }> = ({ onSelectPath }) => {
   const navigate = useNavigate();
   const pathname = usePathname();
   return (
@@ -33,6 +33,7 @@ const InternetNav = () => {
             //     duration: 3000,
             //   });
             // } else {
+            if (onSelectPath) return onSelectPath(item.path);
             navigate(item.path);
             // }
           }}

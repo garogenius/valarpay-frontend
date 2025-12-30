@@ -13,7 +13,7 @@ import { BILL_TYPE, GiftCardDetails } from "@/constants/types";
 import GiftCardNav from "../GiftCardNav";
 import { usePayForGiftCard } from "@/api/gift-card/gift-card.queries";
 
-const BuyGiftCardContent = () => {
+const BuyGiftCardContent: React.FC<{ onSelectPath?: (path: string) => void }> = ({ onSelectPath }) => {
   const [stage, setStage] = useState<"one" | "two" | "three">("one");
   const [phone, _setPhone] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
@@ -49,7 +49,7 @@ const BuyGiftCardContent = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      {stage === "one" && <GiftCardNav />}
+      {stage === "one" && <GiftCardNav onSelectPath={onSelectPath} />}
       {stage === "two" && (
         <div
           onClick={() => {

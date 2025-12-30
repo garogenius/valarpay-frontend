@@ -6,6 +6,7 @@ import {
   airtimePaymentRequest,
   airtimePlanRequest,
   airtimeVariationRequest,
+  internationalAirtimePaymentRequest,
   internationalAirtimeFxRateRequest,
   internationalAirtimePlanRequest,
 } from "./airtime.apis";
@@ -65,6 +66,22 @@ export const usePayForAirtime = (
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: airtimePaymentRequest,
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["get-beneficiaries"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      onSuccess(data);
+    },
+  });
+};
+
+export const usePayForInternationalAirtime = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: internationalAirtimePaymentRequest,
     onError,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["get-beneficiaries"] });

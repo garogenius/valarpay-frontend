@@ -31,12 +31,12 @@ const VerifyPhoneNumberContent = () => {
   const { authEmail, authPhoneNumber } = useAuthEmailStore();
   const [token, setToken] = useState("");
 
-  const isValid = token.length === 4;
+  const isValid = token.length === 6;
 
   const onVerificationSuccess = () => {
     SuccessToast({
-      title: "Email verified",
-      description: "Your email address verification successful",
+      title: "Phone number verified",
+      description: "Your phone number verification successful",
     });
     navigate("/login", "replace");
     setToken("");
@@ -91,10 +91,10 @@ const VerifyPhoneNumberContent = () => {
   );
 
   const handleVerify = async () => {
-    if (authEmail) {
+    if (authPhoneNumber) {
       verifyPhoneNumber({
-        username: authEmail,
-        otp: token,
+        phoneNumber: authPhoneNumber,
+        otpCode: token,
       });
     }
   };
@@ -143,19 +143,19 @@ const VerifyPhoneNumberContent = () => {
   };
 
   const handlePaste: React.ClipboardEventHandler = (event) => {
-    const data = event.clipboardData.getData("text").slice(0, 4); // Get first 4 characters
+    const data = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6); // Get first 6 digits only
     setToken(data);
   };
 
   useEffect(() => {
-    if (!authEmail) {
+    if (!authPhoneNumber) {
       ErrorToast({
         title: "Error",
-        descriptions: ["No email found. Please try again."],
+        descriptions: ["No phone number found. Please try again."],
       });
       router.back();
     }
-  }, [authEmail, router, navigate]);
+  }, [authPhoneNumber, router, navigate]);
 
   const loadingStatus = verificationPending && !verificationError;
   const resendLoadingStatus =
@@ -206,9 +206,13 @@ const VerifyPhoneNumberContent = () => {
             <div className="flex items-center justify-center  w-full ">
               <OtpInput
                 value={token}
-                onChange={(props) => setToken(props)}
+                onChange={(value) => {
+                  // Only allow numeric input
+                  const numericValue = value.replace(/\D/g, "").slice(0, 6);
+                  setToken(numericValue);
+                }}
                 onPaste={handlePaste}
-                numInputs={4}
+                numInputs={6}
                 renderSeparator={<span className="w-2 2xs:w-3 xs:w-4"></span>}
                 containerStyle={{}}
                 skipDefaultStyles
@@ -221,18 +225,18 @@ const VerifyPhoneNumberContent = () => {
                 )}
               />
             </div>
-            <p className=" my-1 sm:my-2.5 text-center w-[90%] xs:w-[80%] text-sm 2xs:text-base text-text-1000  font-medium">
+            <div className=" my-1 sm:my-2.5 text-center w-[90%] xs:w-[80%] text-sm 2xs:text-base text-text-1000  font-medium">
               {resendTimer && resendTimer > 0 ? (
                 <>
-                  Didn’t get the code?{" "}
+                  Didn't get the code?{" "}
                   <span className="text-secondary">Resend</span> in{" "}
                   <span className="text-secondary">
                     {formatTimer(resendTimer)}
                   </span>
                 </>
               ) : (
-                <div className="flex items-center justify-center ">
-                  Didn’t receive any code?
+                <span className="flex items-center justify-center ">
+                  Didn't receive any code?
                   <span
                     className="cursor-pointer text-secondary ml-1"
                     onClick={handleResendClick}
@@ -243,9 +247,9 @@ const VerifyPhoneNumberContent = () => {
                       "Resend"
                     )}
                   </span>
-                </div>
+                </span>
               )}
-            </p>
+            </div>
             <CustomButton
               type="button"
               disabled={loadingStatus || !isValid}

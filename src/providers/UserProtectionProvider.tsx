@@ -60,15 +60,15 @@ const UserProtectionProvider = ({ children }: UserProtectionProviderProps) => {
   ]);
 
   useEffect(() => {
-    if (
-      !isLoading &&
-      isLoggedIn &&
-      isInitialized &&
-      !isVerified &&
-      pathname !== "/user/dashboard"
-    ) {
-      navigate("/user/dashboard", "replace");
-    }
+    // TEMPORARILY DISABLED:
+    // Previously we forced unverified users (no BVN + no wallet pin) back to /user/dashboard.
+    // You asked to allow access to all pages for now.
+    // Keep auth/token protection above intact.
+    //
+    // Re-enable when you want onboarding enforcement again.
+    // if (!isLoading && isLoggedIn && isInitialized && !isVerified && pathname !== "/user/dashboard") {
+    //   navigate("/user/dashboard", "replace");
+    // }
   }, [isVerified, navigate, pathname, isInitialized, isLoading, isLoggedIn]);
 
   // Show loading state while checking auth

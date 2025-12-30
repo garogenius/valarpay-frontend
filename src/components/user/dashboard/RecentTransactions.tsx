@@ -1,15 +1,12 @@
 "use client";
 
 import { useGetTransactions } from "@/api/wallet/wallet.queries";
-
 import Skeleton from "react-loading-skeleton";
 import Link from "next/link";
-import Table from "../table/Table";
 import EmptyState from "../table/EmptyState";
 import images from "../../../../public/images";
 import { useTheme } from "@/store/theme.store";
-import MobileTable from "../table/MobileTable";
-import { GenerateColumns } from "../table/columns";
+import TransactionItem from "./TransactionItem";
 
 const RecentTransactions = () => {
   const theme = useTheme();
@@ -21,74 +18,47 @@ const RecentTransactions = () => {
     limit: pageSize,
   });
 
-  const columns = GenerateColumns();
-
   const hasTransactions =
     transactionsData?.transactions && transactionsData.transactions.length > 0;
   const tableLoading = isPending && !isError;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 bg-[#1C1C1E] rounded-xl p-4 sm:p-6">
       <div className="w-full flex items-center justify-between gap-4">
-        {" "}
-        <h2 className="text-text-200 dark:text-text-800 text-xl sm:text-2xl font-semibold">
-          Recent transactions{" "}
+        <h2 className="text-lg sm:text-xl font-semibold text-white">
+          Recent Transactions
         </h2>
         <Link
-          className="px-5 py-2 rounded-lg bg-dark-primary text-text-1200 font-medium text-sm border border-border-800"
+          className="text-[#FF6B2C] hover:text-[#FF7D3D] font-medium text-xs sm:text-sm transition-colors"
           href={"/user/transactions"}
         >
-          View all
+          View All
         </Link>
       </div>
 
-      <div className="pb-10  w-full flex flex-col justify-center items-center gap-8 xs:gap-10">
-        <div className="w-full">
-          {tableLoading ? (
-            <div className="flex flex-col gap-3 py-4">
-              {[...Array(4)].map((_, index) => (
-                <Skeleton
-                  key={index}
-                  className="h-8"
-                  baseColor={theme === "light" ? "#e0e0e0" : "#202020"}
-                  highlightColor={theme === "light" ? "#f5f5f5" : "#444444"}
-                />
-              ))}
-            </div>
-          ) : hasTransactions ? (
-            <>
-              <div className="hidden md:block">
-                <Table
-                  data={transactionsData?.transactions || []}
-                  columns={columns}
-                />
-              </div>
-              <div className="block md:hidden">
-                <MobileTable
-                  data={transactionsData?.transactions || []}
-                  columns={columns}
-                />
-              </div>
-            </>
-          ) : (
-            <EmptyState
-              image={images.emptyState.emptyTransactions}
-              title={"No transactions"}
-              path={"/user/services"}
-              placeholder={"Pay a bill"}
-              showButton={false}
-            />
-          )}
-        </div>
-
-        {/* {hasTransactions && (
-          <Pagination
-            pageCount={transactionsData?.pageCount}
-            onPageChange={(newPage) => setPageNumber(newPage)}
-            onPageSizeChange={(newSize) => setPageSize(newSize)}
-            pageNumber={pageNumber}
-          />
-        )} */}
+      <div className="w-full flex flex-col">
+        {tableLoading ? (
+          <div className="flex flex-col gap-3 py-4">
+            {[...Array(5)].map((_, index) => (
+              <Skeleton
+                key={index}
+                className="h-16"
+                baseColor="#2C2C2E"
+                highlightColor="#3A3A3C"
+              />
+            ))}
+          </div>
+        ) : hasTransactions ? (
+          <div className="flex flex-col">
+            {transactionsData?.transactions.slice(0, 5).map((transaction) => (
+              <TransactionItem key={transaction.id} transaction={transaction} />
+            ))}
+          </div>
+        ) : (
+          <div className="py-12 flex flex-col items-center justify-center">
+            <p className="text-gray-400 text-sm">No transactions yet</p>
+          </div>
+        )}
       </div>
     </div>
   );

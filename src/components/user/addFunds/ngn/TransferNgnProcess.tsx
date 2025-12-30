@@ -1,15 +1,13 @@
 "use client";
 
-import { useGetQrCode } from "@/api/wallet/wallet.queries";
-import SpinnerLoader from "@/components/Loader/SpinnerLoader";
 import { CURRENCY } from "@/constants/types";
 import useUserStore from "@/store/user.store";
-import Image from "next/image";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { IoQrCodeSharp } from "react-icons/io5";
 import { LuCopy } from "react-icons/lu";
 import { RiBankLine } from "react-icons/ri";
+import QrCodeModal from "@/components/modals/QrCodeModal";
 
 const transferMethods = [
   {
@@ -32,11 +30,7 @@ const transferMethods = [
 const TransferNgnProcess = () => {
   const { user } = useUserStore();
   const [selectedType, setSelectedType] = useState<string>("bank");
-  const [amount, setAmount] = useState("");
-
-  const { qrCode, isPending, isError } = useGetQrCode({
-    amount: Number(amount) || 0,
-  });
+  const [qrModalOpen, setQrModalOpen] = useState(false);
   const accountNumber = user?.wallet?.find(
     (w) => w.currency === CURRENCY.NGN
   )?.accountNumber;
@@ -46,7 +40,6 @@ const TransferNgnProcess = () => {
   const accountName = user?.wallet?.find(
     (w) => w.currency === CURRENCY.NGN
   )?.accountName;
-  const isLoading = isPending && !isError;
   return (
     <div className="w-full flex max-xl:flex-col 2xs:px-2 xs:px-4 sm:px-6 md:px-8 py-4 2xs:py-6 sm:py-10 bg-transparent xs:bg-dark-primary dark:xs:bg-bg-1100 gap-6 xs:gap-10 lg:gap-12 2xl:gap-16 rounded-xl">
       <div className="w-full xl:w-[40%] flex flex-col gap-4 md:gap-6 lg:gap-8 2xl:gap-10">
@@ -157,70 +150,23 @@ const TransferNgnProcess = () => {
               Fund with QR Code{" "}
             </h2>
 
-            <div className="w-full flex flex-col gap-4">
-              <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
-                <label
-                  className="w-full text-sm sm:text-base text-text-200 dark:text-text-800 mb-1 flex items-start "
-                  htmlFor={"amount"}
-                >
-                  Amount{" "}
-                </label>
-                <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
-                  <input
-                    className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
-                    placeholder="Enter Amount"
-                    required={true}
-                    type="text"
-                    value={amount}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^\d*\.?\d*$/.test(value)) {
-                        setAmount(value);
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-              {amount && Number(amount) !== 0 ? (
-                <>
-                  {" "}
-                  {isLoading ? (
-                    <div className="w-full flex justify-center items-center py-8">
-                      <SpinnerLoader width={50} height={50} color="#D4B139" />
-                    </div>
-                  ) : (
-                    <>
-                      {qrCode ? (
-                        <div className="flex flex-col gap-1 w-full">
-                          {/* <label
-                        className="w-full text-sm sm:text-base text-text-200 dark:text-text-800 mb-1 flex items-start "
-                        htmlFor={"amount"}
-                      >
-                        Amount{" "}
-                      </label>{" "} */}
-                          <Image
-                            src={qrCode}
-                            alt="QR Code"
-                            width={200}
-                            height={200}
-                            className="w-full 2xs:w-[70%] xs:w-[60%] sm:w-[50%] md:w-[40%] lg:w-[50%] xl:w-[40%]"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-full flex justify-center items-center py-8">
-                          <p className="text-text-200 dark:text-text-400">
-                            No QR Code
-                          </p>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </>
-              ) : null}
+            <div className="w-full flex flex-col gap-3">
+              <p className="text-sm text-text-200 dark:text-text-1000 text-center">
+                Generate a QR code to receive funds or scan/decode a QR code.
+              </p>
+              <button
+                type="button"
+                onClick={() => setQrModalOpen(true)}
+                className="w-full rounded-xl bg-primary text-black font-semibold py-3 hover:opacity-90 transition-opacity"
+              >
+                Open QR Code
+              </button>
             </div>
           </div>
         )}
       </div>
+
+      <QrCodeModal isOpen={qrModalOpen} onClose={() => setQrModalOpen(false)} defaultTab="generate" />
     </div>
   );
 };

@@ -18,7 +18,7 @@ import icons from "../../../../public/icons";
 import images from "../../../../public/images";
 import SearchableDropdown from "@/components/shared/SearchableDropdown";
 import useOnClickOutside from "@/hooks/useOnClickOutside";
-import { getCurrencyIconByString } from "@/utils/utilityFunctions";
+import { getCurrencyIconByString, handleNumericKeyDown, handleNumericPaste } from "@/utils/utilityFunctions";
 import { useTheme } from "@/store/theme.store";
 import useAuthEmailStore from "@/store/authEmail.store";
 import DatePicker from "react-datepicker";
@@ -42,9 +42,18 @@ const schema = yup.object().shape({
     .oneOf([yup.ref("password")], "Passwords do not match")
     .required("Please confirm your password"),
 
-  dateOfBirth: yup.string().required("Date of birth is required"),
+  dateOfBirth: yup
+    .string()
+    .required("Date of birth is required")
+    .matches(/^\d{2}-\d{2}-\d{4}$/, "Date of birth must be in format: DD-MM-YYYY (e.g., 01-12-2020)"),
 
   countryCode: yup.string().required("Account type is required"),
+  phoneNumber: yup
+    .string()
+    .required("Phone number is required")
+    .matches(/^\d+$/, "Phone number must contain only digits")
+    .min(10, "Phone number must be at least 10 digits")
+    .max(15, "Phone number must be at most 15 digits"),
   referralCode: yup.string().optional(),
 });
 
@@ -97,6 +106,7 @@ const SignupPersonalContent = () => {
       confirmPassword: "",
       dateOfBirth: "",
       countryCode: "NGN",
+      phoneNumber: "",
       referralCode: "",
     },
     resolver: yupResolver(schema) as any,
@@ -121,11 +131,12 @@ const SignupPersonalContent = () => {
   const handleDateChange = (date: Date | null) => {
     if (date) {
       setStartDate(date);
-      const newDate = new Date(date);
-      const day = newDate.getDate();
-      const month = newDate.toLocaleString("en-US", { month: "short" });
-      const year = newDate.getFullYear();
-      setValue("dateOfBirth", `${day}-${month}-${year}`);
+      // Use local date components to avoid timezone issues
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      const formattedDate = `${day}-${month}-${year}`;
+      setValue("dateOfBirth", formattedDate);
       setShowDatePicker(false);
     }
   };
@@ -142,7 +153,8 @@ const SignupPersonalContent = () => {
   };
 
   const onSuccess = (data: any) => {
-    const user = data?.data?.user;
+    // API response structure: { message, statusCode, user, accessToken }
+    const user = data?.data?.user || data?.user;
     setAuthEmail(user?.email);
 
     SuccessToast({
@@ -164,7 +176,39 @@ const SignupPersonalContent = () => {
   const registerLoading = registerPending && !registerError;
 
   const onSubmit = async (data: RegisterFormData) => {
-    signup(data);
+    // Remove confirmPassword from the request body
+    const { confirmPassword, countryCode, ...requestData } = data;
+    
+    // Ensure dateOfBirth is in the correct format DD-MM-YYYY and trim any whitespace
+    if (requestData.dateOfBirth) {
+      requestData.dateOfBirth = String(requestData.dateOfBirth).trim();
+      // Validate and ensure the format is correct
+      const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+      if (!dateRegex.test(requestData.dateOfBirth)) {
+        // If format is wrong, try to fix it
+        const parts = requestData.dateOfBirth.split('-').map(p => p.trim());
+        if (parts.length === 3) {
+          const day = String(parts[0]).padStart(2, '0');
+          const month = String(parts[1]).padStart(2, '0');
+          const year = String(parts[2]);
+          requestData.dateOfBirth = `${day}-${month}-${year}`;
+        }
+      }
+    }
+    
+    // Ensure phoneNumber is a string and contains only digits
+    if (requestData.phoneNumber) {
+      requestData.phoneNumber = String(requestData.phoneNumber).trim().replace(/\D/g, '');
+    }
+    
+    // Map countryCode to currency and add accountType for API
+    const apiPayload = {
+      ...requestData,
+      currency: countryCode, // Map countryCode to currency
+      accountType: "PERSONAL", // Add accountType for personal registration
+    };
+    
+    signup(apiPayload);
   };
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -175,7 +219,7 @@ const SignupPersonalContent = () => {
   // Validate required fields for the current step before moving forward
   const stepFields: (keyof RegisterFormData)[][] = [
     ["fullname", "username", "countryCode"],
-    ["email", "password", "confirmPassword"],
+    ["email", "password", "confirmPassword", "phoneNumber"],
     ["dateOfBirth"],
     [], // Step 4 has no required field (referral is optional)
   ];
@@ -431,7 +475,7 @@ const SignupPersonalContent = () => {
                 </>
               )}
 
-              {/* Step 2: Email, Passwords */}
+              {/* Step 2: Email, Passwords, Phone Number */}
               {activeStep === 1 && (
                 <>
                   <AuthInput
@@ -499,6 +543,32 @@ const SignupPersonalContent = () => {
                       autoComplete="off"
                       {...register("confirmPassword")}
                     />
+                  </div>
+
+                  <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                    <label
+                      className="w-full text-base text-text-800 mb-1 flex items-start "
+                      htmlFor="phoneNumber"
+                    >
+                      Phone Number
+                    </label>
+                    <div className="w-full flex gap-2 justify-center items-center bg-bg-2000 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                      <input
+                        className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-700 dark:placeholder:text-text-1000 placeholder:text-sm"
+                        placeholder="Enter Phone Number (10-15 digits)"
+                        type="text"
+                        maxLength={15}
+                        minLength={10}
+                        {...register("phoneNumber")}
+                        onKeyDown={handleNumericKeyDown}
+                        onPaste={handleNumericPaste}
+                      />
+                    </div>
+                    {errors.phoneNumber?.message ? (
+                      <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
+                        {errors.phoneNumber?.message}
+                      </p>
+                    ) : null}
                   </div>
                 </>
               )}

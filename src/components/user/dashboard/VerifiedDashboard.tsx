@@ -1,11 +1,11 @@
 import RecentTransactions from "./RecentTransactions";
-import StatsContent from "./stats/StatsContent";
+import AnalyticsPanel from "./AnalyticsPanel";
 
 const VerifiedDashboard = () => {
   return (
-    <div className="w-full flex flex-col md:gap-10 gap-8">
-      <StatsContent />
+    <div className="w-full grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
       <RecentTransactions />
+      <AnalyticsPanel />
     </div>
   );
 };

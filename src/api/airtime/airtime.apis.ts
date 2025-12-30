@@ -29,6 +29,16 @@ export const airtimePaymentRequest = async (formdata: IAirtimePayPayload) => {
   });
 };
 
+export const internationalAirtimePaymentRequest = async (
+  formdata: IAirtimePayPayload
+) => {
+  return request({
+    url: `/bill/airtime/international/pay`,
+    method: "post",
+    data: formdata,
+  });
+};
+
 export const airtimeNetworkProviderRequest = async () => {
   return request({
     url: `/bill/airtime/network-providers`,

@@ -3,13 +3,26 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getAllBanks,
+  getAllBanksByCurrency,
+  changeWalletPinRequest,
   getQrCode,
+  decodeQrCodeRequest,
   getTransactions,
   getTransferFee,
+  getExchangeRateRequest,
+  convertCurrencyRequest,
   initiateBvnVerificationRequest,
   initiateTransferRequest,
   validateBvnVerificationRequest,
   verifyAccountRequest,
+  bvnVerificationWithSelfieRequest,
+  createAccountRequest,
+  createMultiCurrencyAccountRequest,
+  getWalletAccountsRequest,
+  createVirtualCardRequest,
+  getVirtualCardDetailsRequest,
+  freezeVirtualCardRequest,
+  unfreezeVirtualCardRequest,
 } from "./wallet.apis";
 import {
   BankProps,
@@ -18,6 +31,8 @@ import {
   TRANSACTION_CATEGORY,
   TRANSACTION_STATUS,
 } from "@/constants/types";
+import type { VirtualCard, WalletAccount, ExchangeRateData, IGetExchangeRate, IConvertCurrency } from "./wallet.types";
+import type { DecodedQrCodeData } from "./wallet.types";
 
 export const useInitiateBvnVerification = (
   onError: (error: any) => void,
@@ -80,15 +95,26 @@ export const useInitiateTransfer = (
   });
 };
 
-export const useGetAllBanks = () => {
+export const useGetAllBanks = (currency: string = "NGN") => {
   const { data, isPending, isError } = useQuery({
-    queryKey: ["banks"],
-    queryFn: getAllBanks,
+    queryKey: ["banks", { currency }],
+    queryFn: () => (currency === "NGN" ? getAllBanks() : getAllBanksByCurrency(currency)),
   });
 
   const banks: BankProps[] = data?.data?.data;
 
   return { banks, isPending, isError };
+};
+
+export const useChangeWalletPin = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  return useMutation({
+    mutationFn: changeWalletPinRequest,
+    onError,
+    onSuccess,
+  });
 };
 
 export const useGetTransferFee = ({
@@ -109,6 +135,34 @@ export const useGetTransferFee = ({
   const fee: number[] = data?.data?.data?.fee;
 
   return { fee, isPending, isError };
+};
+
+export const useGetExchangeRate = (payload: IGetExchangeRate & { enabled?: boolean }) => {
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["exchange-rate", payload],
+    queryFn: () => getExchangeRateRequest(payload),
+    enabled: payload.enabled !== false && !!payload.fromCurrency && !!payload.toCurrency,
+  });
+
+  const exchangeRate: ExchangeRateData | undefined = data?.data?.data;
+  return { exchangeRate, isPending, isError };
+};
+
+export const useConvertCurrency = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: IConvertCurrency) => convertCurrencyRequest(payload),
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["walletAccounts"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      onSuccess(data);
+    },
+  });
 };
 
 export const useGetTransactions = ({
@@ -143,14 +197,156 @@ export const useGetTransactions = ({
   return { transactionsData, isPending, isError };
 };
 
-export const useGetQrCode = ({ amount }: { amount: number }) => {
+export const useGetQrCode = ({
+  amount,
+  enabled = true,
+}: {
+  amount: number;
+  enabled?: boolean;
+}) => {
   const { data, isPending, isError } = useQuery({
     queryKey: ["qrCode", { amount }],
     queryFn: () => getQrCode({ amount }),
-    enabled: amount !== undefined && amount !== 0,
+    enabled: enabled && amount !== undefined && amount !== 0,
   });
 
-  const qrCode: string = data?.data?.data;
+  // Backend returns base64 string in data, but keep compatibility if it ever returns an object.
+  const qrCode: string = data?.data?.data?.qrCode || data?.data?.data;
 
   return { qrCode, isPending, isError };
+};
+
+export const useDecodeQrCode = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  return useMutation({
+    mutationFn: decodeQrCodeRequest,
+    onError,
+    onSuccess,
+  });
+};
+
+export const useBvnVerificationWithSelfie = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: bvnVerificationWithSelfieRequest,
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      onSuccess(data);
+    },
+  });
+};
+
+export const useCreateAccount = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createAccountRequest,
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      onSuccess(data);
+    },
+  });
+};
+
+export const useGetWalletAccounts = () => {
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["walletAccounts"],
+    queryFn: getWalletAccountsRequest,
+  });
+
+  const accounts: WalletAccount[] = data?.data?.data;
+
+  return { accounts, isPending, isError };
+};
+
+export const useCreateMultiCurrencyAccount = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createMultiCurrencyAccountRequest,
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["walletAccounts"] });
+      onSuccess(data);
+    },
+  });
+};
+
+export const useCreateVirtualCard = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createVirtualCardRequest,
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["walletAccounts"] });
+      onSuccess(data);
+    },
+  });
+};
+
+export const useGetVirtualCardDetails = ({
+  cardId,
+  provider,
+  enabled,
+}: {
+  cardId?: string;
+  provider?: string;
+  enabled: boolean;
+}) => {
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["virtualCard", { cardId, provider }],
+    queryFn: () => getVirtualCardDetailsRequest({ cardId: cardId as string, provider }),
+    enabled: enabled && !!cardId,
+  });
+
+  const card: VirtualCard | undefined = data?.data?.data;
+
+  return { card, isPending, isError };
+};
+
+export const useFreezeVirtualCard = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: freezeVirtualCardRequest,
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["virtualCard"] });
+      onSuccess(data);
+    },
+  });
+};
+
+export const useUnfreezeVirtualCard = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: unfreezeVirtualCardRequest,
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["virtualCard"] });
+      onSuccess(data);
+    },
+  });
 };

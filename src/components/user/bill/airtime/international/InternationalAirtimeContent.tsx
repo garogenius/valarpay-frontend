@@ -7,13 +7,13 @@ import { useState } from "react";
 import InternationalAirtimeStageOne from "./StageOne";
 import InternationalAirtimeStageTwo from "../../StageTwo";
 import InternationalAirtimeStageThree from "../../StageThree";
-import { usePayForAirtime } from "@/api/airtime/airtime.queries";
+import { usePayForInternationalAirtime } from "@/api/airtime/airtime.queries";
 import ErrorToast from "@/components/toast/ErrorToast";
 import AirtimeNav from "../AirtimeNav";
 import { IoChevronBack } from "react-icons/io5";
 import { BILL_TYPE } from "@/constants/types";
 
-const InternationalAirtimeContent = () => {
+const InternationalAirtimeContent: React.FC<{ onSelectPath?: (path: string) => void }> = ({ onSelectPath }) => {
   const [stage, setStage] = useState<"one" | "two" | "three">("one");
   const [phone, setPhone] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
@@ -43,13 +43,13 @@ const InternationalAirtimeContent = () => {
     mutate: PayForAirtime,
     isPending: airtimePending,
     isError: airtimeError,
-  } = usePayForAirtime(onPayAirtimeError, onPayAirtimeSuccess);
+  } = usePayForInternationalAirtime(onPayAirtimeError, onPayAirtimeSuccess);
 
   const airtimeLoading = airtimePending && !airtimeError;
 
   return (
     <div className="flex flex-col gap-8">
-      {stage === "one" && <AirtimeNav />}
+      {stage === "one" && <AirtimeNav onSelectPath={onSelectPath} />}
       {stage === "two" && (
         <div
           onClick={() => {

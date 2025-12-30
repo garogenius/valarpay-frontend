@@ -18,7 +18,7 @@ const navItems = [
   },
 ];
 
-const AirtimeNav = () => {
+const AirtimeNav: React.FC<{ onSelectPath?: (path: string) => void }> = ({ onSelectPath }) => {
   const navigate = useNavigate();
   const pathname = usePathname();
   return (
@@ -27,6 +27,7 @@ const AirtimeNav = () => {
         <div
           key={index}
           onClick={() => {
+            if (onSelectPath) return onSelectPath(item.path);
             navigate(item.path);
           }}
           className={classNames({
