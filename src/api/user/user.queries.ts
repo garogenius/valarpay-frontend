@@ -14,6 +14,13 @@ import {
   updateUserRequest,
   validatePhoneNumberRequest,
   verifyPhoneNumberRequest,
+  verifyWalletPinRequest,
+  uploadDocumentRequest,
+  biometricChallengeRequest,
+  biometricEnrollRequest,
+  biometricLoginRequest,
+  biometricDisableRequest,
+  biometricStatusRequest,
 } from "./user.apis";
 import {
   BENEFICIARY_TYPE,
@@ -192,4 +199,88 @@ export const useVerifyPhoneNumber = (
     onError,
     onSuccess,
   });
+};
+
+export const useVerifyWalletPin = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  return useMutation({
+    mutationFn: verifyWalletPinRequest,
+    onError,
+    onSuccess,
+  });
+};
+
+export const useUploadDocument = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: uploadDocumentRequest,
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      onSuccess(data);
+    },
+  });
+};
+
+export const useBiometricChallenge = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  return useMutation({
+    mutationFn: biometricChallengeRequest,
+    onError,
+    onSuccess,
+  });
+};
+
+export const useBiometricEnroll = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  return useMutation({
+    mutationFn: biometricEnrollRequest,
+    onError,
+    onSuccess,
+  });
+};
+
+export const useBiometricLogin = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  return useMutation({
+    mutationFn: biometricLoginRequest,
+    onError,
+    onSuccess,
+  });
+};
+
+export const useBiometricDisable = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  return useMutation({
+    mutationFn: biometricDisableRequest,
+    onError,
+    onSuccess,
+  });
+};
+
+export const useBiometricStatus = (deviceId: string) => {
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["biometric-status", deviceId],
+    queryFn: () => biometricStatusRequest(deviceId),
+    enabled: !!deviceId,
+  });
+
+  return { 
+    status: data?.data?.data, 
+    isPending, 
+    isError 
+  };
 };

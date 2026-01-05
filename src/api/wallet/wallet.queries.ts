@@ -201,17 +201,17 @@ export const useGetQrCode = ({
   amount,
   enabled = true,
 }: {
-  amount: number;
+  amount?: number;
   enabled?: boolean;
 }) => {
   const { data, isPending, isError } = useQuery({
     queryKey: ["qrCode", { amount }],
-    queryFn: () => getQrCode({ amount }),
-    enabled: enabled && amount !== undefined && amount !== 0,
+    queryFn: () => getQrCode({ amount: amount || 0 }),
+    enabled: enabled,
   });
 
-  // Backend returns base64 string in data, but keep compatibility if it ever returns an object.
-  const qrCode: string = data?.data?.data?.qrCode || data?.data?.data;
+  // Backend returns: { message: "...", data: { qrCode: "...", accountNumber: "...", accountName: "...", amount: ..., currency: "..." } }
+  const qrCode: string = data?.data?.data?.qrCode || data?.data?.qrCode || "";
 
   return { qrCode, isPending, isError };
 };

@@ -26,7 +26,7 @@ const InvestmentDetailsContent = ({ id }: { id: string }) => {
   const httpStatus = (error as any)?.response?.status;
 
   const derived = useMemo(() => {
-    const amount = Number(investment?.amount || 0);
+    const amount = Number(investment?.investmentAmount || investment?.amount || 0);
     const expectedReturn = typeof (investment as any)?.expectedReturn === "number" ? (investment as any).expectedReturn : undefined;
     const earned =
       typeof investment?.earnedAmount === "number"
@@ -131,7 +131,7 @@ const InvestmentDetailsContent = ({ id }: { id: string }) => {
           </div>
           <div className="bg-white/5 border border-white/10 rounded-xl p-4">
             <p className="text-white/60 text-xs">ROI</p>
-            <p className="text-white text-sm font-medium mt-1">{typeof investment.roiRate === "number" ? `${investment.roiRate}%` : "-"}</p>
+            <p className="text-white text-sm font-medium mt-1">{typeof investment.roiRate === "number" ? `${(investment.roiRate * 100).toFixed(1)}%` : "-"}</p>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-xl p-4">
             <p className="text-white/60 text-xs">Tenure</p>
@@ -139,17 +139,51 @@ const InvestmentDetailsContent = ({ id }: { id: string }) => {
           </div>
         </div>
 
-        {(investment.walletTransactionId || investment.reference) ? (
+        {/* Transaction Details */}
+        {(investment.transaction || investment.walletTransactionId || investment.reference || investment.transactionId) ? (
           <>
             <div className="my-5 h-px bg-white/10" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <p className="text-white/60 text-xs">Wallet Transaction</p>
-                <p className="text-white text-sm font-medium mt-1">{investment.walletTransactionId || "-"}</p>
-              </div>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <p className="text-white/60 text-xs">Reference</p>
-                <p className="text-white text-sm font-medium mt-1">{investment.reference || "-"}</p>
+            <div>
+              <p className="text-white font-semibold mb-3">Transaction Details</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {investment.transaction && (
+                  <>
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                      <p className="text-white/60 text-xs">Transaction ID</p>
+                      <p className="text-white text-sm font-medium mt-1">{investment.transaction.id || "-"}</p>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                      <p className="text-white/60 text-xs">Transaction Status</p>
+                      <p className="text-white text-sm font-medium mt-1">{investment.transaction.status || "-"}</p>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                      <p className="text-white/60 text-xs">Transaction Type</p>
+                      <p className="text-white text-sm font-medium mt-1">{investment.transaction.type || "-"}</p>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                      <p className="text-white/60 text-xs">Transaction Date</p>
+                      <p className="text-white text-sm font-medium mt-1">{safeDate(investment.transaction.createdAt)}</p>
+                    </div>
+                  </>
+                )}
+                {investment.walletTransactionId && (
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <p className="text-white/60 text-xs">Wallet Transaction ID</p>
+                    <p className="text-white text-sm font-medium mt-1">{investment.walletTransactionId}</p>
+                  </div>
+                )}
+                {investment.transactionId && (
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <p className="text-white/60 text-xs">Transaction ID</p>
+                    <p className="text-white text-sm font-medium mt-1">{investment.transactionId}</p>
+                  </div>
+                )}
+                {investment.reference && (
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <p className="text-white/60 text-xs">Reference</p>
+                    <p className="text-white text-sm font-medium mt-1">{investment.reference}</p>
+                  </div>
+                )}
               </div>
             </div>
           </>

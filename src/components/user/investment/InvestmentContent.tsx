@@ -3,7 +3,8 @@
 import React, { useMemo, useState } from "react";
 import { FiPieChart, FiTrendingUp, FiPlusCircle } from "react-icons/fi";
 import InvestmentStatCard from "@/components/user/dashboard/cards/InvestmentStatCard";
-import StartInvestmentModal from "@/components/modals/StartInvestmentModal";
+import StartInvestmentModal from "@/components/modals/investment/StartInvestmentModal";
+import InvestmentModal from "@/components/modals/investment/InvestmentModal";
 import CustomButton from "@/components/shared/Button";
 import InvestmentCard, { Investment } from "./InvestmentCard";
 import { formatCurrency } from "@/utils/utilityFunctions";
@@ -12,10 +13,13 @@ import { useGetInvestments } from "@/api/investment/investment.queries";
 import { format } from "date-fns";
 import type { InvestmentRecord, InvestmentStatus } from "@/api/investment/investment.types";
 import InvestmentProductInfoCard from "./InvestmentProductInfoCard";
+import { useQueryClient } from "@tanstack/react-query";
 
 const InvestmentContent = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [startOpen, setStartOpen] = useState(false);
+  const [investmentModalOpen, setInvestmentModalOpen] = useState(false);
   const [tab, setTab] = useState<"active" | "completed">("active");
 
   const [pageNumber] = useState(1);
@@ -26,6 +30,10 @@ const InvestmentContent = () => {
     limit: pageSize,
     sort: "newest",
   });
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["investments"] });
+  };
 
   const records: InvestmentRecord[] = investmentsData?.investments || (Array.isArray((investmentsData as any)) ? (investmentsData as any) : []);
 
@@ -45,7 +53,7 @@ const InvestmentContent = () => {
     return records
       .map((r) => {
         const uiStatus = toUiStatus(r.status);
-        const amount = Number(r.amount || 0);
+        const amount = Number(r.investmentAmount || r.amount || 0);
         const earned =
           typeof r.earnedAmount === "number"
             ? r.earnedAmount
@@ -53,7 +61,7 @@ const InvestmentContent = () => {
               ? Math.max(0, r.expectedReturn - amount)
               : 0;
         const roi = r.roiRate ?? (r as any).roi ?? (r as any).interestRate;
-        const interestRate = typeof roi === "number" ? `${roi}%` : roi ? String(roi) : "-";
+        const interestRate = typeof roi === "number" ? `${(roi * 100).toFixed(1)}%` : roi ? String(roi) : "-";
 
         return {
           id: r.id,
@@ -79,24 +87,26 @@ const InvestmentContent = () => {
   }, [uiInvestments]);
 
   return (
-    <div className="flex flex-col gap-6 pb-10">
-      <div className="w-full flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-white text-xl sm:text-2xl font-semibold">Investment</h1>
-          <p className="text-gray-400 text-xs sm:text-sm">Manage your investment portfolio</p>
+    <div className="flex flex-col gap-6 pb-10 overflow-x-hidden">
+      <div className="w-full flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-3 sm:justify-between">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-white text-base sm:text-xl lg:text-2xl font-semibold truncate">Investment</h1>
+          <p className="text-gray-400 text-[10px] sm:text-xs lg:text-sm mt-0.5 sm:mt-1">Manage your investment portfolio</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
           <CustomButton
             onClick={() => navigate("/user/investment/policy")}
-            className="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap"
+            className="flex-1 sm:flex-none bg-white/5 hover:bg-white/10 border border-white/10 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs lg:text-sm font-semibold whitespace-nowrap"
           >
-            Investment Policy
+            <span className="hidden xs:inline">Investment Policy</span>
+            <span className="xs:hidden">Policy</span>
           </CustomButton>
           <CustomButton
             onClick={() => setStartOpen(true)}
-            className="bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap"
+            className="flex-1 sm:flex-none bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs lg:text-sm font-semibold whitespace-nowrap"
           >
-            Start Investment
+            <span className="hidden xs:inline">Start Investment</span>
+            <span className="xs:hidden">Start</span>
           </CustomButton>
         </div>
       </div>
@@ -191,6 +201,7 @@ const InvestmentContent = () => {
                   key={inv.id}
                   investment={inv}
                   onViewDetails={() => navigate(`/user/investment/${inv.id}`)}
+                  onRefresh={handleRefresh}
                 />
               ))}
             </div>
@@ -198,7 +209,23 @@ const InvestmentContent = () => {
         </div>
       </div>
 
-      <StartInvestmentModal isOpen={startOpen} onClose={() => setStartOpen(false)} />
+      <StartInvestmentModal 
+        isOpen={startOpen} 
+        onClose={() => {
+          setStartOpen(false);
+        }}
+        onSelectType={() => {
+          setStartOpen(false);
+          setInvestmentModalOpen(true);
+        }}
+      />
+      <InvestmentModal
+        isOpen={investmentModalOpen}
+        onClose={() => {
+          setInvestmentModalOpen(false);
+          handleRefresh();
+        }}
+      />
     </div>
   );
 };

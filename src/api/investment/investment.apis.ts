@@ -1,5 +1,5 @@
 import { request } from "@/utils/axios-utils";
-import type { CreateInvestmentPayload, GetInvestmentsParams } from "./investment.types";
+import type { CreateInvestmentPayload, GetInvestmentsParams, PayoutInvestmentPayload } from "./investment.types";
 
 export const getInvestmentProductRequest = async () => {
   return request({
@@ -10,7 +10,7 @@ export const getInvestmentProductRequest = async () => {
 
 export const createInvestmentRequest = async (data: CreateInvestmentPayload) => {
   return request({
-    url: "/investment",
+    url: "/investments",
     method: "post",
     data,
   });
@@ -24,15 +24,24 @@ export const getInvestmentsRequest = async ({ page, limit, status, sort }: GetIn
   if (sort) query.set("sort", sort);
 
   return request({
-    url: `/investment?${query.toString()}`,
+    url: `/investments?${query.toString()}`,
     method: "get",
   });
 };
 
 export const getInvestmentDetailsRequest = async ({ id }: { id: string }) => {
   return request({
-    url: `/investment/${id}`,
+    url: `/investments/${id}`,
     method: "get",
+  });
+};
+
+export const payoutInvestmentRequest = async (payload: PayoutInvestmentPayload) => {
+  const { investmentId, formdata, walletPin } = payload;
+  return request({
+    url: `/investments/${investmentId}/payout`,
+    method: "post",
+    data: formdata || { walletPin },
   });
 };
 

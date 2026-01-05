@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { IoWalletOutline } from "react-icons/io5";
 import { RiBankLine } from "react-icons/ri";
 import { useForm } from "react-hook-form";
@@ -42,6 +42,7 @@ import { FiCheckCircle } from "react-icons/fi";
 import { FaFingerprint } from "react-icons/fa";
 import ConfirmTransactionModal from "@/components/shared/ConfirmTransactionModal";
 import TransactionResultModal from "@/components/shared/TransactionResultModal";
+import GlobalPaymentResultModal, { PaymentResultData } from "@/components/shared/GlobalPaymentResultModal";
 
 const transferMethods = [
   {
@@ -107,6 +108,7 @@ const TransferProcess = ({
   quickAmounts,
   availableBalance,
   compactBeneficiaryRow,
+  onRef,
 }: {
   fixedType?: "valarpay" | "bank";
   hideMethodSelector?: boolean;
@@ -115,6 +117,7 @@ const TransferProcess = ({
   quickAmounts?: number[];
   availableBalance?: number;
   compactBeneficiaryRow?: boolean;
+  onRef?: (ref: { fillBeneficiary: (beneficiary: BeneficiaryProps) => void }) => void;
 }) => {
   const theme = useTheme();
   const [selectedType, setSelectedType] = useState<string>(fixedType || "valarpay");
@@ -127,6 +130,7 @@ const TransferProcess = ({
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [paymentResultData, setPaymentResultData] = useState<PaymentResultData | null>(null);
 
   const { banks } = useGetAllBanks();
 
@@ -238,6 +242,7 @@ const TransferProcess = ({
 
   const onError = async (error: any) => {
     const errorMessage = error?.response?.data?.message;
+    const errorCode = error?.response?.data?.code || error?.response?.data?.errorCode;
     const descriptions = Array.isArray(errorMessage)
       ? errorMessage
       : [errorMessage];
@@ -247,15 +252,40 @@ const TransferProcess = ({
       descriptions,
     });
     setShowConfirmModal(false);
+    
+    // Set payment result data for the global modal
+    setPaymentResultData({
+      status: "failed",
+      amount: watchedAmount,
+      currency: "NGN",
+      accountNumber: watchedAccountNumber,
+      accountName: bankData?.accountName,
+      bankName: selectedType === "bank" ? bankName : undefined,
+      narration: watchedDescription,
+      errorMessage: Array.isArray(errorMessage) ? errorMessage[0] : errorMessage,
+      errorCode: errorCode,
+    });
     setShowErrorModal(true);
   };
 
-  const onSuccess = () => {
+  const onSuccess = (responseData?: any) => {
     SuccessToast({
       title: "Transfer successful",
       description: "Your transfer was successful",
     });
     setShowConfirmModal(false);
+    
+    // Set payment result data for the global modal
+    setPaymentResultData({
+      status: "success",
+      amount: watchedAmount,
+      currency: "NGN",
+      accountNumber: watchedAccountNumber,
+      accountName: bankData?.accountName,
+      bankName: selectedType === "bank" ? bankName : undefined,
+      narration: watchedDescription,
+      transactionId: responseData?.data?.transactionId || responseData?.data?.id,
+    });
     setShowSuccessModal(true);
   };
 
@@ -293,17 +323,58 @@ const TransferProcess = ({
     setBankState(false);
   });
 
-  const handleBeneficiarySelect = (beneficiary: BeneficiaryProps) => {
+  const handleBeneficiarySelect = useCallback((beneficiary: BeneficiaryProps) => {
     console.log(beneficiary);
     setSelectedBeneficiary(beneficiary.id);
+    clearErrors();
 
-    const bank = banks?.find((bank) => bank.bankCode === beneficiary.bankCode);
-    if (beneficiary?.accountNumber && bank) {
+    if (beneficiary?.accountNumber) {
       setValue("accountNumber", beneficiary.accountNumber);
-      setValue("bankCode", bank.bankCode);
-      setSelectedBank(bank);
+      
+      // For bank transfers, we need bank code
+      if (selectedType === "bank" && beneficiary.bankCode) {
+        const bank = banks?.find((bank) => bank.bankCode === beneficiary.bankCode);
+        if (bank) {
+          setValue("bankCode", bank.bankCode);
+          setSelectedBank(bank);
+          setBankName(bank.name);
+          
+          // Trigger account verification
+          if (beneficiary.accountNumber.length === 10) {
+            verifyAccount({
+              accountNumber: beneficiary.accountNumber,
+              bankCode: bank.bankCode,
+            });
+          }
+        }
+      } else if (selectedType === "valarpay") {
+        // For ValarPay transfers, bank code might be optional
+        if (beneficiary.bankCode) {
+          setValue("bankCode", beneficiary.bankCode);
+        }
+        
+        // Trigger account verification
+        if (beneficiary.accountNumber.length === 10) {
+          verifyAccount({ accountNumber: beneficiary.accountNumber });
+        }
+      }
     }
-  };
+  }, [banks, selectedType, setValue, verifyAccount, clearErrors]);
+
+  // Store onRef callback in a ref to avoid infinite re-renders
+  const onRefCallbackRef = useRef(onRef);
+  useEffect(() => {
+    onRefCallbackRef.current = onRef;
+  }, [onRef]);
+
+  // Expose fillBeneficiary function to parent component
+  useEffect(() => {
+    if (onRefCallbackRef.current) {
+      onRefCallbackRef.current({
+        fillBeneficiary: handleBeneficiarySelect,
+      });
+    }
+  }, [handleBeneficiarySelect]);
 
   const onBackPressClick = () => {
     setValue("accountNumber", "");
@@ -385,7 +456,7 @@ const TransferProcess = ({
         </div>
       )}
       <div className={`w-full ${(!hideMethodSelector && !fixedType) ? "xl:w-[60%]" : "xl:w-full"} flex`}>
-        <div className="w-full flex flex-col gap-6 items-start bg-transparent rounded-none p-0">
+        <div className="w-full flex flex-col gap-6 items-start bg-transparent rounded-none p-0 sm:p-0 md:p-0 lg:p-0 px-4 sm:px-0 md:px-0 lg:px-0">
 
             {/* Recent Beneficiaries removed as requested */}
 
@@ -484,7 +555,7 @@ const TransferProcess = ({
                   />
 
                   {verifyLoading && watchedAccountNumber.length === 10 && (
-                    <SpinnerLoader width={20} height={20} color="#D4B139" />
+                    <SpinnerLoader width={20} height={20} color="#f76301" />
                   )}
 
                   {watchedAccountNumber && !verifyLoading && (
@@ -699,181 +770,28 @@ const TransferProcess = ({
         </div>
       </div>
 
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-md mx-4 dark:max-xs:px-4 xs:px-6 md:px-8 lg:px-10 2xl:px-12 py-8 flex flex-col gap-8 items-center bg-bg-400 dark:bg-black dark:max-xs:bg-bg-1100 rounded-xl">
-            <div className="pb-4 w-full border-b border-border-100 flex flex-col items-center justify-center gap-2.5 text-center text-white">
-              <div
-                className="flex items-center justify-center w-12 h-12 bg-bg-2600 rounded-full"
-                style={{
-                  animation: "shadowBeat 1.5s ease-in-out infinite",
-                  boxShadow: "0 0 0 0 rgba(34, 197, 94, 0.7)",
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-6 h-6 text-white"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-                <style>
-                  {`
-                    @keyframes shadowBeat {
-                      0%, 100% {
-                        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
-                      }
-                      50% {
-                        box-shadow: 0 0 20px 10px rgba(34, 197, 94, 0.4);
-                      }
-                    }
-                  `}
-                </style>
-              </div>
-              <div className="flex flex-col gap-1">
-                <h2 className="text-lg font-semibold text-text-1600">Payment successful!</h2>
-                <p className="text-sm text-text-800">
-                  {new Date().toLocaleString("en-US", {
-                    month: "long",
-                    day: "2-digit",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
-                </p>
-              </div>
-            </div>
-
-            <h2 className="text-2xl sm:text-3xl font-medium text-text-200 dark:text-text-400 text-center">
-              ₦ {watchedAmount?.toLocaleString()}
-            </h2>
-
-            <div className="w-full flex flex-col gap-2 text-sm sm:text-base">
-              <div className="w-full flex justify-between gap-2">
-                <p className="text-sm text-text-200 dark:text-text-400">Transaction Type</p>
-                <p className="text-text-200 dark:text-text-400 font-semibold text-right">
-                  {selectedType === "bank" ? "Bank Transfer" : "Wallet Transfer"}
-                </p>
-              </div>
-
-              {selectedType === "bank" && bankName && (
-                <div className="w-full flex justify-between gap-2">
-                  <p className="text-sm text-text-200 dark:text-text-400">Bank Name</p>
-                  <p className="text-text-200 dark:text-text-400 font-semibold text-right">{bankName}</p>
-                </div>
-              )}
-
-              <div className="w-full flex justify-between gap-2">
-                <p className="text-sm text-text-200 dark:text-text-400">Account number</p>
-                <p className="text-text-200 dark:text-text-400 font-semibold text-right">{bankData?.accountNumber}</p>
-              </div>
-
-              <div className="w-full flex justify-between gap-2">
-                <p className="text-sm text-text-200 dark:text-text-400">Account name</p>
-                <p className="text-text-200 dark:text-text-400 font-semibold text-right">{bankData?.accountName}</p>
-              </div>
-
-              <div className="w-full flex justify-between gap-2">
-                <p className="text-sm text-text-200 dark:text-text-400">Amount</p>
-                <p className="text-text-200 dark:text-text-400 font-semibold text-right">₦ {watchedAmount?.toLocaleString()}</p>
-              </div>
-
-              {selectedType === "bank" && (
-                <div className="w-full flex justify-between gap-2">
-                  <p className="text-sm text-text-200 dark:text-text-400">Transfer fees</p>
-                  <p className="text-text-200 dark:text-text-400 font-semibold text-right">₦ {fee?.toLocaleString()}</p>
-                </div>
-              )}
-
-              {watchedDescription && (
-                <div className="w-full flex justify-between gap-2">
-                  <p className="text-sm text-text-200 dark:text-text-400">Narration</p>
-                  <p className="text-text-200 dark:text-text-400 font-semibold text-right">{watchedDescription}</p>
-                </div>
-              )}
-
-              <div className="w-full flex justify-between gap-2">
-                <p className="text-sm text-text-200 dark:text-text-400">Debit from</p>
-                <p className="text-text-200 dark:text-text-400 font-semibold text-right">NGN Account</p>
-              </div>
-            </div>
-
-            <CustomButton
-              type="button"
-              className="w-full border-2 border-primary text-white text-base 2xs:text-lg max-2xs:px-6 py-3.5"
-              onClick={() => {
-                setShowSuccessModal(false);
-                setBankData(null);
-                reset();
-              }}
-            >
-              Continue
-            </CustomButton>
-          </div>
-        </div>
-      )}
-
-      {/* Error Modal */}
-      {showErrorModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-md mx-4 dark:max-xs:px-4 xs:px-6 md:px-8 lg:px-10 2xl:px-12 py-8 flex flex-col gap-8 items-center bg-bg-400 dark:bg-black dark:max-xs:bg-bg-1100 rounded-xl">
-            <div className="pb-4 w-full border-b border-border-100 flex flex-col items-center justify-center gap-2.5 text-center text-white">
-              <div className="flex items-center justify-center w-12 h-12 bg-red-700/30 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="15" y1="9" x2="9" y2="15" />
-                  <line x1="9" y1="9" x2="15" y2="15" />
-                </svg>
-              </div>
-              <div className="flex flex-col gap-1">
-                <h2 className="text-lg font-semibold text-text-1600">Payment failed</h2>
-                <p className="text-sm text-text-800">Please try again later</p>
-              </div>
-            </div>
-
-            <div className="w-full flex flex-col gap-2 text-sm sm:text-base">
-              <div className="w-full flex justify-between gap-2">
-                <p className="text-sm text-text-200 dark:text-text-400">Account number</p>
-                <p className="text-text-200 dark:text-text-400 font-semibold text-right">{bankData?.accountNumber}</p>
-              </div>
-              <div className="w-full flex justify-between gap-2">
-                <p className="text-sm text-text-200 dark:text-text-400">Account name</p>
-                <p className="text-text-200 dark:text-text-400 font-semibold text-right">{bankData?.accountName}</p>
-              </div>
-              <div className="w-full flex justify-between gap-2">
-                <p className="text-sm text-text-200 dark:text-text-400">Amount</p>
-                <p className="text-text-200 dark:text-text-400 font-semibold text-right">₦ {watchedAmount?.toLocaleString()}</p>
-              </div>
-            </div>
-
-            <div className="w-full flex items-center justify-between gap-4">
-              <CustomButton
-                type="button"
-                className="w-1/2 border-2 border-border-600 text-white text-base 2xs:text-lg max-2xs:px-6 py-3.5 bg-transparent"
-                onClick={() => setShowErrorModal(false)}
-              >
-                Close
-              </CustomButton>
-              <CustomButton
-                type="button"
-                className="w-1/2 border-2 border-primary text-white text-base 2xs:text-lg max-2xs:px-6 py-3.5"
-                onClick={() => {
+      {/* Global Payment Result Modal */}
+      {paymentResultData && (
+        <GlobalPaymentResultModal
+          isOpen={showErrorModal || showSuccessModal}
+          onClose={() => {
+            setShowErrorModal(false);
+            setShowSuccessModal(false);
+            setPaymentResultData(null);
+            setBankData(null);
+            reset();
+          }}
+          onRetry={
+            showErrorModal
+              ? () => {
                   setShowErrorModal(false);
+                  setPaymentResultData(null);
                   setShowConfirmModal(true);
-                }}
-              >
-                Retry
-              </CustomButton>
-            </div>
-          </div>
-        </div>
+                }
+              : undefined
+          }
+          data={paymentResultData}
+        />
       )}
     </div>
     </>

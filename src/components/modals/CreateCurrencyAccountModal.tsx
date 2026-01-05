@@ -13,12 +13,14 @@ import type { WALLET_CURRENCY, WALLET_PROVIDER } from "@/api/wallet/wallet.types
 interface CreateCurrencyAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
   defaultCurrency?: Exclude<WALLET_CURRENCY, "NGN">;
 }
 
 const CreateCurrencyAccountModal: React.FC<CreateCurrencyAccountModalProps> = ({
   isOpen,
   onClose,
+  onSuccess,
   defaultCurrency = "USD",
 }) => {
   const [currency, setCurrency] = useState<Exclude<WALLET_CURRENCY, "NGN">>(
@@ -30,8 +32,8 @@ const CreateCurrencyAccountModal: React.FC<CreateCurrencyAccountModalProps> = ({
     () =>
       [
         { code: "USD" as const, name: "US Dollar", enabled: true, badge: "Available" },
-        { code: "EUR" as const, name: "Euro", enabled: false, badge: "Coming soon" },
-        { code: "GBP" as const, name: "British Pound", enabled: false, badge: "Coming soon" },
+        { code: "EUR" as const, name: "Euro", enabled: true, badge: "Available" },
+        { code: "GBP" as const, name: "British Pound", enabled: true, badge: "Available" },
       ] as const,
     []
   );
@@ -44,15 +46,16 @@ const CreateCurrencyAccountModal: React.FC<CreateCurrencyAccountModalProps> = ({
     });
   };
 
-  const onSuccess = (data: any) => {
+  const onSuccessCallback = (data: any) => {
     SuccessToast({
       title: "Account created",
       description: data?.data?.message || "Your currency account has been created successfully",
     });
     onClose();
+    onSuccess?.();
   };
 
-  const { mutate: createAccount, isPending } = useCreateMultiCurrencyAccount(onError, onSuccess);
+  const { mutate: createAccount, isPending } = useCreateMultiCurrencyAccount(onError, onSuccessCallback);
 
   if (!isOpen) return null;
 
@@ -138,6 +141,8 @@ const CreateCurrencyAccountModal: React.FC<CreateCurrencyAccountModalProps> = ({
 };
 
 export default CreateCurrencyAccountModal;
+
+
 
 
 

@@ -54,7 +54,7 @@ const ErrorToast = ({
         </div>
       </div>
     ),
-    { id: "error-toast", duration: 100 }
+    { id: "error-toast", duration: 15000 }
   );
 
   return null;

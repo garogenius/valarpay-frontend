@@ -1,9 +1,9 @@
 import { request } from "@/utils/axios-utils";
 import type {
-  ICloseSavingsPlan,
   ICreateSavingsPlan,
   IFundSavingsPlan,
   IGetSavingsPlanDetails,
+  IWithdrawSavingsPlan,
 } from "./savings.types";
 
 export const getSavingsProductsRequest = async () => {
@@ -15,7 +15,7 @@ export const getSavingsProductsRequest = async () => {
 
 export const createSavingsPlanRequest = async (data: ICreateSavingsPlan) => {
   return request({
-    url: "/savings/plan",
+    url: "/savings/plans",
     method: "post",
     data,
   });
@@ -30,43 +30,27 @@ export const getSavingsPlansRequest = async () => {
 
 export const getSavingsPlanDetailsRequest = async (data: IGetSavingsPlanDetails) => {
   return request({
-    url: "/savings/plan/details",
-    method: "post",
-    data,
+    url: `/savings/plans/${data.planId}`,
+    method: "get",
   });
 };
 
 export const fundSavingsPlanRequest = async (data: IFundSavingsPlan) => {
   return request({
-    url: "/savings/plan/fund",
+    url: "/savings/plans/fund",
     method: "post",
-    data,
+    data: {
+      planId: data.planId,
+      amount: data.amount,
+      currency: data.currency,
+    },
   });
 };
 
-export const closeSavingsPlanAtMaturityRequest = async (data: ICloseSavingsPlan) => {
+export const withdrawSavingsPlanRequest = async (data: IWithdrawSavingsPlan) => {
   return request({
-    url: "/savings/plan/close/maturity",
+    url: `/savings/plans/${data.planId}/withdraw`,
     method: "post",
-    data,
+    data: data.walletPin ? { walletPin: data.walletPin } : {},
   });
 };
-
-export const closeSavingsPlanEarlyRequest = async (data: ICloseSavingsPlan) => {
-  return request({
-    url: "/savings/plan/close/early",
-    method: "post",
-    data,
-  });
-};
-
-
-
-
-
-
-
-
-
-
-

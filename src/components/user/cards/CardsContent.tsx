@@ -18,22 +18,23 @@ import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
 import ChangePinModal from "@/components/modals/ChangePinModal";
 import ResetPinModal from "@/components/modals/ResetPinModal";
-import SetSpendingLimitModal from "@/components/modals/SetSpendingLimitModal";
-import BlockCardModal from "@/components/modals/BlockCardModal";
+import SpendingLimitModal from "@/components/modals/cards/SpendingLimitModal";
+import BlockCardModal from "@/components/modals/cards/BlockCardModal";
+import CloseCardModal from "@/components/modals/cards/CloseCardModal";
+import FundCardModal from "@/components/modals/cards/FundCardModal";
+import WithdrawCardModal from "@/components/modals/cards/WithdrawCardModal";
+import CardTransactionsModal from "@/components/modals/cards/CardTransactionsModal";
 import ShowCardDetailsModal from "@/components/modals/cards/ShowCardDetailsModal";
 import ConfirmActionModal from "@/components/modals/cards/ConfirmActionModal";
 import {
-  useCreateVirtualCard,
-  useFreezeVirtualCard,
-  useGetVirtualCardDetails,
-  useGetWalletAccounts,
-  useUnfreezeVirtualCard,
-} from "@/api/wallet/wallet.queries";
-import type { VirtualCard, WalletAccount, WALLET_PROVIDER } from "@/api/wallet/wallet.types";
+  useCreateCard,
+  useGetCards,
+  useFreezeCard,
+} from "@/api/currency/cards.queries";
+import { useGetCurrencyAccounts } from "@/api/currency/currency.queries";
+import type { IVirtualCard, CardCurrency } from "@/api/currency/cards.types";
 
 type TabKey = "physical" | "virtual";
-
-const PROVIDER: WALLET_PROVIDER = "graph";
 
 const CardsContent: React.FC = () => {
   const { user } = useUserStore();
@@ -51,30 +52,34 @@ const CardsContent: React.FC = () => {
   const [openTransactions, setOpenTransactions] = React.useState(false);
   const [openCreateCard, setOpenCreateCard] = React.useState(false);
 
-  const [selectedCard, setSelectedCard] = React.useState<VirtualCard | null>(null);
+  const [selectedCard, setSelectedCard] = React.useState<IVirtualCard | null>(null);
   const [cardLabel, setCardLabel] = React.useState("");
+  const [selectedCurrency, setSelectedCurrency] = React.useState<CardCurrency>("USD");
 
-  const [storedCardId, setStoredCardId] = React.useState<string>("");
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    setStoredCardId(localStorage.getItem("usdVirtualCardId") || "");
-  }, []);
-
-  // Wallet accounts (for USD account existence)
-  const { accounts: walletAccounts, isPending: accountsLoading } = useGetWalletAccounts();
-  const usdWallet = React.useMemo(
-    () => (walletAccounts || []).find((a: WalletAccount) => (a.currency || "").toUpperCase() === "USD"),
-    [walletAccounts]
+  // Get currency accounts (USD, EUR, GBP)
+  const { accounts: currencyAccounts, isPending: accountsLoading } = useGetCurrencyAccounts();
+  const usdAccount = React.useMemo(
+    () => currencyAccounts?.find((a) => a.currency === "USD"),
+    [currencyAccounts]
   );
-  const hasUsdAccount = !!usdWallet?.id;
+  const eurAccount = React.useMemo(
+    () => currencyAccounts?.find((a) => a.currency === "EUR"),
+    [currencyAccounts]
+  );
+  const gbpAccount = React.useMemo(
+    () => currencyAccounts?.find((a) => a.currency === "GBP"),
+    [currencyAccounts]
+  );
 
-  // Virtual card details (we only have a details endpoint; no list endpoint yet)
-  const { card: virtualCard, isPending: cardLoading } = useGetVirtualCardDetails({
-    cardId: storedCardId || undefined,
-    provider: PROVIDER,
-    enabled: !!storedCardId,
-  });
-  const virtualCards = React.useMemo(() => (virtualCard ? [virtualCard] : []), [virtualCard]);
+  const hasAccountForCurrency = (currency: CardCurrency) => {
+    if (currency === "USD") return !!usdAccount?.id;
+    if (currency === "EUR") return !!eurAccount?.id;
+    if (currency === "GBP") return !!gbpAccount?.id;
+    return false;
+  };
+
+  // Get all cards
+  const { cards: virtualCards, isPending: cardLoading, refetch: refetchCards } = useGetCards();
 
   const cardholderName = (user?.fullname || "CARD HOLDER").toUpperCase();
 
@@ -87,22 +92,19 @@ const CardsContent: React.FC = () => {
   };
 
   const onCreateCardSuccess = (data: any) => {
+    const card = data?.data?.data || data?.data;
     SuccessToast({
       title: "Card Created Successfully!",
-      description: "Your virtual USD card has been created.",
+      description: `Your virtual ${selectedCurrency} card has been created.`,
     });
-
-    const cardId = data?.data?.data?.cardId;
-    if (cardId && typeof window !== "undefined") {
-      localStorage.setItem("usdVirtualCardId", cardId);
-      setStoredCardId(cardId);
-    }
 
     setOpenCreateCard(false);
     setCardLabel("");
+    setSelectedCurrency("USD");
+    refetchCards();
   };
 
-  const { mutate: createCard, isPending: creatingCard } = useCreateVirtualCard(
+  const { mutate: createCard, isPending: creatingCard } = useCreateCard(
     onCreateCardError,
     onCreateCardSuccess
   );
@@ -119,16 +121,16 @@ const CardsContent: React.FC = () => {
     const msg = data?.data?.message ?? "Card updated";
     SuccessToast({ title: "Success", description: msg });
     setOpenFreeze(false);
+    refetchCards();
   };
 
-  const { mutate: freezeCard, isPending: freezing } = useFreezeVirtualCard(onFreezeError, onFreezeSuccess);
-  const { mutate: unfreezeCard, isPending: unfreezing } = useUnfreezeVirtualCard(onFreezeError, onFreezeSuccess);
+  const { mutate: freezeCard, isPending: freezing } = useFreezeCard(onFreezeError, onFreezeSuccess);
 
   const handleCreateCard = () => {
-    if (!hasUsdAccount) {
+    if (!hasAccountForCurrency(selectedCurrency)) {
       ErrorToast({
-        title: "USD Account Required",
-        descriptions: ["You must have a USD account before creating a virtual card. Please create a USD account first."],
+        title: `${selectedCurrency} Account Required`,
+        descriptions: [`You must have a ${selectedCurrency} account before creating a virtual card. Please create a ${selectedCurrency} account first.`],
       });
       return;
     }
@@ -139,33 +141,22 @@ const CardsContent: React.FC = () => {
     }
 
     createCard({
-      walletId: usdWallet!.id,
-      currency: "USD",
-      cardholderName,
-      provider: PROVIDER,
+      currency: selectedCurrency,
+      label: cardLabel.trim(),
     });
   };
 
   const handleFreeze = () => {
-    if (!selectedCard?.cardId) return;
-    if ((selectedCard.status || "").toUpperCase() === "FROZEN") {
-      unfreezeCard({ cardId: selectedCard.cardId, provider: PROVIDER });
-    } else {
-      freezeCard({ cardId: selectedCard.cardId, provider: PROVIDER });
-    }
+    if (!selectedCard?.id) return;
+    const isFrozen = (selectedCard.status || "").toUpperCase() === "FROZEN";
+    freezeCard({ cardId: selectedCard.id, freeze: !isFrozen });
   };
 
-  const handleBlock = () => {
-    ErrorToast({ title: "Not available", descriptions: ["Block card is not available yet in this app version."] });
-    setOpenBlock(false);
+  const handleCardAction = () => {
+    refetchCards();
   };
 
-  const handleClose = () => {
-    ErrorToast({ title: "Not available", descriptions: ["Close card is not available yet in this app version."] });
-    setOpenClose(false);
-  };
-
-  const formatExpiry = (card: VirtualCard) => {
+  const formatExpiry = (card: IVirtualCard) => {
     if (card.expiryMonth && card.expiryYear) {
       const month = String(card.expiryMonth).padStart(2, "0");
       const year = String(card.expiryYear).slice(-2);
@@ -189,23 +180,23 @@ const CardsContent: React.FC = () => {
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-2">
           <p className="text-yellow-400 text-xs sm:text-sm font-medium mb-1">Important Notice</p>
           <p className="text-white/80 text-xs sm:text-sm">• NGN cards are not available</p>
-          <p className="text-white/80 text-xs sm:text-sm">• Only USD virtual cards are available for now</p>
-          <p className="text-white/80 text-xs sm:text-sm">• You must have a USD account before creating a virtual card</p>
+          <p className="text-white/80 text-xs sm:text-sm">• Virtual cards are available for USD, EUR, and GBP</p>
+          <p className="text-white/80 text-xs sm:text-sm">• You must have a currency account before creating a virtual card</p>
         </div>
-        {!hasUsdAccount ? (
+        {!usdAccount && !eurAccount && !gbpAccount ? (
           <div className="space-y-2">
-            <p className="text-white/60 text-sm">You need a USD account to create a virtual card.</p>
-            <p className="text-white/40 text-xs">Please create a USD account in the Accounts page first.</p>
+            <p className="text-white/60 text-sm">You need a currency account (USD, EUR, or GBP) to create a virtual card.</p>
+            <p className="text-white/40 text-xs">Please create a currency account in the Accounts page first.</p>
           </div>
         ) : (
           <p className="text-white text-sm sm:text-base mb-2">
-            You currently do not have any virtual USD card linked to this account.
+            You currently do not have any virtual cards.
           </p>
         )}
       </div>
       <CustomButton
         onClick={() => setOpenCreateCard(true)}
-        disabled={!hasUsdAccount}
+        disabled={!usdAccount && !eurAccount && !gbpAccount}
         className="bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Create Virtual Card
@@ -299,9 +290,14 @@ const CardsContent: React.FC = () => {
           const isFrozen = rawStatus === "FROZEN";
           const status: "active" | "frozen" | "blocked" =
             rawStatus === "BLOCKED" || rawStatus === "CLOSED" ? "blocked" : isFrozen ? "frozen" : "active";
+          
+          const currencyAccount = 
+            card.currency === "USD" ? usdAccount :
+            card.currency === "EUR" ? eurAccount :
+            card.currency === "GBP" ? gbpAccount : null;
 
           return (
-            <div key={card.cardId} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div key={card.id} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-4 items-center md:items-start">
                 <div className="flex justify-center w-full">
                   <CardPreview
@@ -320,7 +316,7 @@ const CardsContent: React.FC = () => {
                   <div>
                     <p className="text-white/60 text-xs">Balance</p>
                     <p className="text-white text-lg font-semibold">
-                      ${Number(usdWallet?.balance || 0).toLocaleString()}
+                      {card.currency} {Number(card.balance || 0).toLocaleString()}
                     </p>
                   </div>
                   <div className="text-right">
@@ -514,8 +510,7 @@ const CardsContent: React.FC = () => {
           setOpenDetails(false);
           setSelectedCard(null);
         }}
-        card={selectedCard || virtualCard || null}
-        cardholderName={cardholderName}
+        card={selectedCard}
       />
       <ChangePinModal
         isOpen={openChangePin}
@@ -529,16 +524,20 @@ const CardsContent: React.FC = () => {
           setOpenResetPin(false);
         }}
       />
-      <SetSpendingLimitModal
+      <SpendingLimitModal
         isOpen={openLimit}
         onClose={() => {
           setOpenLimit(false);
+          setSelectedCard(null);
         }}
+        card={selectedCard}
+        onSuccess={handleCardAction}
       />
       <ConfirmActionModal
         isOpen={openFreeze}
         onClose={() => {
           setOpenFreeze(false);
+          setSelectedCard(null);
         }}
         onConfirm={handleFreeze}
         title={(selectedCard?.status || "").toUpperCase() === "FROZEN" ? "Un-freeze Card?" : "Freeze Card?"}
@@ -548,7 +547,7 @@ const CardsContent: React.FC = () => {
             : "This will temporarily disable card transactions until un-frozen."
         }
         confirmText={(selectedCard?.status || "").toUpperCase() === "FROZEN" ? "Un-freeze" : "Freeze"}
-        isLoading={freezing || unfreezing}
+        isLoading={freezing}
       />
       <BlockCardModal
         isOpen={openBlock}
@@ -556,62 +555,43 @@ const CardsContent: React.FC = () => {
           setOpenBlock(false);
           setSelectedCard(null);
         }}
+        card={selectedCard}
+        onSuccess={handleCardAction}
       />
-      <ConfirmActionModal
+      <CloseCardModal
         isOpen={openClose}
         onClose={() => {
           setOpenClose(false);
           setSelectedCard(null);
         }}
-        onConfirm={handleClose}
-        title="Close Card?"
-        description="This action is permanent. Your card will be closed and you'll need to create a new one."
-        confirmText="Close"
-        confirmTone="danger"
+        card={selectedCard}
+        onSuccess={handleCardAction}
       />
-
-      {/* “Coming soon” actions (fund/withdraw/transactions) */}
-      <ConfirmActionModal
+      <FundCardModal
         isOpen={openFund}
         onClose={() => {
           setOpenFund(false);
           setSelectedCard(null);
         }}
-        onConfirm={() => {
-          setOpenFund(false);
-          ErrorToast({ title: "Coming Soon", descriptions: ["Fund card will be available soon."] });
-        }}
-        title="Fund Card"
-        description="This feature is coming soon."
-        confirmText="Okay"
+        card={selectedCard}
+        onSuccess={handleCardAction}
       />
-      <ConfirmActionModal
+      <WithdrawCardModal
         isOpen={openWithdraw}
         onClose={() => {
           setOpenWithdraw(false);
           setSelectedCard(null);
         }}
-        onConfirm={() => {
-          setOpenWithdraw(false);
-          ErrorToast({ title: "Coming Soon", descriptions: ["Withdraw funds will be available soon."] });
-        }}
-        title="Withdraw Funds"
-        description="This feature is coming soon."
-        confirmText="Okay"
+        card={selectedCard}
+        onSuccess={handleCardAction}
       />
-      <ConfirmActionModal
+      <CardTransactionsModal
         isOpen={openTransactions}
         onClose={() => {
           setOpenTransactions(false);
           setSelectedCard(null);
         }}
-        onConfirm={() => {
-          setOpenTransactions(false);
-          ErrorToast({ title: "Coming Soon", descriptions: ["Card transactions will be available soon."] });
-        }}
-        title="Card Transactions"
-        description="This feature is coming soon."
-        confirmText="Okay"
+        card={selectedCard}
       />
 
       {/* Create Card Modal */}
@@ -626,25 +606,34 @@ const CardsContent: React.FC = () => {
           />
           <div className="relative w-full max-w-md bg-[#0A0A0A] border border-white/10 rounded-2xl p-5 z-10">
             <h2 className="text-white text-base font-semibold mb-4">Create Virtual USD Card</h2>
-            {!hasUsdAccount && (
-              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-4">
-                <p className="text-yellow-400 text-xs font-medium mb-1">USD Account Required</p>
-                <p className="text-white/80 text-xs">
-                  You must have a USD account before creating a virtual card. Please create a USD account in the Accounts page first.
-                </p>
-              </div>
-            )}
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mb-4">
               <p className="text-blue-400 text-xs font-medium mb-1">Note</p>
               <p className="text-white/80 text-xs">• NGN cards are not available</p>
-              <p className="text-white/80 text-xs">• Only USD virtual cards are available for now</p>
+              <p className="text-white/80 text-xs">• Virtual cards are available for USD, EUR, and GBP</p>
             </div>
             <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-white/70 text-xs">Currency</label>
+                <select
+                  className="w-full bg-[#1C1C1E] border border-gray-700 rounded-lg py-3 px-3 text-white text-sm outline-none focus:border-[#FF6B2C]"
+                  value={selectedCurrency}
+                  onChange={(e) => setSelectedCurrency(e.target.value as CardCurrency)}
+                >
+                  <option value="USD" disabled={!usdAccount}>USD {!usdAccount ? "(Account Required)" : ""}</option>
+                  <option value="EUR" disabled={!eurAccount}>EUR {!eurAccount ? "(Account Required)" : ""}</option>
+                  <option value="GBP" disabled={!gbpAccount}>GBP {!gbpAccount ? "(Account Required)" : ""}</option>
+                </select>
+                {!hasAccountForCurrency(selectedCurrency) && (
+                  <p className="text-yellow-400 text-xs mt-1">
+                    You need a {selectedCurrency} account. Create one in the Accounts page.
+                  </p>
+                )}
+              </div>
               <div className="flex flex-col gap-1">
                 <label className="text-white/70 text-xs">Card Label</label>
                 <input
                   className="w-full bg-[#1C1C1E] border border-gray-700 rounded-lg py-3 px-3 text-white text-sm placeholder:text-white/50 outline-none focus:border-[#FF6B2C]"
-                  placeholder="e.g., Personal USD Card"
+                  placeholder={`e.g., Personal ${selectedCurrency} Card`}
                   value={cardLabel}
                   onChange={(e) => setCardLabel(e.target.value)}
                 />
@@ -661,7 +650,7 @@ const CardsContent: React.FC = () => {
                 </CustomButton>
                 <CustomButton
                   onClick={handleCreateCard}
-                  disabled={creatingCard || !cardLabel.trim() || !hasUsdAccount}
+                  disabled={creatingCard || !cardLabel.trim() || !hasAccountForCurrency(selectedCurrency)}
                   isLoading={creatingCard}
                   className="flex-1 bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black rounded-lg py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >

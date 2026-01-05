@@ -1,18 +1,16 @@
 "use client";
 
 import React from "react";
-import { IoClose } from "react-icons/io5";
-import CustomButton from "@/components/shared/Button";
+import { CgClose } from "react-icons/cg";
 
 interface ConfirmActionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  description: string;
-  confirmText: string;
-  confirmTone?: "primary" | "danger";
-  isLoading?: boolean;
+  description?: string;
+  confirmText?: string;
+  confirmTone?: "danger" | "primary";
 }
 
 const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
@@ -21,45 +19,30 @@ const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
   onConfirm,
   title,
   description,
-  confirmText,
+  confirmText = "Confirm",
   confirmTone = "primary",
-  isLoading = false,
 }) => {
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
-      <div className="relative bg-[#0A0A0A] rounded-2xl w-full max-w-md mx-4 p-6 shadow-xl border border-white/10">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="text-white text-lg font-semibold">{title}</h3>
-            <p className="text-gray-400 text-sm mt-1">{description}</p>
-          </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
-            <IoClose className="text-2xl" />
-          </button>
-        </div>
+  const confirmClasses =
+    confirmTone === "danger"
+      ? "bg-red-500 hover:bg-red-600 text-white"
+      : "bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black";
 
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 rounded-lg bg-[#2C2C2E] text-white text-sm font-medium hover:bg-[#3C3C3E] transition-colors"
-            disabled={isLoading}
-          >
-            Cancel
-          </button>
-          <CustomButton
-            onClick={onConfirm}
-            isLoading={isLoading}
-            className={
-              confirmTone === "danger"
-                ? "flex-1 py-3 bg-red-500 hover:bg-red-600"
-                : "flex-1 py-3 bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black"
-            }
-          >
-            {confirmText}
-          </CustomButton>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/80" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-bg-600 dark:bg-bg-1100 border border-white/10 rounded-2xl p-5 z-10">
+        <button onClick={onClose} className="absolute top-4 right-4 p-1.5 hover:bg-white/10 rounded-full">
+          <CgClose className="text-xl text-white" />
+        </button>
+        <h2 className="text-white text-base font-semibold mb-2">{title}</h2>
+        {description && (
+          <p className="text-white/70 text-sm mb-4">{description}</p>
+        )}
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <button onClick={onClose} className="px-5 py-2 rounded-lg border border-white/10 text-white hover:bg-white/5 text-sm font-medium">Back</button>
+          <button onClick={onConfirm} className={`px-5 py-2 rounded-lg text-sm font-medium ${confirmClasses}`}>{confirmText}</button>
         </div>
       </div>
     </div>
@@ -67,8 +50,3 @@ const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
 };
 
 export default ConfirmActionModal;
-
-
-
-
-

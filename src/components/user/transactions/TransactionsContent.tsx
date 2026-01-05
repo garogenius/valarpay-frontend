@@ -27,7 +27,7 @@ type FilterChangeEvent = {
 
 const TransactionsContent = () => {
   const theme = useTheme();
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
   const [pageNumber, setPageNumber] = useState(1);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterChangeEvent>({});
@@ -89,7 +89,7 @@ const TransactionsContent = () => {
   }, [filter.status]);
 
   const CategoryMenu = () => (
-    <div className="absolute left-0 top-full mt-2 w-64 bg-[#0A0A0A] border border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50">
+    <div className="absolute left-0 top-full mt-2 w-full sm:w-64 bg-[#0A0A0A] border border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50">
       <div className="max-h-72 overflow-y-auto">
         {[
           { label: "All categories", value: undefined as any },
@@ -128,7 +128,7 @@ const TransactionsContent = () => {
   );
 
   const StatusMenu = () => (
-    <div className="absolute left-0 top-full mt-2 w-56 bg-[#0A0A0A] border border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50">
+    <div className="absolute left-0 top-full mt-2 w-full sm:w-56 bg-[#0A0A0A] border border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50">
       <div className="py-1">
         {[
           { label: "All Status", value: undefined as any, enabled: true },
@@ -178,7 +178,7 @@ const TransactionsContent = () => {
     const orangeBar = "bg-[#FF6B2C]";
 
     return (
-      <div className="absolute right-0 top-full mt-2 w-[320px] bg-[#0A0A0A] border border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50">
+      <div className="absolute right-0 top-full mt-2 w-[calc(100vw-3rem)] sm:w-[320px] max-w-[320px] bg-[#0A0A0A] border border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50">
         <div className={`px-4 py-2 ${orangeBar} flex items-center justify-between`}>
           <button
             type="button"
@@ -195,7 +195,7 @@ const TransactionsContent = () => {
           </button>
         </div>
 
-        <div className="flex">
+        <div className="flex flex-col sm:flex-row">
           {/* Month grid */}
           <div className="flex-1 p-3">
             <DatePicker
@@ -204,18 +204,18 @@ const TransactionsContent = () => {
               inline
               renderCustomHeader={({ date, decreaseMonth, increaseMonth }) => (
                 <div className="flex items-center justify-between px-1 pb-2">
-                  <button type="button" onClick={decreaseMonth} className="text-gray-300 hover:text-white px-2">
+                  <button type="button" onClick={decreaseMonth} className="text-white hover:text-white/80 px-2 text-base">
                     ‹
                   </button>
-                  <p className="text-xs text-gray-300">
+                  <p className="text-xs text-white font-medium">
                     {date.toLocaleString("en-US", { month: "long" })} {activeYear}
                   </p>
-                  <button type="button" onClick={increaseMonth} className="text-gray-300 hover:text-white px-2">
+                  <button type="button" onClick={increaseMonth} className="text-white hover:text-white/80 px-2 text-base">
                     ›
                   </button>
                 </div>
               )}
-              calendarClassName="!bg-[#0A0A0A] !border-0"
+              calendarClassName="!bg-[#0A0A0A] !border-0 [&_.react-datepicker__day-name]:!text-white [&_.react-datepicker__day]:!text-white [&_.react-datepicker__day--selected]:!bg-[#FF6B2C] [&_.react-datepicker__day--selected]:!text-black [&_.react-datepicker__day--keyboard-selected]:!bg-[#FF6B2C]/20 [&_.react-datepicker__day--keyboard-selected]:!text-white [&_.react-datepicker__day:hover]:!bg-white/10 [&_.react-datepicker__day--disabled]:!text-gray-600 [&_.react-datepicker__day--outside-month]:!text-gray-600 [&_.react-datepicker__current-month]:!text-white [&_.react-datepicker__month]:!text-white"
             />
             <button
               type="button"
@@ -230,8 +230,8 @@ const TransactionsContent = () => {
           </div>
 
           {/* Year list (visual only) */}
-          <div className="w-[110px] border-l border-gray-800">
-            <div className="max-h-[278px] overflow-y-auto">
+          <div className="w-full sm:w-[110px] border-t sm:border-t-0 sm:border-l border-gray-800">
+            <div className="max-h-[200px] sm:max-h-[278px] overflow-y-auto">
               {years.map((y) => (
                 <button
                   key={y}
@@ -252,7 +252,7 @@ const TransactionsContent = () => {
   };
 
   const TypeMenu = () => (
-    <div className="absolute left-0 top-full mt-2 w-56 bg-[#0A0A0A] border border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50">
+    <div className="absolute left-0 top-full mt-2 w-full sm:w-56 bg-[#0A0A0A] border border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50">
       <div className="py-1">
         {["All Types", "Credit", "Debit"].map((opt) => (
           <button
@@ -275,18 +275,19 @@ const TransactionsContent = () => {
   return (
     <div className="w-full max-w-6xl">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-white text-lg font-semibold">Transaction History</p>
-          <p className="text-gray-400 text-xs mt-1">View and manage all your transaction history</p>
+      <div className="flex flex-row items-center gap-2 sm:gap-3 justify-between">
+        <div className="flex-1 min-w-0">
+          <p className="text-white text-base sm:text-lg font-semibold truncate">Transaction History</p>
+          <p className="text-gray-400 text-[10px] sm:text-xs mt-0.5 sm:mt-1 line-clamp-1">View and manage all your transaction history</p>
         </div>
         <button
           type="button"
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-[#FF6B2C] text-black font-semibold text-sm px-4 py-2.5 hover:bg-[#FF7A3D] transition-colors"
+          className="flex-shrink-0 inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg bg-[#FF6B2C] text-black font-semibold text-[10px] sm:text-sm px-2.5 sm:px-4 py-1.5 sm:py-2.5 hover:bg-[#FF7A3D] transition-colors whitespace-nowrap"
           onClick={() => setDownloadOpen(true)}
         >
-          <FiDownload />
-          Download Statement
+          <FiDownload className="text-xs sm:text-sm" />
+          <span className="hidden xs:inline">Download Statement</span>
+          <span className="xs:hidden">Download</span>
         </button>
       </div>
 

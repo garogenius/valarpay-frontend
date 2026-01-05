@@ -7,7 +7,9 @@ import {
   getBettingPlatformsRequest,
   getBettingWalletRequest,
   getBettingWalletTransactionsRequest,
+  getBettingTransactionsRequest,
   withdrawBettingWalletRequest,
+  queryBettingTransactionRequest,
 } from "./betting.apis";
 import type {
   BettingPlatform,
@@ -28,21 +30,37 @@ export const useGetBettingPlatforms = () => {
 };
 
 export const useGetBettingWallet = () => {
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: ["betting-wallet"],
     queryFn: getBettingWalletRequest,
   });
   const wallet: BettingWallet | null = data?.data?.data ?? null;
-  return { wallet, isPending, isError };
+  return { data, wallet, isPending, isError, refetch };
 };
 
-export const useGetBettingWalletTransactions = ({ limit = 50 }: { limit?: number }) => {
+export const useGetBettingWalletTransactions = ({ limit = 20 }: { limit?: number }) => {
   const { data, isPending, isError } = useQuery({
     queryKey: ["betting-wallet-transactions", { limit }],
     queryFn: () => getBettingWalletTransactionsRequest({ limit }),
   });
   const transactions: BettingTransaction[] = data?.data?.data ?? [];
   return { transactions, isPending, isError };
+};
+
+export const useGetBettingTransactions = (params: {
+  type?: "FUND" | "WITHDRAW";
+  status?: "PENDING" | "PROCESSING" | "SUCCESS" | "FAILED" | "CANCELLED";
+  platform?: string;
+  page?: number;
+  limit?: number;
+}) => {
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["betting-transactions", params],
+    queryFn: () => getBettingTransactionsRequest(params),
+  });
+  const transactions: BettingTransaction[] = data?.data?.data ?? [];
+  const meta = data?.data?.meta;
+  return { transactions, meta, isPending, isError };
 };
 
 export const useFundBettingPlatform = (
@@ -98,6 +116,9 @@ export const useWithdrawBettingWallet = (
     },
   });
 };
+
+
+
 
 
 

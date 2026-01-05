@@ -13,12 +13,6 @@ interface Props {
 
 const VerifyWalletPinModal: React.FC<Props> = ({ isOpen, onClose, onVerify }) => {
   const [pin, setPin] = useState("");
-  if (!isOpen) return null;
-
-  const closeAndClear = () => {
-    setPin("");
-    onClose();
-  };
 
   useEffect(() => {
     return () => {
@@ -27,10 +21,17 @@ const VerifyWalletPinModal: React.FC<Props> = ({ isOpen, onClose, onVerify }) =>
     };
   }, []);
 
+  if (!isOpen) return null;
+
+  const closeAndClear = () => {
+    setPin("");
+    onClose();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60" onClick={closeAndClear} aria-hidden="true" />
-      <div className="relative bg-[#0A0A0A] border border-white/10 rounded-2xl w-full max-w-md p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={closeAndClear} aria-hidden="true" />
+      <div className="relative bg-[#0A0A0A] border border-white/10 rounded-2xl w-full max-w-md p-4 sm:p-6 max-h-[calc(100vh-1.5rem)] sm:max-h-[90vh] overflow-y-auto my-auto">
         <div className="flex items-start justify-between mb-4">
           <div>
             <h3 className="text-white text-lg font-semibold">Verify Transaction PIN</h3>

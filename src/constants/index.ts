@@ -14,6 +14,7 @@ import { HiOutlineCurrencyDollar } from "react-icons/hi2";
 import { TbTrendingUp } from "react-icons/tb";
 import { MdAccountBalance } from "react-icons/md";
 import { MdSupportAgent } from "react-icons/md";
+import { TbCurrencyDollar } from "react-icons/tb";
 import { BENEFICIARY_TYPE, BeneficiaryProps, NETWORK } from "./types";
 
 export const statusStyles = {
@@ -276,6 +277,12 @@ export const SidebarData = [
         title: "Cards",
         path: "/user/cards",
         icon: CiCreditCard1,
+      },
+      {
+        id: 5,
+        title: "Multi-Currency",
+        path: "/user/multi-currency",
+        icon: TbCurrencyDollar,
       },
     ],
   },

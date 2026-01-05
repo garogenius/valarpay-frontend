@@ -284,16 +284,16 @@ const AccountsContent: React.FC = () => {
   return (
     <div className="flex flex-col gap-6 pb-10">
       {/* Header + Currency Switcher */}
-      <div className="w-full flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-        <div className="w-full">
-          <h1 className="text-white text-2xl font-semibold">Accounts</h1>
-          <p className="text-white/60 text-sm mt-1">Manage your account settings, limits, and verification</p>
-          </div>
-        <div className="relative self-start sm:self-auto" ref={menuRef}>
+      <div className="w-full flex flex-row items-center gap-2 sm:gap-3 justify-between">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-white text-base sm:text-xl lg:text-2xl font-semibold truncate">Accounts</h1>
+          <p className="text-white/60 text-[10px] sm:text-xs lg:text-sm mt-0.5 sm:mt-1 line-clamp-1">Manage your account settings, limits, and verification</p>
+        </div>
+        <div className="relative flex-shrink-0" ref={menuRef}>
           <button
             type="button"
             onClick={() => setMenuOpen(v => !v)}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#FF6B2C] text-black text-xs sm:text-sm font-semibold px-3 py-1.5 uppercase whitespace-nowrap"
+            className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg bg-[#FF6B2C] text-black text-[10px] sm:text-xs lg:text-sm font-semibold px-2.5 sm:px-3 py-1.5 uppercase whitespace-nowrap"
           >
             <NextImage 
               src={getCurrencyIconByString(selectedCurrency.toLowerCase()) || ""} 

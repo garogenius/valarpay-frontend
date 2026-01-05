@@ -9,29 +9,57 @@ export type SavingsProduct = {
   minAmount?: number;
   maxAmount?: number;
   currency?: string;
-  type?: string; // fixed-savings | target-savings | easy-life | fixed-deposit (backend dependent)
+  type?: string;
   status?: string;
   [k: string]: any;
 };
 
 export type SavingsPlanStatus = "ACTIVE" | "COMPLETED" | "BROKEN" | "CLOSED" | string;
 
+export type SavingsPlanType = "FLEX_SAVE" | "VALAR_AUTO_SAVE";
+
 export type SavingsPlan = {
   id?: string | number;
   planId?: string | number;
+  userId?: string;
   productId?: string | number;
   product?: SavingsProduct | any;
   name?: string;
-  type?: string; // backend dependent
+  description?: string;
+  type?: SavingsPlanType | string;
   currency?: string;
+  goalAmount?: number;
   targetAmount?: number;
   currentAmount?: number;
+  totalDeposited?: number;
+  totalInterestAccrued?: number;
   interestRate?: number;
+  penaltyRate?: number;
+  durationMonths?: number;
+  minMonthlyDeposit?: number | null;
   status?: SavingsPlanStatus;
-  createdAt?: string;
   startDate?: string;
   endDate?: string;
   maturityDate?: string;
+  lockedUntil?: string;
+  lastDepositDate?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  fundings?: Array<{
+    id: string;
+    amount: number;
+    createdAt: string;
+    [k: string]: any;
+  }>;
+  deposits?: Array<{
+    id: string;
+    planId: string;
+    walletId: string;
+    amount: number;
+    currency: string;
+    transactionId: string;
+    createdAt: string;
+  }>;
   [k: string]: any;
 };
 
@@ -49,6 +77,7 @@ export type FundingHistoryItem = {
 export type SavingsPlanDetails = {
   plan?: SavingsPlan;
   fundingHistory?: FundingHistoryItem[];
+  deposits?: FundingHistoryItem[];
   totalPayout?: number;
   interestEarned?: number;
   principal?: number;
@@ -56,24 +85,13 @@ export type SavingsPlanDetails = {
 };
 
 export type ICreateSavingsPlan = {
-  productId?: string | number;
-  planType?: string;
-  name?: string;
-  currency?: string; // NGN
-  targetAmount?: number;
-
-  // optional fields used by existing UI (backend dependent)
-  fundingType?: "manual" | "auto-save" | string;
-  amount?: number;
-  startDate?: string;
-  endDate?: string;
-  frequency?: string;
-  topUpAmount?: number;
-  strictMode?: boolean;
-  preferredTime?: string;
-  targetType?: string;
-  duration?: string;
-  rules?: any;
+  type: SavingsPlanType;
+  name: string;
+  description?: string;
+  goalAmount: number;
+  currency: string;
+  durationMonths: number;
+  walletPin?: string;
   [k: string]: any;
 };
 
@@ -85,7 +103,13 @@ export type IFundSavingsPlan = {
   planId: string | number;
   amount: number;
   currency: string;
-  walletPin: string;
+  walletPin?: string;
+  [k: string]: any;
+};
+
+export type IWithdrawSavingsPlan = {
+  planId: string | number;
+  walletPin?: string;
   [k: string]: any;
 };
 
@@ -94,14 +118,3 @@ export type ICloseSavingsPlan = {
   walletPin: string;
   [k: string]: any;
 };
-
-
-
-
-
-
-
-
-
-
-

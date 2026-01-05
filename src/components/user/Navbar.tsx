@@ -19,7 +19,6 @@ import {
   useMarkNotificationRead,
 } from "@/api/notification/notification.queries";
 import SearchDropdown from "@/components/shared/SearchDropdown";
-import SearchModal from "@/components/modals/SearchModal";
 
 const Navbar = () => {
   const { user } = useUserStore();
@@ -101,7 +100,6 @@ const Navbar = () => {
   useOnClickOutside(notifRef, () => setNotifOpen(false));
 
   const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
-  const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   // Notifications
@@ -129,25 +127,33 @@ const Navbar = () => {
           </svg>
           <input
             type="text"
+            value={searchTerm}
+            onChange={(e) => {
+              const value = e.target.value;
+              setSearchTerm(value);
+              if (!value.trim()) {
+                setSearchDropdownOpen(true);
+              } else {
+                setSearchDropdownOpen(false);
+              }
+            }}
+            onFocus={() => {
+              if (!searchTerm.trim()) {
+                setSearchDropdownOpen(true);
+              }
+            }}
             placeholder="Search transactions, bills or payments..."
-            onClick={() => setSearchDropdownOpen(true)}
-            onFocus={() => setSearchDropdownOpen(true)}
-            className="w-full rounded-lg bg-transparent border border-gray-800 text-xs sm:text-sm pl-9 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-2.5 text-white placeholder:text-gray-600 outline-none focus:border-gray-700 cursor-pointer"
+            className="w-full rounded-lg bg-transparent border border-gray-800 text-xs sm:text-sm pl-9 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-2.5 text-white placeholder:text-gray-600 outline-none focus:border-gray-700"
           />
         </div>
         
-        {/* Search Dropdown */}
+        {/* Search Dropdown - Only shows recent searches */}
         <SearchDropdown
-          isOpen={searchDropdownOpen}
+          isOpen={searchDropdownOpen && !searchTerm.trim()}
           onClose={() => setSearchDropdownOpen(false)}
           onSearch={(term) => {
             setSearchTerm(term);
             setSearchDropdownOpen(false);
-            setSearchModalOpen(true);
-          }}
-          onOpenFullSearch={() => {
-            setSearchDropdownOpen(false);
-            setSearchModalOpen(true);
           }}
         />
       </div>
@@ -258,16 +264,6 @@ const Navbar = () => {
           )}
         </div>
       </div>
-
-      {/* Full Search Modal with Results */}
-      <SearchModal 
-        isOpen={searchModalOpen} 
-        onClose={() => {
-          setSearchModalOpen(false);
-          setSearchTerm("");
-        }}
-        initialSearchTerm={searchTerm}
-      />
     </div>
   );
 };

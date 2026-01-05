@@ -6,8 +6,10 @@ import { RiBankLine } from "react-icons/ri";
 import { MdStorefront } from "react-icons/md";
 import { FiArrowRight } from "react-icons/fi";
 import { HiOutlineReceiptRefund } from "react-icons/hi2";
+import { IoQrCodeOutline } from "react-icons/io5";
 import BillsPaymentContent from "@/components/user/bill/BillsPaymentContent";
 import PaymentSettingModal from "@/components/modals/PaymentSettingModal";
+import QRCodeModal from "@/components/modals/QrCodeModal";
 import { useGetTransactions } from "@/api/wallet/wallet.queries";
 import { useGetBeneficiaries } from "@/api/user/user.queries";
 import {
@@ -54,6 +56,8 @@ const PaymentContent = () => {
   const [dest, setDest] = useState<DestKey>("valarpay");
   const [rightTab, setRightTab] = useState<RightTab>("transactions");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [qrCodeModalOpen, setQrCodeModalOpen] = useState(false);
+  const [transferProcessRef, setTransferProcessRef] = useState<{ fillBeneficiary: (beneficiary: any) => void } | null>(null);
   const { user } = useUserStore();
   const ngnBalance = (user?.wallet || []).find((w: any) => w.currency === "NGN")?.balance || 0;
 
@@ -168,17 +172,26 @@ const PaymentContent = () => {
                 <div className="py-10 text-center text-gray-400 text-sm">No saved beneficiaries</div>
               ) : (
                 (beneficiaries || []).slice(0, 8).map((b) => (
-                  <div key={b.id} className="flex items-center justify-between gap-3 py-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-full bg-[#10B981] flex items-center justify-center text-black font-bold">$
+                  <button
+                    key={b.id}
+                    type="button"
+                    onClick={() => {
+                      if (transferProcessRef?.fillBeneficiary) {
+                        transferProcessRef.fillBeneficiary(b);
+                      }
+                    }}
+                    className="w-full flex items-center justify-between gap-3 py-3 hover:bg-white/5 transition-colors rounded-lg px-2 -mx-2"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-9 h-9 rounded-full bg-[#10B981] flex items-center justify-center text-black font-bold flex-shrink-0">$
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 text-left">
                         <p className="text-white text-sm font-medium truncate">{b.accountName || "Beneficiary"}</p>
                         <p className="text-gray-400 text-xs truncate">{b.accountNumber || b.billerNumber || ""}</p>
                       </div>
                     </div>
-                    <FiArrowRight className="text-gray-500" />
-                  </div>
+                    <FiArrowRight className="text-gray-500 flex-shrink-0" />
+                  </button>
                 ))
               )}
             </div>
@@ -190,17 +203,20 @@ const PaymentContent = () => {
 
   const renderTransferContent = () => (
     <div className="w-full grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
-      <div className="w-full h-full flex flex-col gap-4">
+      <div className="w-full h-full flex flex-col gap-6 sm:gap-4">
         {renderDestCards()}
-        <TransferProcess
-          fixedType={dest === "bank" ? "bank" : "valarpay"}
-          hideMethodSelector
-          initialActionLabel="Pay"
-          showAvailableBalance
-          quickAmounts={[1000, 5000, 10000, 20000]}
-          availableBalance={ngnBalance}
-          compactBeneficiaryRow
-        />
+        <div className="pt-2 sm:pt-0 px-4 sm:px-0">
+          <TransferProcess
+            fixedType={dest === "bank" ? "bank" : "valarpay"}
+            hideMethodSelector
+            initialActionLabel="Pay"
+            showAvailableBalance
+            quickAmounts={[1000, 5000, 10000, 20000]}
+            availableBalance={ngnBalance}
+            compactBeneficiaryRow
+            onRef={(ref) => setTransferProcessRef(ref)}
+          />
+        </div>
       </div>
       {renderRightPanel()}
     </div>
@@ -209,18 +225,27 @@ const PaymentContent = () => {
   return (
     <div className="flex flex-col gap-6 pb-10">
       {/* Header (no card wrapper) */}
-      <div className="w-full flex items-start justify-between">
-        <div>
-          <h1 className="text-white text-xl sm:text-2xl font-semibold">Payments</h1>
-          <p className="text-gray-400 text-xs sm:text-sm">Pay bills securely, and manage scheduled payments easily</p>
+      <div className="w-full flex items-center gap-2 sm:gap-3 justify-between">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-white text-base sm:text-xl lg:text-2xl font-semibold truncate">Payments</h1>
+          <p className="text-gray-400 text-[10px] sm:text-xs lg:text-sm mt-0.5 sm:mt-1 line-clamp-1">Pay bills securely, and manage scheduled payments easily</p>
         </div>
-        <button
-          onClick={() => setSettingsOpen(true)}
-          className="flex items-center gap-2 px-3 py-2 rounded-full bg-[#1C1C1E] border border-gray-800 text-white text-xs hover:bg-[#2C2C2E]"
-        >
-          <IoSettingsOutline className="text-base" />
-          Settings
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setQrCodeModalOpen(true)}
+            className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full bg-[#1C1C1E] border border-gray-800 text-white text-[10px] sm:text-xs hover:bg-[#2C2C2E] whitespace-nowrap"
+          >
+            <IoQrCodeOutline className="text-xs sm:text-base" />
+            <span className="hidden xs:inline">QR Code</span>
+          </button>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full bg-[#1C1C1E] border border-gray-800 text-white text-[10px] sm:text-xs hover:bg-[#2C2C2E] whitespace-nowrap"
+          >
+            <IoSettingsOutline className="text-xs sm:text-base" />
+            <span className="hidden xs:inline">Settings</span>
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -274,6 +299,7 @@ const PaymentContent = () => {
       )}
 
       <PaymentSettingModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <QRCodeModal isOpen={qrCodeModalOpen} onClose={() => setQrCodeModalOpen(false)} />
     </div>
   );
 };

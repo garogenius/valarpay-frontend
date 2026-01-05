@@ -141,13 +141,13 @@ export const getTransactions = ({
 
 export const getQrCode = ({ amount }: { amount: number }) => {
   return request({
-    url: `/wallet/generate-qrcode?amount=${amount}`,
+    url: `/wallet/generate-qrcode${amount ? `?amount=${amount}` : ""}`,
   });
 };
 
 export const decodeQrCodeRequest = async (formdata: IDecodeQrCode) => {
   return request({
-    url: "/wallet/decode-qr",
+    url: "/wallet/decode-qrcode",
     method: "post",
     data: formdata,
   });

@@ -10,7 +10,7 @@ import { LuShieldPlus, LuTv } from "react-icons/lu";
 import { MdCardGiftcard } from "react-icons/md";
 import { RiGovernmentLine } from "react-icons/ri";
 import { SlPlane, SlTrophy } from "react-icons/sl";
-import BillsHubModal, { BillModalKey } from "@/components/modals/BillsHubModal";
+import BillsHubModal, { BillModalKey } from "@/components/modals/bills/BillsHubModal";
 import { LuPhoneOutgoing } from "react-icons/lu";
 import { BsPhone } from "react-icons/bs";
 import { TbWorldUp, TbWorldPin } from "react-icons/tb";

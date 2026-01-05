@@ -242,7 +242,7 @@ const VerifyPhoneNumberContent = () => {
                     onClick={handleResendClick}
                   >
                     {resendLoadingStatus ? (
-                      <SpinnerLoader width={20} height={20} color="#D4B139" />
+                      <SpinnerLoader width={20} height={20} color="#f76301" />
                     ) : (
                       "Resend"
                     )}

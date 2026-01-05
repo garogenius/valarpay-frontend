@@ -1,6 +1,11 @@
 export type BettingPlatform = {
   code: string;
   name: string;
+  description?: string;
+  isActive: boolean;
+  category: string;
+  minAmount: number;
+  maxAmount: number;
   enabled?: boolean;
 };
 
@@ -18,21 +23,24 @@ export type BettingWallet = {
 
 export type BettingTransaction = {
   id: string;
-  operationType: string;
-  status: string;
+  type: "FUND" | "WITHDRAW";
+  status: "PENDING" | "PROCESSING" | "SUCCESS" | "FAILED" | "CANCELLED";
   amount: number;
+  platform: string;
+  orderReference: string;
+  operationType?: string;
   currency: string;
-  transactionRef: string;
+  transactionRef?: string;
+  description?: string;
   createdAt: string;
 };
 
 export type IFundBettingPlatform = {
-  platform: string;
-  platformUserId: string;
   amount: number;
+  platform: string;
   currency: string;
-  walletPin: string;
-  description?: string;
+  remark?: string;
+  walletPin?: string;
 };
 
 export type IFundBettingWallet = {
@@ -44,13 +52,22 @@ export type IFundBettingWallet = {
 
 export type IWithdrawBettingWallet = {
   amount: number;
-  currency: string;
-  bankCode: string;
+  platform: string;
   accountNumber: string;
   accountName: string;
+  bankCode: string;
+  bankName?: string;
+  currency: string;
+  remark?: string;
   walletPin: string;
-  description?: string;
 };
+
+export type IQueryBettingTransaction = {
+  orderReference: string;
+};
+
+
+
 
 
 

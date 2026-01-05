@@ -74,18 +74,34 @@ const InvestmentProductInfoCard = () => {
         <div className="bg-white/5 border border-white/10 rounded-xl p-4">
           <p className="text-white/60 text-xs">Minimum Investment</p>
           <p className="text-white text-lg font-semibold mt-1">
-            {formatCurrency(Number(product.minimumAmount || 0), "NGN")}
+            {formatCurrency(Number(product.minimumInvestmentAmount || product.minimumAmount || 0), "NGN")}
           </p>
         </div>
         <div className="bg-white/5 border border-white/10 rounded-xl p-4">
           <p className="text-white/60 text-xs">ROI</p>
-          <p className="text-white text-lg font-semibold mt-1">{Number(product.roiRate || 0)}%</p>
+          <p className="text-white text-lg font-semibold mt-1">{Number((product.roiRate || 0) * 100).toFixed(1)}%</p>
         </div>
         <div className="bg-white/5 border border-white/10 rounded-xl p-4">
           <p className="text-white/60 text-xs">Tenure</p>
           <p className="text-white text-lg font-semibold mt-1">{Number(product.tenureMonths || 0)} months</p>
         </div>
       </div>
+
+      {product.capitalGuaranteed !== undefined && (
+        <div className="mt-4 bg-white/5 border border-white/10 rounded-xl p-4">
+          <p className="text-white/60 text-xs mb-1">Capital Guarantee</p>
+          <p className="text-white text-sm font-medium">
+            {product.capitalGuaranteed ? "✓ Capital is guaranteed" : "Capital not guaranteed"}
+          </p>
+        </div>
+      )}
+
+      {product.repaymentStructure && (
+        <div className="mt-4 bg-white/5 border border-white/10 rounded-xl p-4">
+          <p className="text-white/60 text-xs mb-1">Repayment Structure</p>
+          <p className="text-white text-sm font-medium">{product.repaymentStructure}</p>
+        </div>
+      )}
 
       {(product.features || []).length > 0 ? (
         <div className="mt-5">

@@ -63,17 +63,18 @@ const SupportContent = () => {
   return (
     <div className="w-full max-w-6xl">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-white text-lg font-semibold">Support Center</p>
-          <p className="text-gray-400 text-xs mt-1">Get help, report issues, and find answers to your questions</p>
+      <div className="flex flex-row items-center gap-2 sm:gap-3 justify-between">
+        <div className="flex-1 min-w-0">
+          <p className="text-white text-base sm:text-lg font-semibold truncate">Support Center</p>
+          <p className="text-gray-400 text-[10px] sm:text-xs mt-0.5 sm:mt-1 line-clamp-1">Get help, report issues, and find answers</p>
         </div>
         <button
           type="button"
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-[#FF6B2C] text-black font-semibold text-sm px-4 py-2.5 hover:bg-[#FF7A3D] transition-colors"
+          className="flex-shrink-0 inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg bg-[#FF6B2C] text-black font-semibold text-[10px] sm:text-sm px-2.5 sm:px-4 py-1.5 sm:py-2.5 hover:bg-[#FF7A3D] transition-colors whitespace-nowrap"
           onClick={() => window.open(`mailto:${SUPPORT_EMAIL}?subject=Support%20Live%20Chat%20Request`, "_blank")}
         >
-          Start Live Chat
+          <span className="hidden xs:inline">Start Live Chat</span>
+          <span className="xs:hidden">Chat</span>
         </button>
       </div>
 

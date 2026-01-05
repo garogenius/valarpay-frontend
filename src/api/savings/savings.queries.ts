@@ -2,15 +2,14 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  closeSavingsPlanAtMaturityRequest,
-  closeSavingsPlanEarlyRequest,
   createSavingsPlanRequest,
   fundSavingsPlanRequest,
   getSavingsPlanDetailsRequest,
   getSavingsPlansRequest,
   getSavingsProductsRequest,
+  withdrawSavingsPlanRequest,
 } from "./savings.apis";
-import type { ICloseSavingsPlan, ICreateSavingsPlan, IFundSavingsPlan, IGetSavingsPlanDetails } from "./savings.types";
+import type { ICreateSavingsPlan, IFundSavingsPlan, IGetSavingsPlanDetails, IWithdrawSavingsPlan } from "./savings.types";
 
 export const useSavingsProducts = () => {
   const { data, isPending, isError, error, refetch } = useQuery({
@@ -32,21 +31,27 @@ export const useSavingsPlans = () => {
     retry: 1,
   });
 
+  // Handle new API structure: { message: "...", data: [...] }
   const plans = data?.data?.data || data?.data || data?.plans || [];
   return { plans, isPending, isError, error, refetch };
 };
 
-export const useSavingsPlanDetails = (payload: IGetSavingsPlanDetails, enabled = true) => {
+export const useGetSavingsPlanById = (planId: string | number | null, enabled = true) => {
   const { data, isPending, isError, error, refetch } = useQuery({
-    queryKey: ["savingsPlanDetails", payload?.planId],
-    queryFn: () => getSavingsPlanDetailsRequest(payload),
-    enabled: !!payload?.planId && enabled,
+    queryKey: ["savingsPlanDetails", planId],
+    queryFn: () => getSavingsPlanDetailsRequest({ planId: planId! }),
+    enabled: !!planId && enabled,
     staleTime: 10 * 1000,
     retry: 1,
   });
 
-  const details = data?.data?.data || data?.data || data?.details || {};
-  return { details, isPending, isError, error, refetch };
+  // Handle new API structure: { message: "...", data: {...} }
+  const plan = data?.data?.data || data?.data || {};
+  return { plan, isPending, isError, error, refetch };
+};
+
+export const useSavingsPlanDetails = (payload: IGetSavingsPlanDetails, enabled = true) => {
+  return useGetSavingsPlanById(payload.planId, enabled);
 };
 
 export const useCreateSavingsPlan = (onError: (e: any) => void, onSuccess: (d: any) => void) => {
@@ -58,6 +63,7 @@ export const useCreateSavingsPlan = (onError: (e: any) => void, onSuccess: (d: a
       queryClient.invalidateQueries({ queryKey: ["savingsPlans"] });
       queryClient.invalidateQueries({ queryKey: ["savingsProducts"] });
       queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["walletAccounts"] });
       onSuccess(data);
     },
   });
@@ -72,49 +78,25 @@ export const useFundSavingsPlan = (onError: (e: any) => void, onSuccess: (d: any
       queryClient.invalidateQueries({ queryKey: ["savingsPlans"] });
       queryClient.invalidateQueries({ queryKey: ["savingsPlanDetails", variables?.planId] });
       queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["walletAccounts"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       onSuccess(data);
     },
   });
 };
 
-export const useCloseSavingsPlanAtMaturity = (onError: (e: any) => void, onSuccess: (d: any) => void) => {
+export const useWithdrawSavingsPlan = (onError: (e: any) => void, onSuccess: (d: any) => void) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: ICloseSavingsPlan) => closeSavingsPlanAtMaturityRequest(payload),
+    mutationFn: (payload: IWithdrawSavingsPlan) => withdrawSavingsPlanRequest(payload),
     onError,
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["savingsPlans"] });
       queryClient.invalidateQueries({ queryKey: ["savingsPlanDetails", variables?.planId] });
       queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["walletAccounts"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       onSuccess(data);
     },
   });
 };
-
-export const useCloseSavingsPlanEarly = (onError: (e: any) => void, onSuccess: (d: any) => void) => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: ICloseSavingsPlan) => closeSavingsPlanEarlyRequest(payload),
-    onError,
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["savingsPlans"] });
-      queryClient.invalidateQueries({ queryKey: ["savingsPlanDetails", variables?.planId] });
-      queryClient.invalidateQueries({ queryKey: ["user"] });
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      onSuccess(data);
-    },
-  });
-};
-
-
-
-
-
-
-
-
-
-
-

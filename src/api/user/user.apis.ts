@@ -7,6 +7,12 @@ import {
   ITier3Verification,
   IValidatePhoneNumber,
   IVerifyPhoneNumber,
+  IVerifyWalletPin,
+  IUploadDocument,
+  IBiometricChallenge,
+  IBiometricEnroll,
+  IBiometricLogin,
+  IBiometricDisable,
 } from "./user.types";
 import { BENEFICIARY_TYPE, BILL_TYPE, TRANSFER_TYPE } from "@/constants/types";
 
@@ -117,5 +123,63 @@ export const verifyPhoneNumberRequest = async (
     url: "/user/verify-phoneNumber",
     method: "post",
     data: formdata,
+  });
+};
+
+export const verifyWalletPinRequest = async (formdata: IVerifyWalletPin) => {
+  return request({
+    url: "/user/verify-wallet-pin",
+    method: "post",
+    data: formdata,
+  });
+};
+
+export const uploadDocumentRequest = async (formData: FormData) => {
+  return request({
+    url: "/user/upload-document",
+    method: "post",
+    data: formData,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+export const biometricChallengeRequest = async (formdata: IBiometricChallenge) => {
+  return request({
+    url: "/auth/biometric/challenge",
+    method: "post",
+    data: formdata,
+  });
+};
+
+export const biometricEnrollRequest = async (formdata: IBiometricEnroll) => {
+  return request({
+    url: "/auth/biometric/enroll",
+    method: "post",
+    data: formdata,
+  });
+};
+
+export const biometricLoginRequest = async (formdata: IBiometricLogin) => {
+  return request({
+    url: "/auth/biometric/login",
+    method: "post",
+    data: formdata,
+  });
+};
+
+export const biometricDisableRequest = async (formdata: IBiometricDisable) => {
+  return request({
+    url: "/auth/biometric/disable",
+    method: "post",
+    data: formdata,
+  });
+};
+
+export const biometricStatusRequest = async (deviceId: string) => {
+  return request({
+    url: `/auth/biometric/status?deviceId=${deviceId}`,
+    method: "get",
   });
 };

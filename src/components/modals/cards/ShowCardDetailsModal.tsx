@@ -1,140 +1,96 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { IoClose } from "react-icons/io5";
-import { FiCopy, FiEye, FiEyeOff } from "react-icons/fi";
-import type { VirtualCard } from "@/api/wallet/wallet.types";
-import SuccessToast from "@/components/toast/SuccessToast";
+import React from "react";
+import { CgClose } from "react-icons/cg";
+import { IVirtualCard } from "@/api/currency/cards.types";
+import { useGetCardById } from "@/api/currency/cards.queries";
+import { LuCopy } from "react-icons/lu";
 
 interface ShowCardDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  card?: VirtualCard | null;
-  cardholderName?: string;
+  card: IVirtualCard | null;
 }
 
-const maskNumber = (n?: string) => {
-  if (!n) return "•••• •••• •••• ••••";
-  const last4 = n.replace(/\s+/g, "").slice(-4);
-  return `•••• •••• •••• ${last4}`;
-};
+const ShowCardDetailsModal: React.FC<ShowCardDetailsModalProps> = ({ isOpen, onClose, card }) => {
+  const { card: cardData, isPending } = useGetCardById(card?.id || "", !!card?.id);
+  const displayCard = cardData || card;
 
-const formatCardNumber = (n?: string) => {
-  if (!n) return "";
-  return n.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim();
-};
-
-const ShowCardDetailsModal: React.FC<ShowCardDetailsModalProps> = ({
-  isOpen,
-  onClose,
-  card,
-  cardholderName = "CARD HOLDER",
-}) => {
-  const [show, setShow] = useState(false);
-  const expiry = useMemo(() => {
-    if (!card?.expiryMonth || !card?.expiryYear) return "MM/YY";
-    const m = String(card.expiryMonth).padStart(2, "0");
-    const y = String(card.expiryYear).slice(-2);
-    return `${m}/${y}`;
-  }, [card?.expiryMonth, card?.expiryYear]);
-
-  if (!isOpen) return null;
-
-  const handleCopy = async (value: string, label: string) => {
-    try {
-      await navigator.clipboard.writeText(value);
-      SuccessToast({ title: "Copied", description: `${label} copied to clipboard` });
-    } catch {
-      // ignore
+  const formatExpiry = () => {
+    if (!displayCard) return "MM/YY";
+    if (displayCard.expiryMonth && displayCard.expiryYear) {
+      const month = String(displayCard.expiryMonth).padStart(2, "0");
+      const year = String(displayCard.expiryYear).slice(-2);
+      return `${month}/${year}`;
     }
+    return "MM/YY";
   };
 
-  const cardNumberToShow = show ? formatCardNumber(card?.cardNumber) : maskNumber(card?.cardNumber);
-  const cvvToShow = show ? card?.cvv || "***" : "***";
+  if (!isOpen || !card) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
-      <div className="relative bg-[#0A0A0A] rounded-2xl w-full max-w-md mx-4 p-6 shadow-xl border border-white/10">
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h3 className="text-white text-lg font-semibold">Card Details</h3>
-            <p className="text-gray-400 text-sm mt-1">Keep your card details secure</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/80" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-bg-600 dark:bg-bg-1100 border border-white/10 rounded-2xl p-5 z-10">
+        <button onClick={onClose} className="absolute top-4 right-4 p-1.5 hover:bg-white/10 rounded-full">
+          <CgClose className="text-xl text-white" />
+        </button>
+        <h2 className="text-white text-base font-semibold mb-4">Card Details</h2>
+        {isPending ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="w-8 h-8 border-2 border-[#FF6B2C] border-t-transparent rounded-full animate-spin"></div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
-            <IoClose className="text-2xl" />
-          </button>
-        </div>
-
-        <div className="flex items-center justify-between mb-4">
-          <button
-            onClick={() => setShow((v) => !v)}
-            className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors"
-          >
-            {show ? <FiEyeOff /> : <FiEye />}
-            <span>{show ? "Hide details" : "Show details"}</span>
-          </button>
-        </div>
-
-        <div className="space-y-3">
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-white/60 text-xs mb-1">Card Number</p>
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-white font-mono tracking-widest text-sm">{cardNumberToShow}</p>
-              <button
-                onClick={() => handleCopy(card?.cardNumber || "", "Card number")}
-                className="p-2 rounded-lg hover:bg-white/10 text-white/70 hover:text-white"
-                disabled={!card?.cardNumber}
-                title="Copy"
-              >
-                <FiCopy />
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <p className="text-white/60 text-xs mb-1">Expiry</p>
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-white text-sm font-semibold">{expiry}</p>
-                <button
-                  onClick={() => handleCopy(expiry, "Expiry")}
-                  className="p-2 rounded-lg hover:bg-white/10 text-white/70 hover:text-white"
-                  title="Copy"
-                >
-                  <FiCopy />
-                </button>
+        ) : (
+          <div className="space-y-3">
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-white/90 text-sm flex items-center justify-between">
+              <span>Card Number</span>
+              <div className="flex items-center gap-2">
+                <span>{displayCard?.cardNumber ? `•••• •••• •••• ${displayCard.cardNumber.slice(-4)}` : "•••• •••• •••• ••••"}</span>
+                {displayCard?.maskedNumber && (
+                  <button
+                    onClick={() => navigator.clipboard.writeText(displayCard.maskedNumber)}
+                    className="p-1 rounded hover:bg-white/10"
+                  >
+                    <LuCopy className="w-4 h-4 text-white/80" />
+                  </button>
+                )}
               </div>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <p className="text-white/60 text-xs mb-1">CVV</p>
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-white text-sm font-semibold">{cvvToShow}</p>
-                <button
-                  onClick={() => handleCopy(card?.cvv || "", "CVV")}
-                  className="p-2 rounded-lg hover:bg-white/10 text-white/70 hover:text-white"
-                  disabled={!card?.cvv}
-                  title="Copy"
-                >
-                  <FiCopy />
-                </button>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-white/90 text-sm flex items-center justify-between">
+                <span>Expiry</span>
+                <span>{formatExpiry()}</span>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-white/90 text-sm flex items-center justify-between">
+                <span>CVV</span>
+                <span>{displayCard?.cvv ? "•••" : "N/A"}</span>
               </div>
             </div>
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-white/90 text-sm flex items-center justify-between">
+              <span>Cardholder</span>
+              <span>{displayCard?.label || "N/A"}</span>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-white/90 text-sm flex items-center justify-between">
+              <span>Balance</span>
+              <span className="font-semibold">${displayCard?.balance?.toLocaleString() || "0"}</span>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-white/90 text-sm flex items-center justify-between">
+              <span>Status</span>
+              <span className={`capitalize ${
+                displayCard?.status === "ACTIVE" ? "text-green-400" :
+                displayCard?.status === "FROZEN" ? "text-yellow-400" :
+                displayCard?.status === "BLOCKED" ? "text-red-400" :
+                "text-gray-400"
+              }`}>
+                {displayCard?.status?.toLowerCase() || "N/A"}
+              </span>
+            </div>
           </div>
-
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-white/60 text-xs mb-1">Card Holder</p>
-            <p className="text-white text-sm font-semibold">{cardholderName}</p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default ShowCardDetailsModal;
-
-
-
-
 

@@ -51,24 +51,26 @@ const NotificationsPage = () => {
   return (
     <div className="flex flex-col gap-4 sm:gap-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg sm:text-xl font-semibold text-white">Notifications</h1>
-          <p className="text-xs sm:text-sm text-gray-400">Stay updated with your account activity</p>
+      <div className="flex flex-row items-center gap-2 sm:gap-3 justify-between">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-white text-base sm:text-lg lg:text-xl font-semibold truncate">Notifications</h1>
+          <p className="text-gray-400 text-[10px] sm:text-xs lg:text-sm mt-0.5 sm:mt-1 line-clamp-1">Stay updated with your account activity</p>
         </div>
-        <div className="hidden sm:flex items-center gap-2">
+        <div className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2">
           <button
             onClick={() => markAllRead()}
             disabled={markingAll}
-            className="px-3 py-2 rounded-lg bg-[#1C1C1E] border border-gray-800 text-white text-xs hover:bg-[#2C2C2E] disabled:opacity-60"
+            className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-[#1C1C1E] border border-gray-800 text-white text-[10px] sm:text-xs hover:bg-[#2C2C2E] disabled:opacity-60 whitespace-nowrap"
           >
-            ✓ Mark all as read
+            <span className="hidden xs:inline">✓ Mark all as read</span>
+            <span className="xs:hidden">✓ Read</span>
           </button>
           <button
             onClick={() => markAllRead()}
-            className="px-3 py-2 rounded-lg bg-[#1C1C1E] border border-gray-800 text-white text-xs hover:bg-[#2C2C2E]"
+            className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-[#1C1C1E] border border-gray-800 text-white text-[10px] sm:text-xs hover:bg-[#2C2C2E] whitespace-nowrap"
           >
-            🗑 Clear All
+            <span className="hidden xs:inline">🗑 Clear All</span>
+            <span className="xs:hidden">🗑 Clear</span>
           </button>
         </div>
       </div>
@@ -141,21 +143,6 @@ const NotificationsPage = () => {
         )}
       </div>
 
-      {/* Sticky actions on mobile */}
-      <div className="sm:hidden flex items-center gap-2">
-        <button
-          onClick={() => markAllRead()}
-          className="flex-1 px-3 py-2 rounded-lg bg-[#1C1C1E] border border-gray-800 text-white text-xs hover:bg-[#2C2C2E]"
-        >
-          ✓ Mark all as read
-        </button>
-        <button
-          onClick={() => markAllRead()}
-          className="flex-1 px-3 py-2 rounded-lg bg-[#1C1C1E] border border-gray-800 text-white text-xs hover:bg-[#2C2C2E]"
-        >
-          🗑 Clear All
-        </button>
-      </div>
     </div>
   );
 };

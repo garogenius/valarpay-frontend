@@ -6,12 +6,14 @@ import {
   getInvestmentDetailsRequest,
   getInvestmentProductRequest,
   getInvestmentsRequest,
+  payoutInvestmentRequest,
 } from "./investment.apis";
 import type {
   CreateInvestmentPayload,
   GetInvestmentsParams,
   InvestmentProduct,
   InvestmentRecord,
+  PayoutInvestmentPayload,
 } from "./investment.types";
 
 export const useGetInvestmentProduct = () => {
@@ -38,7 +40,11 @@ export const useGetInvestments = (params: GetInvestmentsParams & { enabled?: boo
     retry: 1,
   });
 
-  const investmentsData:
+  // Handle new API structure: { message: "...", data: [...] }
+  const responseData = data?.data?.data || data?.data;
+  const meta = data?.data?.meta;
+  
+  let investmentsData:
     | {
         investments: InvestmentRecord[];
         totalCount?: number;
@@ -46,7 +52,35 @@ export const useGetInvestments = (params: GetInvestmentsParams & { enabled?: boo
         page?: number;
         limit?: number;
       }
-    | undefined = data?.data?.data || data?.data;
+    | undefined;
+
+  if (Array.isArray(responseData)) {
+    investmentsData = {
+      investments: responseData,
+      ...(meta && {
+        totalCount: meta.total,
+        page: meta.page,
+        limit: meta.limit,
+      }),
+    };
+  } else if (responseData && typeof responseData === "object") {
+    if (Array.isArray(responseData.investments)) {
+      investmentsData = responseData;
+    } else if (Array.isArray(responseData.data)) {
+      investmentsData = {
+        investments: responseData.data,
+        ...(meta && {
+          totalCount: meta.total,
+          page: meta.page,
+          limit: meta.limit,
+        }),
+      };
+    } else {
+      investmentsData = undefined;
+    }
+  } else {
+    investmentsData = undefined;
+  }
 
   return { investmentsData, isPending, isError, error };
 };
@@ -78,6 +112,26 @@ export const useCreateInvestment = (
       // Wallet debit should reflect globally via user refetch.
       queryClient.invalidateQueries({ queryKey: ["user"] });
       queryClient.invalidateQueries({ queryKey: ["investments"] });
+      queryClient.invalidateQueries({ queryKey: ["walletAccounts"] });
+      onSuccess(data);
+    },
+  });
+};
+
+export const usePayoutInvestment = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: PayoutInvestmentPayload) => payoutInvestmentRequest(payload),
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["investments"] });
+      queryClient.invalidateQueries({ queryKey: ["investment-details"] });
+      queryClient.invalidateQueries({ queryKey: ["walletAccounts"] });
       onSuccess(data);
     },
   });

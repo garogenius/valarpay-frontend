@@ -4,36 +4,71 @@ export interface InvestmentProduct {
   id?: string;
   name: string;
   description?: string;
-  minimumAmount: number;
-  roiRate: number; // percent (e.g. 15)
+  minimumInvestmentAmount: number;
+  minimumAmount?: number; // Support both field names
+  roiRate: number; // percent (e.g. 0.1 for 10%)
   tenureMonths: number;
+  capitalGuaranteed?: boolean;
+  repaymentStructure?: string;
   features?: string[];
 }
 
 export interface CreateInvestmentPayload {
   amount: number;
-  walletPin: string;
-  // The backend may accept additional KYC fields; we pass through everything collected by the modal.
+  currency: string;
+  agreementReference?: string;
+  legalDocumentUrl?: string;
+  walletPin?: string; // For PIN verification if needed
   [key: string]: any;
 }
 
 export interface InvestmentRecord {
   id: string;
+  userId?: string;
+  walletId?: string;
   name?: string;
-  amount: number;
+  investmentAmount?: number;
+  amount?: number; // Support both field names
+  currency?: string;
   roiRate?: number;
   tenureMonths?: number;
+  expectedReturn?: number;
+  capitalAmount?: number;
+  interestAmount?: number;
   status: InvestmentStatus;
-  createdAt?: string;
+  agreementReference?: string;
+  agreementStatus?: string;
+  legalDocumentUrl?: string | null;
   startDate?: string;
   maturityDate?: string;
+  payoutDate?: string | null;
   paidOutAt?: string;
-  expectedReturn?: number;
   earnedAmount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  // Transaction data from backend
+  transaction?: {
+    id: string;
+    transactionRef?: string;
+    amount: number;
+    type: string;
+    status: string;
+    createdAt: string;
+    description?: string;
+  };
+  transactionId?: string;
   // optionally include transaction references if backend provides them
   walletTransactionId?: string;
   reference?: string;
   [key: string]: any;
+}
+
+export interface PayoutInvestmentPayload {
+  investmentId: string;
+  formdata?: {
+    walletPin: string;
+  };
+  walletPin?: string;
 }
 
 export interface GetInvestmentsParams {

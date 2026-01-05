@@ -1,7 +1,51 @@
 export interface IUpdateUser {
-  fullname: string;
-  phoneNumber: string;
-  dateOfBirth: string;
+  fullName?: string;
+  phoneNumber?: string;
+  dateOfBirth?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  employmentStatus?: string;
+  occupation?: string;
+  primaryPurpose?: string;
+  sourceOfFunds?: string;
+  expectedMonthlyInflow?: number;
+  passportNumber?: string;
+  passportCountry?: string;
+}
+
+export interface IUploadDocument {
+  documentType: "passport" | "bank_statement" | "utility_bill" | "drivers_license" | "national_id" | "other";
+  document: File;
+  documentNumber?: string;
+  documentCountry?: string;
+  issueDate?: string;
+  expiryDate?: string;
+}
+
+export interface IBiometricChallenge {
+  identifier: string;
+  deviceId: string;
+}
+
+export interface IBiometricEnroll {
+  deviceId: string;
+  publicKey: string;
+  biometricType: "fingerprint" | "faceid";
+  deviceName: string;
+}
+
+export interface IBiometricLogin {
+  identifier: string;
+  deviceId: string;
+  signature: string;
+  challenge: string;
+  publicKey: string;
+}
+
+export interface IBiometricDisable {
+  deviceId: string;
 }
 
 export interface IUpdateUserCurrency {
@@ -46,4 +90,8 @@ export interface IVerifyPhoneNumber {
 
 export interface IValidatePhoneNumber {
   phoneNumber: string;
+}
+
+export interface IVerifyWalletPin {
+  pin: string;
 }
