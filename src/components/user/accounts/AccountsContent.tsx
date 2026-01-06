@@ -5,6 +5,7 @@ import NextImage from "next/image";
 import Link from "next/link";
 import useUserStore from "@/store/user.store";
 import { useGetNotifications } from "@/api/notification/notification.queries";
+import { NotificationItem } from "@/api/notification/notification.types";
 import { format, formatDistanceToNow } from "date-fns";
 import { FiArrowDownLeft, FiArrowUpRight, FiCheckCircle, FiXCircle, FiChevronDown, FiPlus, FiClock, FiCopy } from "react-icons/fi";
 import { LuWifi } from "react-icons/lu";
@@ -791,8 +792,8 @@ const AccountsContent: React.FC = () => {
           </div>
         ) : hasActivity ? (
           <ul className="flex flex-col gap-1.5">
-            {recent.map((n, idx) => {
-              const isPositive = /login|successful|completed/i.test(`${n.title} ${n.body}`);
+            {recent.map((n: NotificationItem, idx: number) => {
+              const isPositive = /login|successful|completed/i.test(`${n.title} ${n.message}`);
               const Icon = isPositive ? FiCheckCircle : FiXCircle;
               return (
                 <li key={n.id ?? idx} className="grid grid-cols-[auto,1fr,auto] items-center gap-3 py-2.5">
@@ -801,7 +802,7 @@ const AccountsContent: React.FC = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-text-200 dark:text-text-800 text-sm sm:text-base truncate">{n.title}</p>
-                    <p className="text-xs text-white/80 truncate">{n.body}</p>
+                    <p className="text-xs text-white/80 truncate">{n.message}</p>
                   </div>
                   <div className="text-[11px] text-white/70 whitespace-nowrap">
                     {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
