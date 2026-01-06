@@ -41,7 +41,7 @@ const TransactionChartCard = ({ spanCols = 1 }: TransactionChartCardProps) => {
           transaction.transferDetails?.amountPaid ||
           transaction.depositDetails?.amountPaid ||
           transaction.billDetails?.amountPaid ||
-          transaction.amount ||
+          Math.abs(transaction.currentBalance - transaction.previousBalance) ||
           0;
 
         if (transaction.type === "CREDIT") {
