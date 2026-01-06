@@ -272,14 +272,14 @@ export const useCreateAccount = (
 };
 
 export const useGetWalletAccounts = () => {
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: ["walletAccounts"],
     queryFn: getWalletAccountsRequest,
   });
 
   const accounts: WalletAccount[] = data?.data?.data;
 
-  return { accounts, isPending, isError };
+  return { accounts, isPending, isError, refetch };
 };
 
 export const useCreateMultiCurrencyAccount = (
