@@ -11,6 +11,7 @@ interface ConfirmActionModalProps {
   description?: string;
   confirmText?: string;
   confirmTone?: "danger" | "primary";
+  isLoading?: boolean;
 }
 
 const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
@@ -21,6 +22,7 @@ const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
   description,
   confirmText = "Confirm",
   confirmTone = "primary",
+  isLoading = false,
 }) => {
   if (!isOpen) return null;
 
@@ -41,8 +43,20 @@ const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
           <p className="text-white/70 text-sm mb-4">{description}</p>
         )}
         <div className="mt-4 flex items-center justify-between gap-3">
-          <button onClick={onClose} className="px-5 py-2 rounded-lg border border-white/10 text-white hover:bg-white/5 text-sm font-medium">Back</button>
-          <button onClick={onConfirm} className={`px-5 py-2 rounded-lg text-sm font-medium ${confirmClasses}`}>{confirmText}</button>
+          <button 
+            onClick={onClose} 
+            disabled={isLoading}
+            className="px-5 py-2 rounded-lg border border-white/10 text-white hover:bg-white/5 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Back
+          </button>
+          <button 
+            onClick={onConfirm} 
+            disabled={isLoading}
+            className={`px-5 py-2 rounded-lg text-sm font-medium ${confirmClasses} disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            {isLoading ? "Loading..." : confirmText}
+          </button>
         </div>
       </div>
     </div>
