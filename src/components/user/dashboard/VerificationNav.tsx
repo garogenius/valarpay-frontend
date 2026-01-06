@@ -3,6 +3,7 @@ import React from "react";
 const VerificationNav = ({
   currentStep,
   steps,
+  handleStepClick,
 }: {
   currentStep: number;
   steps: { value: number; clickable: boolean; completed: boolean }[];
@@ -17,14 +18,14 @@ const VerificationNav = ({
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto p-4">
+    <div className="w-full max-w-md mx-auto px-2">
       <div className="relative flex items-center justify-between">
         {/* Progress Line */}
-        <div className="absolute left-0 right-0 top-1/2 h-[1px] bg-bg-300 -translate-y-1/2" />
+        <div className="absolute left-0 right-0 top-1/2 h-[0.5px] bg-bg-300 -translate-y-1/2" />
 
         {/* Active Progress Line */}
         <div
-          className="absolute left-0 top-1/2 h-[1px] bg-primary -translate-y-1/2 transition-all duration-300"
+          className="absolute left-0 top-1/2 h-[0.5px] bg-primary -translate-y-1/2 transition-all duration-300"
           style={{ width: getProgressWidth() }}
         />
 
@@ -41,9 +42,9 @@ const VerificationNav = ({
           return (
             <button
               key={index}
-              onClick={() => {}}
+              onClick={() => handleStepClick(step.value)}
               className={`
-                  relative z-10 w-8 xs:w-10 h-8 xs:h-10 rounded-full border-[3.34px] 
+                  relative z-10 w-5 h-5 rounded-full border-[2px] 
                   flex items-center justify-center
                   transition-all duration-300
                   ${
@@ -55,7 +56,7 @@ const VerificationNav = ({
             >
               {showActiveStyle && (
                 <svg
-                  className="text-text-1500 dark:text-text-200 transform transition-transform duration-300 hover:scale-110"
+                  className="text-text-1500 dark:text-text-200 transform transition-transform duration-300 w-3 h-3"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -63,7 +64,7 @@ const VerificationNav = ({
                   <path
                     d="M6.75 12.75L10.25 16.25L17.25 9.75"
                     stroke="currentColor"
-                    strokeWidth="3"
+                    strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     className="animate-draw"

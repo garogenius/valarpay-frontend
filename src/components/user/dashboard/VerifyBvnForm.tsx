@@ -4,10 +4,9 @@
 
 import { motion } from "framer-motion";
 import CustomButton from "@/components/shared/Button";
-import ErrorToast from "@/components/toast/ErrorToast";
-import SuccessToast from "@/components/toast/SuccessToast";
 import { useEffect, useState } from "react";
 import OtpInput from "react-otp-input";
+import VerificationResultModal from "@/components/modals/VerificationResultModal";
 
 import useTimerStore from "@/store/timer.store";
 import {
@@ -24,16 +23,19 @@ const VerifyBvnForm = ({
   handleComplete: (step: number) => void;
 }) => {
   const [token, setToken] = useState("");
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [resultType, setResultType] = useState<"success" | "error">("success");
+  const [resultTitle, setResultTitle] = useState("");
+  const [resultMessage, setResultMessage] = useState<string[]>([]);
 
   const isValid = token.length === 6;
 
   const onVerificationSuccess = () => {
-    SuccessToast({
-      title: "BVN verified",
-      description: "Your BVN verification successful",
-    });
+    setResultType("success");
+    setResultTitle("BVN Verified Successfully!");
+    setResultMessage(["Your BVN has been verified. Your wallet has been created."]);
+    setShowResultModal(true);
     setToken("");
-    handleComplete(2);
   };
 
   const onVerificationError = (error: any) => {
@@ -41,12 +43,19 @@ const VerifyBvnForm = ({
 
     const descriptions = Array.isArray(errorMessage)
       ? errorMessage
-      : [errorMessage];
+      : [errorMessage || "BVN verification failed. Please try again."];
 
-    ErrorToast({
-      title: "Verification Failed",
-      descriptions,
-    });
+    setResultType("error");
+    setResultTitle("Verification Failed");
+    setResultMessage(descriptions);
+    setShowResultModal(true);
+  };
+
+  const handleResultModalClose = () => {
+    setShowResultModal(false);
+    if (resultType === "success") {
+      handleComplete(2);
+    }
   };
 
   const {
@@ -207,6 +216,16 @@ const VerifyBvnForm = ({
       >
         Verify BVN
       </CustomButton>
+
+      {/* Verification Result Modal */}
+      <VerificationResultModal
+        isOpen={showResultModal}
+        onClose={handleResultModalClose}
+        type={resultType}
+        title={resultTitle}
+        message={resultMessage}
+        proceedButtonText={resultType === "success" ? "Continue" : "Try Again"}
+      />
     </motion.div>
   );
 };

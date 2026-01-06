@@ -4,6 +4,7 @@ import {
   ILogin,
   IForgotPassword,
   IVerifyEmail,
+  IVerify2fa,
   IResendVerificationCode,
   IResetPassword,
 } from "./auth.types";
@@ -44,7 +45,7 @@ export const resendVerificationCodeRequest = async (
   });
 };
 
-export const verify2faCodeRequest = async (formdata: IVerifyEmail) => {
+export const verify2faCodeRequest = async (formdata: IVerify2fa) => {
   return request({
     url: "/auth/verify-2fa",
     method: "post",
@@ -53,13 +54,20 @@ export const verify2faCodeRequest = async (formdata: IVerifyEmail) => {
 };
 
 export const resend2faCodeRequest = async (
-  formdata: IResendVerificationCode
+  formdata?: IResendVerificationCode
 ) => {
-  return request({
+  // API expects no body - email is retrieved from auth session
+  const requestConfig: any = {
     url: "/auth/resend-2fa",
     method: "post",
-    data: formdata,
-  });
+  };
+  
+  // Only include data if formdata is provided and not empty
+  if (formdata && Object.keys(formdata).length > 0) {
+    requestConfig.data = formdata;
+  }
+  
+  return request(requestConfig);
 };
 
 export const forgotPasswordRequest = async (formdata: IForgotPassword) => {

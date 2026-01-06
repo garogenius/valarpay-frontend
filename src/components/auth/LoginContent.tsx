@@ -52,7 +52,7 @@ interface LoginFormData {
 const LoginContent = () => {
   const navigate = useNavigate();
   const theme = useTheme();
-  const { setAuthEmail } = useAuthEmailStore();
+  const { setAuthEmail, setAuthUsername } = useAuthEmailStore();
   const { setUser, setIsLoggedIn } = useUserStore();
 
   const [biometricType, setBiometricType] = useState<"fingerprint" | "faceid" | null>(null);
@@ -137,6 +137,7 @@ const LoginContent = () => {
   const onSuccess = (data: any) => {
     const user: User = data?.data?.user;
     setAuthEmail(user?.email);
+    setAuthUsername(form.getValues("username").toLowerCase());
 
     // After login, always go to 2FA verification
     SuccessToast({

@@ -62,7 +62,7 @@ const CreatePinForm = ({
       title: "PIN Created",
       description: "Your PIN has been created successfully",
     });
-    handleComplete(3);
+    handleComplete(2);
     reset();
   };
 

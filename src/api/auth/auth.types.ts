@@ -26,6 +26,11 @@ export interface IVerifyEmail {
   otpCode: string;
 }
 
+export interface IVerify2fa {
+  username: string;
+  otpCode: string;
+}
+
 export interface IResendVerificationCode {
   email: string;
 }

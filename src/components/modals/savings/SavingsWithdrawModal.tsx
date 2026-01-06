@@ -124,7 +124,7 @@ const SavingsWithdrawModal: React.FC<SavingsWithdrawModalProps> = ({
   };
 
   const today = new Date();
-  const maturity = plan ? new Date(plan.maturityDate) : new Date();
+  const maturity = plan && plan.maturityDate ? new Date(plan.maturityDate) : new Date();
   const isEarly = maturity > today;
   const penaltyRatePercent =
     typeof plan?.penaltyRate === "number" ? Math.round(plan.penaltyRate * 1000) / 10 : undefined;

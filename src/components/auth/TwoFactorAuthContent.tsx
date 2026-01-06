@@ -23,11 +23,11 @@ const TwoFactorAuthContent = () => {
   const navigate = useNavigate();
   const router = useRouter();
 
-  const { authEmail } = useAuthEmailStore();
+  const { authEmail, authUsername } = useAuthEmailStore();
   const [token, setToken] = useState("");
   const { setUser, setIsLoggedIn } = useUserStore();
 
-  const isValid = token.length === 6;
+  const isValid = token.length === 6 && !!authUsername;
 
   const onVerificationSuccess = (data: any) => {
     Cookies.set("accessToken", data?.data?.accessToken);
@@ -92,9 +92,9 @@ const TwoFactorAuthContent = () => {
   );
 
   const handleVerify = async () => {
-    if (authEmail) {
+    if (authUsername) {
       verify2faCode({
-        email: authEmail,
+        username: authUsername,
         otpCode: token,
       });
     }
@@ -102,7 +102,8 @@ const TwoFactorAuthContent = () => {
 
   const handleResendClick = async () => {
     if (resendTimer === 0) {
-      resend2faCode({ email: authEmail });
+      // API expects no body - email is retrieved from auth session
+      resend2faCode(undefined);
     }
   };
 

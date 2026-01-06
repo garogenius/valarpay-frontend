@@ -5,11 +5,13 @@ import { IoClose } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 import useUserStore from "@/store/user.store";
 import { TIER_LEVEL } from "@/constants/types";
-import VerificationNav from "@/components/user/dashboard/VerificationNav";
 import BvnForm from "@/components/user/dashboard/BvnForm";
+import NinForm from "@/components/user/dashboard/NinForm";
 import VerifyBvnForm from "@/components/user/dashboard/VerifyBvnForm";
 import CreatePinForm from "@/components/user/dashboard/CreatePinForm";
 import BvnFaceCaptureModal from "@/components/modals/BvnFaceCaptureModal";
+import WelcomeSuccessModal from "@/components/modals/WelcomeSuccessModal";
+import VerificationResultModal from "@/components/modals/VerificationResultModal";
 import { useBvnVerificationWithSelfie, useValidateBvnVerification } from "@/api/wallet/wallet.queries";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
@@ -31,27 +33,13 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
   const hasNgnWallet = !!user?.wallet?.find((w: any) => w.currency === "NGN");
   const isBvnVerified =
     hasNgnWallet || (user?.tierLevel !== TIER_LEVEL.notSet && user?.isBvnVerified);
+  const isNinVerified = user?.isNinVerified || false;
+  const isIdentityVerified = isBvnVerified || isNinVerified;
   const isPinCreated = user?.isWalletPinSet;
 
-  const [steps, setSteps] = useState([
-    {
-      value: 1,
-      clickable: true,
-      completed: isBvnVerified || false,
-    },
-    {
-      value: 2,
-      clickable: false,
-      completed: isBvnVerified || false,
-    },
-    {
-      value: 3,
-      clickable: false,
-      completed: isPinCreated || false,
-    },
-  ]);
+  const [identityType, setIdentityType] = useState<"nin" | "bvn">("nin");
   const [currentStep, setCurrentStep] = useState(
-    (isBvnVerified && !isPinCreated) ? 3 : (isBvnVerified && isPinCreated) ? 3 : 1
+    (isIdentityVerified && !isPinCreated) ? 2 : (isIdentityVerified && isPinCreated) ? 2 : 1
   );
   const [showOtpStep, setShowOtpStep] = useState(false);
   const [bvnDetails, setBvnDetails] = useState<{
@@ -65,13 +53,22 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
   });
   const [showFaceCapture, setShowFaceCapture] = useState(false);
   const [capturedSelfie, setCapturedSelfie] = useState<string>("");
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showVerificationResultModal, setShowVerificationResultModal] = useState(false);
+  const [verificationResultType, setVerificationResultType] = useState<"success" | "error">("success");
+  const [verificationResultTitle, setVerificationResultTitle] = useState("");
+  const [verificationResultMessage, setVerificationResultMessage] = useState<string[]>([]);
   const { setUser } = useUserStore();
 
   // Face ID verification
   const onFaceVerificationError = (error: any) => {
     const errorMessage = error?.response?.data?.message;
     const descriptions = Array.isArray(errorMessage) ? errorMessage : [errorMessage || "Face verification failed"];
-    ErrorToast({ title: "Face Verification Failed", descriptions });
+    
+    setVerificationResultType("error");
+    setVerificationResultTitle("Face Verification Failed");
+    setVerificationResultMessage(descriptions);
+    setShowVerificationResultModal(true);
     setShowFaceCapture(false);
     setCapturedSelfie("");
   };
@@ -79,10 +76,6 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
   const onFaceVerificationSuccess = (data: any) => {
     const responseData = data?.data?.data;
     if (responseData?.verified) {
-      SuccessToast({
-        title: "BVN Verified Successfully!",
-        description: "Your BVN has been verified using face ID. Your wallet has been created.",
-      });
       // Update user data
       if (responseData?.wallet) {
         const { user } = useUserStore.getState();
@@ -94,22 +87,28 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
         };
         setUser(updatedUser as any);
       }
-      handleComplete(1);
+      
+      setVerificationResultType("success");
+      setVerificationResultTitle("BVN Verified Successfully!");
+      setVerificationResultMessage(["Your BVN has been verified using face ID. Your wallet has been created."]);
+      setShowVerificationResultModal(true);
       setShowFaceCapture(false);
       setCapturedSelfie("");
-      // Close modal if required verification is complete
-      if (isRequired) {
-        setTimeout(() => {
-          onSuccess?.();
-        }, 1000);
-      }
     } else {
-      ErrorToast({
-        title: "Face Verification Failed",
-        descriptions: ["Face match verification failed. Please try again."],
-      });
+      setVerificationResultType("error");
+      setVerificationResultTitle("Face Verification Failed");
+      setVerificationResultMessage(["Face match verification failed. Please try again."]);
+      setShowVerificationResultModal(true);
       setShowFaceCapture(false);
       setCapturedSelfie("");
+    }
+  };
+
+  const handleVerificationResultModalClose = () => {
+    setShowVerificationResultModal(false);
+    if (verificationResultType === "success") {
+      // Move to PIN step directly (Face ID doesn't need OTP)
+      handleComplete(1);
     }
   };
 
@@ -128,43 +127,19 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
     }
   };
 
-  // Update steps when user data changes
+  // Update current step when user data changes
   useEffect(() => {
-    setSteps([
-      {
-        value: 1,
-        clickable: true,
-        completed: isBvnVerified || false,
-      },
-      {
-        value: 2,
-        clickable: false,
-        completed: isBvnVerified || false,
-      },
-      {
-        value: 3,
-        clickable: false,
-        completed: isPinCreated || false,
-      },
-    ]);
     setCurrentStep(
-      (isBvnVerified && !isPinCreated) || (isBvnVerified && isPinCreated) ? 3 : 1
+      (isIdentityVerified && !isPinCreated) ? 2 : (isIdentityVerified && isPinCreated) ? 2 : 1
     );
     
     // If verification is complete and modal is required, close it
-    if (isBvnVerified && isPinCreated && isRequired) {
+    if (isIdentityVerified && isPinCreated && isRequired) {
       setTimeout(() => {
         onSuccess?.();
       }, 1000);
     }
-  }, [isBvnVerified, isPinCreated, isRequired, onSuccess]);
-
-  const handleStepClick = (step: number) => {
-    const stepIndex = steps.findIndex((s) => s.value === step);
-    if (stepIndex === 0 || steps[stepIndex - 1].completed) {
-      setCurrentStep(step);
-    }
-  };
+  }, [isBvnVerified, isNinVerified, isIdentityVerified, isPinCreated, isRequired, onSuccess]);
 
   // OTP Validation handlers
   const onOtpValidationError = (error: any) => {
@@ -174,10 +149,6 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
   };
 
   const onOtpValidationSuccess = (data: any) => {
-    SuccessToast({
-      title: "BVN Verified Successfully!",
-      description: "Your BVN has been verified. Your wallet has been created.",
-    });
     // Update user data - wallet is created by the API
     const walletData = data?.data?.data;
     if (walletData) {
@@ -191,7 +162,7 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
       setUser(updatedUser as any);
     }
     // Mark BVN step as complete and move to PIN
-    handleComplete(2);
+    handleComplete(1.5);
   };
 
   const { mutate: validateOtp, isPending: validatingOtp } = useValidateBvnVerification(
@@ -201,54 +172,42 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
 
   const handleComplete = (step: number) => {
     if (step === 1) {
-      // BVN initiated - check if OTP method was used
-      if (bvnDetails.verificationMethod === "otp" && bvnDetails.verificationId) {
-        // Show OTP step
+      // Identity verified (BVN or NIN) - check if BVN OTP method was used
+      if (identityType === "bvn" && bvnDetails.verificationMethod === "otp" && bvnDetails.verificationId) {
+        // Show OTP step for BVN
         setShowOtpStep(true);
-        setCurrentStep(2);
+        setCurrentStep(1.5); // Intermediate step for OTP
       } else {
-        // Face ID method - already handled in onFaceVerificationSuccess
-        setSteps((prevSteps) =>
-          prevSteps.map((s) =>
-            s.value === 1 || s.value === 2 ? { ...s, completed: true } : s
-          )
-        );
-        setCurrentStep(3);
+        // NIN verified or BVN Face ID - move to PIN step
+        setCurrentStep(2);
       }
       return;
     }
 
-    if (step === 2) {
-      // OTP validated - move to PIN step
-      setSteps((prevSteps) =>
-        prevSteps.map((s) =>
-          s.value === 1 || s.value === 2 ? { ...s, completed: true } : s
-        )
-      );
-      setCurrentStep(3);
+    if (step === 1.5) {
+      // OTP validated for BVN - move to PIN step
+      setCurrentStep(2);
       return;
     }
 
-    setSteps((prevSteps) =>
-      prevSteps.map((s) => (s.value === step ? { ...s, completed: true } : s))
-    );
-
-    if (step === 3) {
-      // All steps completed - PIN created
-      // Wait a moment for user data to refresh, then close modal
-      setTimeout(() => {
-        onSuccess?.();
-        if (!isRequired) {
-          handleClose();
-        }
-      }, 1500);
+    if (step === 2) {
+      // PIN created - show welcome modal
+      setShowWelcomeModal(true);
     }
   };
 
   const handleClose = () => {
     // Only allow closing if not required or verification is complete
-    if (!isRequired || isBvnVerified) {
+    if (!isRequired || isIdentityVerified) {
       onClose();
+    }
+  };
+
+  const handleWelcomeClose = () => {
+    setShowWelcomeModal(false);
+    onSuccess?.();
+    if (!isRequired) {
+      handleClose();
     }
   };
 
@@ -271,103 +230,155 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative w-full max-w-2xl bg-bg-600 dark:bg-bg-1100 rounded-2xl border border-border-800 dark:border-border-700 shadow-2xl max-h-[90vh] overflow-hidden flex flex-col"
+            className="relative w-full max-w-lg bg-bg-600 dark:bg-bg-1100 rounded-xl border border-border-800 dark:border-border-700 shadow-2xl max-h-[90vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border-800 dark:border-border-700 bg-bg-500 dark:bg-bg-900">
-              <div>
-                <h2 className="text-white text-xl font-semibold">Complete Your Profile</h2>
-                <p className="text-white/60 text-sm mt-1">Verify your identity to access all features</p>
-              </div>
-              {!isRequired && (
-                <button
-                  onClick={handleClose}
-                  className="p-1.5 rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors"
-                  aria-label="Close modal"
-                >
-                  <IoClose className="w-6 h-6" />
-                </button>
-              )}
-            </div>
+            {/* Close button - top right */}
+            {!isRequired && (
+              <button
+                onClick={handleClose}
+                className="absolute top-4 right-4 z-10 p-1.5 rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+                aria-label="Close modal"
+              >
+                <IoClose className="w-5 h-5" />
+              </button>
+            )}
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto bg-bg-600 dark:bg-bg-1100">
-              <div className="py-6 sm:py-8 flex flex-col h-full gap-6 sm:gap-10 px-4 sm:px-6">
-                {isRequired && (
-                  <div className="bg-[#FF6B2C]/10 border border-[#FF6B2C]/20 rounded-lg p-4 mb-2">
-                    <div className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full bg-[#FF6B2C] flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-white font-medium text-sm">Verification Required</p>
-                        <p className="text-white/70 text-xs mt-1">
-                          You must verify your BVN or NIN to access your dashboard. This is a one-time verification process.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex flex-col gap-3 justify-center items-center">
-                  <h2 className="text-xl sm:text-2xl text-white font-semibold">
-                    {currentStep === 1 && "Verify Your Identity"}
-                    {currentStep === 2 && "Enter OTP Code"}
-                    {currentStep === 3 && "Create Transaction PIN"}
-                  </h2>
-
-                  <VerificationNav
-                    currentStep={currentStep}
-                    steps={steps}
-                    handleStepClick={handleStepClick}
-                  />
-
-                  <p className="w-[90%] 2xs:w-[80%] xs:w-[70%] sm:w-[60%] md:w-[50%] text-center text-white/60 text-sm sm:text-base">
-                    {currentStep === 1 &&
-                      "Verify your identity using BVN with OTP or Face ID to secure your account"}
-                    {currentStep === 2 &&
-                      "Enter the 6-digit OTP code sent to your registered phone number"}
-                    {currentStep === 3 &&
-                      "Create a 4-digit PIN for secure transactions and payment confirmations"}
-                  </p>
-                </div>
-
+              <div className="py-6 sm:py-8 flex flex-col h-full gap-4 sm:gap-6 px-4 sm:px-6">
                 {currentStep === 1 && (
-                  <div className="w-full max-w-xl mx-auto flex flex-col h-full items-center gap-6 sm:gap-8">
-                    <BvnForm
-                      handleComplete={handleComplete}
-                      setBvnDetails={(bvnDetails) => {
-                        setBvnDetails({
-                          ...bvnDetails,
-                          verificationMethod: bvnDetails.verificationMethod || "otp",
-                        });
-                      }}
-                      verificationMethod={bvnDetails.verificationMethod}
-                      setVerificationMethod={(method) => {
-                        setBvnDetails({ ...bvnDetails, verificationMethod: method });
-                      }}
-                      onFaceIdSelected={(bvn) => {
-                        setBvnDetails({ ...bvnDetails, bvn });
-                        setShowFaceCapture(true);
-                      }}
-                    />
-                  </div>
+                  <>
+                    <div className="flex flex-col gap-3 justify-center items-center">
+                      <h2 className="text-lg sm:text-xl text-white font-semibold">
+                        Verify Your Identity
+                      </h2>
+                      <p className="w-full max-w-md text-center text-white/60 text-xs sm:text-sm">
+                        If you want to open account with
+                      </p>
+                    </div>
+
+                    {/* NIN/BVN Selection */}
+                    <div className="w-full max-w-md mx-auto flex flex-col gap-4">
+                      <div className="flex gap-4">
+                        <button
+                          type="button"
+                          onClick={() => setIdentityType("nin")}
+                          className={`flex-1 p-4 rounded-lg border-2 transition-all ${
+                            identityType === "nin"
+                              ? "border-[#FF6B2C] bg-[#FF6B2C]/10"
+                              : "border-border-600 bg-bg-2400 dark:bg-bg-2100"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                              identityType === "nin"
+                                ? "border-[#FF6B2C] bg-[#FF6B2C]"
+                                : "border-gray-400 bg-transparent"
+                            }`}>
+                              {identityType === "nin" && (
+                                <div className="w-2 h-2 rounded-full bg-white" />
+                              )}
+                            </div>
+                            <span className={`text-sm font-medium ${
+                              identityType === "nin"
+                                ? "text-[#FF6B2C]"
+                                : "text-text-200 dark:text-text-800"
+                            }`}>
+                              NIN
+                            </span>
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIdentityType("bvn")}
+                          className={`flex-1 p-4 rounded-lg border-2 transition-all ${
+                            identityType === "bvn"
+                              ? "border-[#FF6B2C] bg-[#FF6B2C]/10"
+                              : "border-border-600 bg-bg-2400 dark:bg-bg-2100"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                              identityType === "bvn"
+                                ? "border-[#FF6B2C] bg-[#FF6B2C]"
+                                : "border-gray-400 bg-transparent"
+                            }`}>
+                              {identityType === "bvn" && (
+                                <div className="w-2 h-2 rounded-full bg-white" />
+                              )}
+                            </div>
+                            <span className={`text-sm font-medium ${
+                              identityType === "bvn"
+                                ? "text-[#FF6B2C]"
+                                : "text-text-200 dark:text-text-800"
+                            }`}>
+                              BVN
+                            </span>
+                          </div>
+                        </button>
+                      </div>
+
+                      {/* Show appropriate form based on selection */}
+                      {identityType === "nin" ? (
+                        <NinForm handleComplete={handleComplete} />
+                      ) : (
+                        <BvnForm
+                          handleComplete={handleComplete}
+                          setBvnDetails={(bvnDetails) => {
+                            setBvnDetails({
+                              ...bvnDetails,
+                              verificationMethod: bvnDetails.verificationMethod || "otp",
+                            });
+                          }}
+                          verificationMethod={bvnDetails.verificationMethod}
+                          setVerificationMethod={(method) => {
+                            setBvnDetails({ ...bvnDetails, verificationMethod: method });
+                          }}
+                          onFaceIdSelected={(bvn) => {
+                            setBvnDetails({ ...bvnDetails, bvn });
+                            setShowFaceCapture(true);
+                          }}
+                        />
+                      )}
+                    </div>
+                  </>
                 )}
-                {currentStep === 2 && showOtpStep && bvnDetails.verificationId && (
-                  <div className="w-full max-w-xl mx-auto flex flex-col h-full items-center gap-6 sm:gap-8">
-                    <VerifyBvnForm
-                      bvnDetails={bvnDetails}
-                      handleComplete={handleComplete}
-                    />
-                  </div>
+                {showOtpStep && bvnDetails.verificationId && currentStep !== 2 && (
+                  <>
+                    <div className="flex flex-col gap-3 justify-center items-center">
+                      <h2 className="text-lg sm:text-xl text-white font-semibold">
+                        Enter OTP Code
+                      </h2>
+                      <p className="w-full max-w-md text-center text-white/60 text-xs sm:text-sm">
+                        Enter the 6-digit OTP code sent to your registered phone number
+                      </p>
+                    </div>
+                    <div className="w-full max-w-md mx-auto flex flex-col h-full items-center gap-4 sm:gap-6">
+                      <VerifyBvnForm
+                        bvnDetails={bvnDetails}
+                        handleComplete={() => {
+                          // After OTP validation, move to PIN step
+                          handleComplete(1.5);
+                        }}
+                      />
+                    </div>
+                  </>
                 )}
-                {currentStep === 3 && (
-                  <div className="w-full max-w-xl mx-auto flex flex-col h-full items-center gap-6 sm:gap-8">
-                    <CreatePinForm handleComplete={handleComplete} />
-                  </div>
+                {currentStep === 2 && (
+                  <>
+                    <div className="flex flex-col gap-3 justify-center items-center">
+                      <h2 className="text-lg sm:text-xl text-white font-semibold">
+                        Create Transaction PIN
+                      </h2>
+                      <p className="w-full max-w-md text-center text-white/60 text-xs sm:text-sm">
+                        Create a 4-digit PIN for secure transactions and payment confirmations
+                      </p>
+                    </div>
+                    <div className="w-full max-w-md mx-auto flex flex-col h-full items-center gap-4 sm:gap-6">
+                      <CreatePinForm handleComplete={handleComplete} />
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -385,6 +396,22 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
       onCapture={handleFaceCapture}
       bvn={bvnDetails.bvn}
       isVerifying={verifyingFace}
+    />
+
+    {/* Welcome Success Modal */}
+    <WelcomeSuccessModal
+      isOpen={showWelcomeModal}
+      onClose={handleWelcomeClose}
+    />
+
+    {/* Verification Result Modal for Face ID */}
+    <VerificationResultModal
+      isOpen={showVerificationResultModal}
+      onClose={handleVerificationResultModalClose}
+      type={verificationResultType}
+      title={verificationResultTitle}
+      message={verificationResultMessage}
+      proceedButtonText={verificationResultType === "success" ? "Continue" : "Try Again"}
     />
   </>
   );

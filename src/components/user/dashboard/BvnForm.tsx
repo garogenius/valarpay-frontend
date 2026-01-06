@@ -4,7 +4,6 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import ErrorToast from "@/components/toast/ErrorToast";
 import { motion } from "framer-motion";
 import CustomButton from "@/components/shared/Button";
 import {
@@ -12,7 +11,8 @@ import {
   handleNumericPaste,
 } from "@/utils/utilityFunctions";
 import { useInitiateBvnVerification } from "@/api/wallet/wallet.queries";
-import SuccessToast from "@/components/toast/SuccessToast";
+import VerificationResultModal from "@/components/modals/VerificationResultModal";
+import { useState } from "react";
 
 const schema = yup.object().shape({
   bvn: yup.string().required("BVN is required"),
@@ -33,6 +33,12 @@ const BvnForm = ({
   setVerificationMethod?: (method: "otp" | "faceid") => void;
   onFaceIdSelected?: (bvn: string) => void;
 }) => {
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [resultType, setResultType] = useState<"success" | "error">("success");
+  const [resultTitle, setResultTitle] = useState("");
+  const [resultMessage, setResultMessage] = useState<string[]>([]);
+  const [verificationId, setVerificationId] = useState<string>("");
+
   const form = useForm<EnterBvnFormData>({
     defaultValues: {
       bvn: "",
@@ -48,42 +54,51 @@ const BvnForm = ({
     const errorMessage = error?.response?.data?.message;
     const descriptions = Array.isArray(errorMessage)
       ? errorMessage
-      : [errorMessage];
+      : [errorMessage || "BVN verification failed. Please try again."];
 
-    ErrorToast({
-      title: "Error during bvn initialization",
-      descriptions,
-    });
+    setResultType("error");
+    setResultTitle("BVN Verification Failed");
+    setResultMessage(descriptions);
+    setShowResultModal(true);
   };
 
   const onSuccess = (data: any) => {
     const responseData = data?.data?.data;
-    const verificationId = responseData?.verificationId || "";
+    const receivedVerificationId = responseData?.verificationId || "";
+    const successMessage = data?.data?.message || "An OTP has been sent to your registered phone number.";
     
-    SuccessToast({
-      title: "OTP Sent",
-      description: data?.data?.message || "An OTP has been sent to your registered phone number.",
-    });
+    // Store verification ID in state
+    setVerificationId(receivedVerificationId);
     
     // Store verification ID for OTP validation
     const bvnValue = form.getValues("bvn");
     setBvnDetails({ 
       bvn: bvnValue, 
-      verificationId: verificationId,
+      verificationId: receivedVerificationId,
       verificationMethod: "otp"
     });
     
-    // Move to OTP verification step (step 2)
-    // Only call handleComplete if we have verificationId
-    if (verificationId) {
-      handleComplete(1);
+    // Only show success modal if we have verificationId
+    if (receivedVerificationId) {
+      setResultType("success");
+      setResultTitle("OTP Sent Successfully");
+      setResultMessage([successMessage]);
+      setShowResultModal(true);
     } else {
-      ErrorToast({
-        title: "Verification Error",
-        descriptions: ["Failed to receive verification ID. Please try again."],
-      });
+      setResultType("error");
+      setResultTitle("Verification Error");
+      setResultMessage(["Failed to receive verification ID. Please try again."]);
+      setShowResultModal(true);
     }
-    reset();
+  };
+
+  const handleResultModalClose = () => {
+    setShowResultModal(false);
+    if (resultType === "success" && verificationId) {
+      // Move to OTP verification step
+      handleComplete(1);
+      reset();
+    }
   };
 
   const {
@@ -221,6 +236,16 @@ const BvnForm = ({
           number, full name, gender, and date of birth.
         </p>
       </div>
+
+      {/* Verification Result Modal */}
+      <VerificationResultModal
+        isOpen={showResultModal}
+        onClose={handleResultModalClose}
+        type={resultType}
+        title={resultTitle}
+        message={resultMessage}
+        proceedButtonText={resultType === "success" ? "Continue" : "Try Again"}
+      />
     </motion.form>
   );
 };
