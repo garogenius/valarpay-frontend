@@ -7,6 +7,8 @@ import CustomButton from "@/components/shared/Button";
 import { useEffect, useState } from "react";
 import OtpInput from "react-otp-input";
 import VerificationResultModal from "@/components/modals/VerificationResultModal";
+import SuccessToast from "@/components/toast/SuccessToast";
+import ErrorToast from "@/components/toast/ErrorToast";
 
 import useTimerStore from "@/store/timer.store";
 import {
