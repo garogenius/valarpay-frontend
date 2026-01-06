@@ -143,7 +143,7 @@ const FinancePlanCard: React.FC<FinancePlanCardProps> = ({
         </div>
       </div>
 
-      {/* Two buttons: View Details and Break Plan - Break Plan only hidden when completed */}
+      {/* Two buttons: View Details and Break Plan - Break Plan only shown for active plans */}
       <div className="flex items-center gap-2 sm:gap-3">
         <button 
           onClick={onView} 
@@ -151,7 +151,7 @@ const FinancePlanCard: React.FC<FinancePlanCardProps> = ({
         >
           View Details
         </button>
-        {onBreak && status !== "completed" && (
+        {onBreak && (
           <button 
             onClick={onBreak} 
             className="flex-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-red-500 py-2 sm:py-2.5 text-xs sm:text-sm transition-colors"
