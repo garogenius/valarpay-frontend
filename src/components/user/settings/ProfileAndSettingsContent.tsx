@@ -28,7 +28,7 @@ import { useNotificationPreferences, useUpdateNotificationPreferences } from "@/
 import { PreferenceDto } from "@/api/notification/notification.types";
 import { useValidatePhoneNumber, useVerifyPhoneNumber, useUpdateUser, useChangePassword } from "@/api/user/user.queries";
 import { useChangeWalletPin } from "@/api/wallet/wallet.queries";
-import { useResendVerificationCode, useVerify2faCode } from "@/api/auth/auth.queries";
+import { useResendVerificationCode, useVerifyEmail } from "@/api/auth/auth.queries";
 
 type TabKey = "personal" | "security" | "preferences";
 
@@ -345,7 +345,7 @@ export default function ProfileAndSettingsContent() {
     setEmailStep("change");
     setChangeEmailOpen(false);
   };
-  const { mutate: verifyEmailCode, isPending: verifyingEmailCode, isError: verifyingEmailCodeErr } = useVerify2faCode(
+  const { mutate: verifyEmailCode, isPending: verifyingEmailCode, isError: verifyingEmailCodeErr } = useVerifyEmail(
     onVerifyEmailCodeError,
     onVerifyEmailCodeSuccess
   );
