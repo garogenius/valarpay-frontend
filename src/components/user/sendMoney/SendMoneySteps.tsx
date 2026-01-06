@@ -217,7 +217,6 @@ const SendMoneySteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       title: "Error during transfer",
       descriptions,
     });
-    setShowConfirmModal(false);
   };
 
   const onSuccess = (data: any) => {
@@ -225,7 +224,6 @@ const SendMoneySteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       title: "Transfer successful",
       description: "Your transfer was successful",
     });
-    setShowConfirmModal(false);
     setTransactionData({
       id: data?.data?.data?.transactionRef || "",
       type: "TRANSFER",
