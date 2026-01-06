@@ -482,7 +482,7 @@ const ProfileContent = () => {
       title: "Biometric Login Enabled",
       description: "You can now log in using fingerprint or Face ID on this device.",
     });
-    refetchBiometricStatus();
+    // refetchBiometricStatus(); // Commented out as biometric hooks are disabled
   };
 
   // const { mutate: enrollBiometric, isPending: enrollingBiometric } = useBiometricEnrollV1(
@@ -582,7 +582,7 @@ const ProfileContent = () => {
       title: "Biometric Login Disabled",
       description: "Biometric login has been disabled on this device.",
     });
-    refetchBiometricStatus();
+    // refetchBiometricStatus(); // Commented out as biometric hooks are disabled
   };
 
   // const { mutate: disableBiometric, isPending: disablingBiometric } = useBiometricDisableV1(
