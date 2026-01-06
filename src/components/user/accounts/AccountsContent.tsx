@@ -471,13 +471,7 @@ const AccountsContent: React.FC = () => {
                   <div>
                     <p className="text-white/60">Account Tier</p>
                     <p className="text-white">{tier}</p>
-            </div>
-          )}
-                {currencyAccount?.status && (
-                <div>
-                    <p className="text-white/60">Status</p>
-                    <p className="text-white capitalize">{currencyAccount.status.toLowerCase()}</p>
-                </div>
+                  </div>
                 )}
               </div>
 
