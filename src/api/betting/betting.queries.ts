@@ -39,12 +39,12 @@ export const useGetBettingWallet = () => {
 };
 
 export const useGetBettingWalletTransactions = ({ limit = 20 }: { limit?: number }) => {
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: ["betting-wallet-transactions", { limit }],
     queryFn: () => getBettingWalletTransactionsRequest({ limit }),
   });
   const transactions: BettingTransaction[] = data?.data?.data ?? [];
-  return { transactions, isPending, isError };
+  return { transactions, isPending, isError, refetch };
 };
 
 export const useGetBettingTransactions = (params: {

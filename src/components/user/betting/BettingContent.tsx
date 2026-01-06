@@ -21,14 +21,12 @@ const BettingContent = () => {
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
   // Fetch betting wallet
-  const { data: walletData, isLoading: walletLoading, refetch: refetchWallet } = useGetBettingWallet();
-  const bettingWallet = walletData?.data?.data;
+  const { wallet: bettingWallet, isPending: walletLoading, refetch: refetchWallet } = useGetBettingWallet();
 
   // Fetch transactions
-  const { data: transactionsData, isLoading: transactionsLoading, refetch: refetchTransactions } = useGetBettingWalletTransactions({
+  const { transactions, isPending: transactionsLoading, refetch: refetchTransactions } = useGetBettingWalletTransactions({
     limit: 20,
   });
-  const transactions = transactionsData?.data?.data || [];
 
   const handleModalSuccess = () => {
     refetchWallet();
