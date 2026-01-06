@@ -111,7 +111,7 @@ const CloseCurrencyAccountModal: React.FC<CloseCurrencyAccountModalProps> = ({
             <CustomButton
               type="button"
               isLoading={isPending}
-              disabled={isPending || (account.balance && account.balance > 0)}
+              disabled={isPending || !!(account.balance && account.balance > 0)}
               className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white disabled:opacity-50"
               onClick={handleSubmit}
             >

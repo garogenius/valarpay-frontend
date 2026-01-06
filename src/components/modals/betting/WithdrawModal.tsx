@@ -31,6 +31,7 @@ const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose, onSucces
   const [selectedPlatform, setSelectedPlatform] = useState<BettingPlatform | null>(null);
   const [showPlatformDropdown, setShowPlatformDropdown] = useState(false);
   const [selectedBank, setSelectedBank] = useState<any>(null);
+  const [showBankDropdown, setShowBankDropdown] = useState(false);
   const [accountNumber, setAccountNumber] = useState("");
   const [accountName, setAccountName] = useState("");
   const [amount, setAmount] = useState("");
@@ -215,23 +216,40 @@ const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose, onSucces
             </div>
 
             {/* Bank Selection */}
-            <div>
+            <div className="relative">
               <label className="text-gray-400 text-sm mb-2 block">Select Bank</label>
-              <SearchableDropdown
-                options={(banks || []).map((bank: any) => ({
-                  value: bank.bankCode,
-                  label: bank.name,
-                  ...bank,
-                }))}
-                value={selectedBank ? { value: selectedBank.bankCode, label: selectedBank.name } : null}
-                onChange={(option: any) => {
-                  setSelectedBank(option);
-                  setAccountName(""); // Clear account name when bank changes
-                }}
-                placeholder="Search and select bank"
-                isLoading={banksLoading}
-                className="w-full"
-              />
+              <button
+                type="button"
+                onClick={() => setShowBankDropdown(!showBankDropdown)}
+                className="w-full bg-[#1C1C1E] border border-gray-700 rounded-lg py-3 px-3 text-white text-sm outline-none focus:border-[#FF6B2C] flex items-center justify-between"
+              >
+                <span className={selectedBank ? "text-white" : "text-gray-400"}>
+                  {selectedBank ? selectedBank.name : "Search and select bank"}
+                </span>
+                <FiChevronDown className={cn("text-gray-400 transition-transform", showBankDropdown && "rotate-180")} />
+              </button>
+              {showBankDropdown && (
+                <div className="absolute top-full mt-2 w-full bg-[#0F0F10] border border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50 max-h-64 overflow-y-auto">
+                  <SearchableDropdown
+                    items={banks || []}
+                    searchKey="name"
+                    displayFormat={(bank: any) => (
+                      <div className="flex flex-col">
+                        <p className="text-sm font-medium text-white">{bank.name}</p>
+                      </div>
+                    )}
+                    onSelect={(bank: any) => {
+                      setSelectedBank(bank);
+                      setAccountName(""); // Clear account name when bank changes
+                      setShowBankDropdown(false);
+                    }}
+                    placeholder="Search bank..."
+                    isOpen={showBankDropdown}
+                    onClose={() => setShowBankDropdown(false)}
+                    isLoading={banksLoading}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Account Number */}

@@ -94,7 +94,7 @@ const TwoFactorAuthContent = () => {
   const handleVerify = async () => {
     if (authEmail) {
       verify2faCode({
-        username: authEmail,
+        email: authEmail,
         otpCode: token,
       });
     }
@@ -102,7 +102,7 @@ const TwoFactorAuthContent = () => {
 
   const handleResendClick = async () => {
     if (resendTimer === 0) {
-      resend2faCode({ username: authEmail });
+      resend2faCode({ email: authEmail });
     }
   };
 

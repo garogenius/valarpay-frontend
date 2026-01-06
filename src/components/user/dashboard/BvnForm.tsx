@@ -23,9 +23,15 @@ type EnterBvnFormData = yup.InferType<typeof schema>;
 const BvnForm = ({
   handleComplete,
   setBvnDetails,
+  verificationMethod,
+  setVerificationMethod,
+  onFaceIdSelected,
 }: {
   handleComplete: (step: number) => void;
-  setBvnDetails: (bvnDetails: { bvn: string; verificationId: string }) => void;
+  setBvnDetails: (bvnDetails: { bvn: string; verificationId: string; verificationMethod?: "otp" | "faceid" }) => void;
+  verificationMethod?: "otp" | "faceid";
+  setVerificationMethod?: (method: "otp" | "faceid") => void;
+  onFaceIdSelected?: (bvn: string) => void;
 }) => {
   const form = useForm<EnterBvnFormData>({
     defaultValues: {
@@ -51,11 +57,32 @@ const BvnForm = ({
   };
 
   const onSuccess = (data: any) => {
+    const responseData = data?.data?.data;
+    const verificationId = responseData?.verificationId || "";
+    
     SuccessToast({
-      title: "Account created",
-      description: data?.data?.message || "Your NGN virtual account has been created successfully.",
+      title: "OTP Sent",
+      description: data?.data?.message || "An OTP has been sent to your registered phone number.",
     });
-    handleComplete(1);
+    
+    // Store verification ID for OTP validation
+    const bvnValue = form.getValues("bvn");
+    setBvnDetails({ 
+      bvn: bvnValue, 
+      verificationId: verificationId,
+      verificationMethod: "otp"
+    });
+    
+    // Move to OTP verification step (step 2)
+    // Only call handleComplete if we have verificationId
+    if (verificationId) {
+      handleComplete(1);
+    } else {
+      ErrorToast({
+        title: "Verification Error",
+        descriptions: ["Failed to receive verification ID. Please try again."],
+      });
+    }
     reset();
   };
 
@@ -68,9 +95,18 @@ const BvnForm = ({
   const bvnLoading = bvnPending && !bvnError;
 
   const onSubmit = async (data: EnterBvnFormData) => {
-    // keep BVN available for later steps even though OTP is no longer required
-    setBvnDetails({ bvn: data.bvn, verificationId: "" });
-    initiateBvn(data);
+    const method = verificationMethod || "otp";
+    setBvnDetails({ bvn: data.bvn, verificationId: "", verificationMethod: method });
+    
+    if (method === "faceid") {
+      // Trigger face capture modal
+      if (onFaceIdSelected) {
+        onFaceIdSelected(data.bvn);
+      }
+    } else {
+      // OTP method - initiate BVN verification
+      initiateBvn(data);
+    }
   };
 
   return (
@@ -106,15 +142,79 @@ const BvnForm = ({
         ) : null}
       </div>
 
+      {/* Verification Method Selection */}
+      <div className="w-full flex flex-col gap-3 mt-4">
+        <label className="text-sm sm:text-base text-text-200 dark:text-text-800 font-medium">
+          Choose Verification Method
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setVerificationMethod?.("otp")}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              verificationMethod === "otp" || !verificationMethod
+                ? "border-[#FF6B2C] bg-[#FF6B2C]/10"
+                : "border-border-600 bg-bg-2400 dark:bg-bg-2100"
+            }`}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                verificationMethod === "otp" || !verificationMethod
+                  ? "bg-[#FF6B2C] text-white"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+              }`}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span className={`text-sm font-medium ${
+                verificationMethod === "otp" || !verificationMethod
+                  ? "text-[#FF6B2C]"
+                  : "text-text-200 dark:text-text-800"
+              }`}>
+                OTP Verification
+              </span>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setVerificationMethod?.("faceid")}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              verificationMethod === "faceid"
+                ? "border-[#FF6B2C] bg-[#FF6B2C]/10"
+                : "border-border-600 bg-bg-2400 dark:bg-bg-2100"
+            }`}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                verificationMethod === "faceid"
+                  ? "bg-[#FF6B2C] text-white"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+              }`}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <span className={`text-sm font-medium ${
+                verificationMethod === "faceid"
+                  ? "text-[#FF6B2C]"
+                  : "text-text-200 dark:text-text-800"
+              }`}>
+                Face ID
+              </span>
+            </div>
+          </button>
+        </div>
+      </div>
+
       <div className="flex flex-col gap-4 mt-4">
-        {" "}
         <CustomButton
           type="submit"
-          disabled={!isValid || bvnLoading}
-          isLoading={bvnLoading}
-          className="w-full  border-2 border-primary text-black text-base 2xs:text-lg max-2xs:px-6 py-3.5"
+          disabled={!isValid || (bvnLoading && verificationMethod !== "faceid")}
+          isLoading={bvnLoading && verificationMethod !== "faceid"}
+          className="w-full bg-[#FF6B2C] hover:bg-[#FF7A3D] text-white text-base 2xs:text-lg max-2xs:px-6 py-3.5"
         >
-          Initiate BVN Verification{" "}
+          {verificationMethod === "faceid" ? "Verify with Face ID" : "Initiate BVN Verification"}
         </CustomButton>
         <p className="w-full 2xs:w-[90%] sm:w-[80%] font-medium text-sm text-text-200 dark:text-text-800 ">
           Your BVN is secured with us. It only gives us access to your phone

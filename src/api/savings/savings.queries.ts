@@ -19,7 +19,7 @@ export const useSavingsProducts = () => {
     retry: 1,
   });
 
-  const products = data?.data?.data || data?.data || data?.products || [];
+  const products = (data as any)?.data?.data || (data as any)?.data || (data as any)?.products || [];
   return { products, isPending, isError, error, refetch };
 };
 
@@ -32,7 +32,7 @@ export const useSavingsPlans = () => {
   });
 
   // Handle new API structure: { message: "...", data: [...] }
-  const plans = data?.data?.data || data?.data || data?.plans || [];
+  const plans = (data as any)?.data?.data || (data as any)?.data || (data as any)?.plans || [];
   return { plans, isPending, isError, error, refetch };
 };
 

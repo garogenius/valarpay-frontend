@@ -27,9 +27,10 @@ import ChangePhoneInfoModal from "@/components/modals/settings/ChangePhoneInfoMo
 import ChangePhoneEnterModal from "@/components/modals/settings/ChangePhoneEnterModal";
 import UpdateUsernameModal from "@/components/modals/settings/UpdateUsernameModal";
 import UpdateAddressModal from "@/components/modals/settings/UpdateAddressModal";
-import PassportUploadModal from "@/components/modals/settings/PassportUploadModal";
-import BankStatementUploadModal from "@/components/modals/settings/BankStatementUploadModal";
-import UtilityBillUploadModal from "@/components/modals/settings/UtilityBillUploadModal";
+// Document upload modals - using direct upload in KYC tab instead
+// import PassportUploadModal from "@/components/modals/settings/PassportUploadModal";
+// import BankStatementUploadModal from "@/components/modals/settings/BankStatementUploadModal";
+// import UtilityBillUploadModal from "@/components/modals/settings/UtilityBillUploadModal";
 import SearchableDropdown from "@/components/shared/SearchableDropdown";
 import ChangeTransactionPinModal from "@/components/modals/settings/ChangeTransactionPinModal";
 import ChangePasswordModal from "@/components/modals/settings/ChangePasswordModal";
@@ -37,12 +38,14 @@ import ChangePasscodeModal from "@/components/modals/settings/ChangePasscodeModa
 import SetSecurityQuestionsModal from "@/components/modals/settings/SetSecurityQuestionsModal";
 import LinkedAccountsModal from "@/components/modals/settings/LinkedAccountsModal";
 import DeleteAccountModal from "@/components/modals/settings/DeleteAccountModal";
-import BiometricTypeSelectionModal from "@/components/modals/settings/BiometricTypeSelectionModal";
+// Biometric modal - commented out as biometric login is disabled
+// import BiometricTypeSelectionModal from "@/components/modals/settings/BiometricTypeSelectionModal";
 import PersonalTab from "@/components/user/settings/tabs/PersonalTab";
 import SecurityPrivacyTab from "@/components/user/settings/tabs/SecurityPrivacyTab";
 import PreferencesTab from "@/components/user/settings/tabs/PreferencesTab";
 import useNavigate from "@/hooks/useNavigate";
-import { useUpdateUser, useCreateOvalPerson, useUploadDocument } from "@/api/user/user.queries";
+import { useUpdateUser, useUploadDocument } from "@/api/user/user.queries";
+// useCreateOvalPerson - commented out as it doesn't exist
 import { updateUserRequest } from "@/api/user/user.apis";
 import { CURRENCY } from "@/constants/types";
 import usePaymentSettingsStore from "@/store/paymentSettings.store";
@@ -312,21 +315,24 @@ const SOURCE_OF_FUNDS_OPTIONS = [
 
 import VerifyWalletPinModal from "@/components/modals/settings/VerifyWalletPinModal";
 import { isFingerprintPaymentAvailable } from "@/services/fingerprintPayment.service";
-import ConfirmDialog from "@/components/modals/ConfirmDialog";
-import {
-  clearBiometricCredentials,
-  getBiometricType,
-  hasBiometricCredential,
-  isPlatformAuthenticatorAvailable,
-  isWebAuthnSupported,
-  registerBiometric,
-} from "@/services/webauthn.service";
-import { getDeviceId, getDeviceInfo } from "@/services/fcm.service";
-import {
-  useBiometricDisableV1,
-  useBiometricEnrollV1,
-  useBiometricStatusV1,
-} from "@/api/auth/auth.queries";
+// Generic confirm dialog - using inline confirmation instead
+// import ConfirmDialog from "@/components/modals/ConfirmDialog";
+// Biometric services - commented out as services don't exist and biometric login is disabled
+// import {
+//   clearBiometricCredentials,
+//   getBiometricType,
+//   hasBiometricCredential,
+//   isPlatformAuthenticatorAvailable,
+//   isWebAuthnSupported,
+//   registerBiometric,
+// } from "@/services/webauthn.service";
+// import { getDeviceId, getDeviceInfo } from "@/services/fcm.service";
+// Biometric hooks - commented out as they don't exist and biometric login is disabled
+// import {
+//   useBiometricDisableV1,
+//   useBiometricEnrollV1,
+//   useBiometricStatusV1,
+// } from "@/api/auth/auth.queries";
 
 const schema = yup.object().shape({
   email: yup
@@ -423,7 +429,8 @@ const ProfileContent = () => {
   const [openDisableBiometricLogin, setOpenDisableBiometricLogin] = useState(false);
   const [openBiometricTypeSelection, setOpenBiometricTypeSelection] = useState(false);
   const [selectedBiometricType, setSelectedBiometricType] = useState<"fingerprint" | "faceid" | null>(null);
-  const [biometricDeviceId] = useState(() => getDeviceId());
+  // const [biometricDeviceId] = useState(() => getDeviceId()); // Commented out - service doesn't exist
+  const [biometricDeviceId] = useState<string>("");
   
   // Document upload modal states
   const [openPassportUpload, setOpenPassportUpload] = useState(false);
@@ -435,29 +442,32 @@ const ProfileContent = () => {
     isFingerprintPaymentAvailable().then(setIsFingerprintAvailable);
   }, []);
 
-  useEffect(() => {
-    const check = async () => {
-      if (!isWebAuthnSupported()) {
-        setIsBiometricLoginAvailable(false);
-        return;
-      }
-      const available = await isPlatformAuthenticatorAvailable();
-      setIsBiometricLoginAvailable(available);
-    };
-    check();
-  }, []);
+  // Biometric availability check - commented out as services don't exist
+  // useEffect(() => {
+  //   const check = async () => {
+  //     if (!isWebAuthnSupported()) {
+  //       setIsBiometricLoginAvailable(false);
+  //       return;
+  //     }
+  //     const available = await isPlatformAuthenticatorAvailable();
+  //     setIsBiometricLoginAvailable(available);
+  //   };
+  //   check();
+  // }, []);
 
-  const {
-    data: biometricStatusResp,
-    isFetching: biometricStatusLoading,
-    refetch: refetchBiometricStatus,
-  } = useBiometricStatusV1(biometricDeviceId);
-  const biometricStatus = (biometricStatusResp as any)?.data as any;
-  const biometricEnabledOnServer = !!biometricStatus?.enabled;
-  const biometricLocked = !!biometricStatus?.locked;
-  const biometricFailedAttempts =
-    typeof biometricStatus?.failedAttempts === "number" ? biometricStatus.failedAttempts : undefined;
-  const hasLocalCredential = hasBiometricCredential();
+  // Biometric status - commented out as hook doesn't exist
+  // const {
+  //   data: biometricStatusResp,
+  //   isFetching: biometricStatusLoading,
+  //   refetch: refetchBiometricStatus,
+  // } = useBiometricStatusV1(biometricDeviceId);
+  // const biometricStatus = (biometricStatusResp as any)?.data as any;
+  const biometricStatusLoading = false;
+  const biometricEnabledOnServer = false;
+  const biometricLocked = false;
+  const biometricFailedAttempts = undefined;
+  // const hasLocalCredential = hasBiometricCredential(); // Commented out - service doesn't exist
+  const hasLocalCredential = false;
 
   const onBiometricEnrollError = (error: any) => {
     const errorMessage = error?.response?.data?.message;
@@ -475,10 +485,12 @@ const ProfileContent = () => {
     refetchBiometricStatus();
   };
 
-  const { mutate: enrollBiometric, isPending: enrollingBiometric } = useBiometricEnrollV1(
-    onBiometricEnrollError,
-    onBiometricEnrollSuccess
-  );
+  // const { mutate: enrollBiometric, isPending: enrollingBiometric } = useBiometricEnrollV1(
+  //   onBiometricEnrollError,
+  //   onBiometricEnrollSuccess
+  // );
+  const enrollingBiometric = false;
+  const enrollBiometric = () => {}; // Stub function
 
   const handleBiometricTypeSelection = async (type: "fingerprint" | "faceid") => {
     // Validate prerequisites
@@ -506,33 +518,35 @@ const ProfileContent = () => {
     setSelectedBiometricType(type);
 
     try {
-      const deviceInfo = getDeviceInfo();
-      
-      // Register the biometric credential (this will prompt user for their biometric)
-      // Note: The actual biometric used will be determined by the device/browser
-      // We're just specifying which type we want to register it as
-      const credential = await registerBiometric({
-        userId: user.id,
-        username: user?.email || user?.phoneNumber || user?.username || "user",
-        displayName:
-          (user as any)?.businessName ||
-          user?.fullname ||
-          user?.username ||
-          "NattyPay User",
-      });
-
-      // Validate credential was created successfully
-      if (!credential || !credential.publicKey) {
-        throw new Error("Failed to create biometric credential");
-      }
-
-      // Enroll with the selected type
-      enrollBiometric({
-        deviceId: biometricDeviceId,
-        publicKey: credential.publicKey, // Already in PEM format from webauthn.service
-        biometricType: type,
-        deviceName: deviceInfo?.deviceName || "Web Browser",
-      });
+      // Biometric registration - commented out as services don't exist
+      // const deviceInfo = getDeviceInfo();
+      // 
+      // // Register the biometric credential (this will prompt user for their biometric)
+      // // Note: The actual biometric used will be determined by the device/browser
+      // // We're just specifying which type we want to register it as
+      // const credential = await registerBiometric({
+      //   userId: user.id,
+      //   username: user?.email || user?.phoneNumber || user?.username || "user",
+      //   displayName:
+      //     (user as any)?.businessName ||
+      //     user?.fullname ||
+      //     user?.username ||
+      //     "NattyPay User",
+      // });
+      // 
+      // // Validate credential was created successfully
+      // if (!credential || !credential.publicKey) {
+      //   throw new Error("Failed to create biometric credential");
+      // }
+      // 
+      // // Enroll with the selected type
+      // enrollBiometric({
+      //   deviceId: biometricDeviceId,
+      //   publicKey: credential.publicKey, // Already in PEM format from webauthn.service
+      //   biometricType: type,
+      //   deviceName: deviceInfo?.deviceName || "Web Browser",
+      // });
+      throw new Error("Biometric login is currently disabled");
     } catch (e: any) {
       // Handle user cancellation specifically
       const errorMessage = e?.message || "Unable to enable biometric login";
@@ -571,10 +585,12 @@ const ProfileContent = () => {
     refetchBiometricStatus();
   };
 
-  const { mutate: disableBiometric, isPending: disablingBiometric } = useBiometricDisableV1(
-    onBiometricDisableError,
-    onBiometricDisableSuccess
-  );
+  // const { mutate: disableBiometric, isPending: disablingBiometric } = useBiometricDisableV1(
+  //   onBiometricDisableError,
+  //   onBiometricDisableSuccess
+  // );
+  const disablingBiometric = false;
+  const disableBiometric = () => {}; // Stub function
 
   useOnClickOutside(datePickerRef as React.RefObject<HTMLElement>, () =>
     setShowDatePicker(false)
@@ -1109,10 +1125,12 @@ const ProfileContent = () => {
     });
   };
 
-  const { mutate: createOvalPerson, isPending: creatingOvalPerson } = useCreateOvalPerson(
-    onOvalPersonError,
-    onOvalPersonSuccess
-  );
+  // const { mutate: createOvalPerson, isPending: creatingOvalPerson } = useCreateOvalPerson(
+  //   onOvalPersonError,
+  //   onOvalPersonSuccess
+  // );
+  const creatingOvalPerson = false;
+  const createOvalPerson = () => {}; // Stub function
 
   const onSubmit = async (data: UserFormData) => {
     // Store the submitted data to preserve form values after save
@@ -3005,13 +3023,17 @@ const ProfileContent = () => {
                       }
 
                       try {
-                        // First, detect the biometric type
-                        const detectedType = await getBiometricType();
-                        const defaultBiometricType = detectedType === "face" ? ("faceid" as const) : ("fingerprint" as const);
-                        
-                        // Show selection modal to let user choose or confirm the type
-                        setSelectedBiometricType(defaultBiometricType);
-                        setOpenBiometricTypeSelection(true);
+                        // Biometric type detection - commented out as service doesn't exist
+                        // const detectedType = await getBiometricType();
+                        // const defaultBiometricType = detectedType === "face" ? ("faceid" as const) : ("fingerprint" as const);
+                        // 
+                        // // Show selection modal to let user choose or confirm the type
+                        // setSelectedBiometricType(defaultBiometricType);
+                        // setOpenBiometricTypeSelection(true);
+                        ErrorToast({
+                          title: "Biometric Login Disabled",
+                          descriptions: ["Biometric login is currently disabled"],
+                        });
                       } catch (e: any) {
                         ErrorToast({
                           title: "Biometric Setup Failed",
@@ -3137,8 +3159,8 @@ const ProfileContent = () => {
         <LinkedAccountsModal isOpen={openLinked} onClose={()=> setOpenLinked(false)} />
         <DeleteAccountModal isOpen={openDelete} onClose={()=> setOpenDelete(false)} />
         
-        {/* Document Upload Modals */}
-        <PassportUploadModal
+        {/* Document Upload Modals - Commented out as modals don't exist, using direct upload in KYC tab */}
+        {/* <PassportUploadModal
           isOpen={openPassportUpload}
           onClose={() => setOpenPassportUpload(false)}
           onSubmit={handlePassportUpload}
@@ -3164,7 +3186,7 @@ const ProfileContent = () => {
             utilityBillUrl: (user as any)?.utilityBillUrl || "",
           }}
           isLoading={uploadDocumentPending}
-        />
+        /> */}
         <VerifyWalletPinModal
           isOpen={openVerifyPinForFingerprint}
           onClose={() => {
@@ -3184,8 +3206,8 @@ const ProfileContent = () => {
           }}
         />
 
-        {/* Disable Biometric Login Confirmation */}
-        <ConfirmDialog
+        {/* Disable Biometric Login Confirmation - Commented out as modal doesn't exist, biometric login is disabled */}
+        {/* <ConfirmDialog
           isOpen={openDisableBiometricLogin}
           title="Disable Biometric Login?"
           description="You will need to use password login on this device. You can enable biometric login again anytime."
@@ -3196,12 +3218,12 @@ const ProfileContent = () => {
           onConfirm={() => {
             setOpenDisableBiometricLogin(false);
             disableBiometric({ deviceId: biometricDeviceId });
-            clearBiometricCredentials();
+            // clearBiometricCredentials(); // Commented out - service doesn't exist
           }}
-        />
+        /> */}
         
-        {/* Biometric Type Selection Modal */}
-        {selectedBiometricType && (
+        {/* Biometric Type Selection Modal - Commented out as modal doesn't exist, biometric login is disabled */}
+        {/* {selectedBiometricType && (
           <BiometricTypeSelectionModal
             isOpen={openBiometricTypeSelection}
             onClose={() => {
@@ -3214,7 +3236,7 @@ const ProfileContent = () => {
             detectedType={selectedBiometricType}
             isLoading={enrollingBiometric}
           />
-        )}
+        )} */}
       </div>
     </div>
     </>

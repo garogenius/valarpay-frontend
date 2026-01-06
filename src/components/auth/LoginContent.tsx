@@ -18,9 +18,13 @@ import useNavigate from "@/hooks/useNavigate";
 import icons from "../../../public/icons";
 import { useTheme } from "@/store/theme.store";
 import useAuthEmailStore from "@/store/authEmail.store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { User } from "@/constants/types";
 import { ILogin } from "@/api/auth/auth.types";
+import Cookies from "js-cookie";
+import * as BiometricService from "@/services/biometric.service";
+import { useBiometricChallenge, useBiometricLogin } from "@/api/biometric/biometric.queries";
+import useUserStore from "@/store/user.store";
 
 const schema = yup.object().shape({
   username: yup
@@ -49,6 +53,10 @@ const LoginContent = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { setAuthEmail } = useAuthEmailStore();
+  const { setUser, setIsLoggedIn } = useUserStore();
+
+  const [biometricType, setBiometricType] = useState<"fingerprint" | "faceid" | null>(null);
+  const [deviceId] = useState(() => BiometricService.getDeviceId());
 
   const form = useForm<LoginFormData>({
     defaultValues: {
@@ -103,6 +111,10 @@ const LoginContent = () => {
     setValue("operatingSystem", getOS());
     setValue("deviceName", getDeviceName());
     getIpAddress();
+
+    // Detect biometric capability
+    // COMMENTED OUT: Biometric login feature temporarily disabled
+    // BiometricService.detectBiometricCapability().then(setBiometricType);
   }, [setValue]); // Run once when component mounts
 
   const onError = async (error: any) => {
@@ -144,6 +156,47 @@ const LoginContent = () => {
   } = useLogin(onError, onSuccess);
 
   const loginLoading = loginPending && !loginError;
+
+  // COMMENTED OUT: Biometric login feature temporarily disabled
+  // Biometric login
+  // const { mutate: getChallenge, isPending: challengePending } = useBiometricChallenge(
+  //   (error) => {
+  //     ErrorToast({ title: "Challenge Error", descriptions: [error?.response?.data?.message || "Failed to get challenge"] });
+  //   },
+  //   (data) => {
+  //     const challenge = data.data.challenge;
+  //     BiometricService.signChallenge(challenge).then((signed) => {
+  //       if (signed) {
+  //         biometricLoginMutate({
+  //           identifier: form.getValues("username"),
+  //           deviceId,
+  //           signature: signed.signature,
+  //           challenge,
+  //           publicKey: BiometricService.getStoredBiometricInfo()?.publicKey || "",
+  //         });
+  //       } else {
+  //         ErrorToast({ title: "Biometric Error", descriptions: ["Failed to sign challenge"] });
+  //       }
+  //     }).catch(() => {
+  //       ErrorToast({ title: "Biometric Error", descriptions: ["Failed to sign challenge"] });
+  //     });
+  //   }
+  // );
+
+  // const { mutate: biometricLoginMutate, isPending: biometricLoginPending } = useBiometricLogin(
+  //   (error) => {
+  //     const errorMessage = error?.response?.data?.message;
+  //     const descriptions = Array.isArray(errorMessage) ? errorMessage : [errorMessage || "Biometric login failed"];
+  //     ErrorToast({ title: "Biometric Login Failed", descriptions });
+  //   },
+  //   (data) => {
+  //     Cookies.set("accessToken", data.data.accessToken);
+  //     setUser(data.data.user);
+  //     setIsLoggedIn(true);
+  //     SuccessToast({ title: "Login successful!", description: "You have been logged in using biometric authentication." });
+  //     navigate("/user/dashboard");
+  //   }
+  // );
 
   const onSubmit = async (data: LoginFormData) => {
     console.log('data:',data)
@@ -291,6 +344,26 @@ const LoginContent = () => {
               >
                 Sign In{" "}
               </CustomButton>
+
+              {/* COMMENTED OUT: Biometric login feature temporarily disabled */}
+              {/* {biometricType && BiometricService.isWebAuthnSupported() && (
+                <CustomButton
+                  type="button"
+                  onClick={() => {
+                    const username = form.getValues("username");
+                    if (!username) {
+                      ErrorToast({ title: "Username Required", descriptions: ["Please enter your username first"] });
+                      return;
+                    }
+                    getChallenge({ identifier: username, deviceId });
+                  }}
+                  disabled={challengePending || biometricLoginPending || !form.getValues("username")}
+                  isLoading={challengePending || biometricLoginPending}
+                  className="w-full bg-gray-800 hover:bg-gray-700 text-white text-base py-3.5"
+                >
+                  {biometricType === "faceid" ? "Login with Face ID" : "Login with Fingerprint"}
+                </CustomButton>
+              )} */}
             </form>
           </motion.div>
         </div>

@@ -1,4 +1,4 @@
-export type CardCurrency = "USD" | "EUR" | "GBP";
+export type CardCurrency = "USD";
 export type CardStatus = "ACTIVE" | "FROZEN" | "BLOCKED" | "CLOSED";
 
 export interface IVirtualCard {
@@ -72,4 +72,9 @@ export interface ICardTransaction {
   description?: string;
   timestamp: string;
 }
+
+
+
+
+
 

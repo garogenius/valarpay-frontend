@@ -192,7 +192,7 @@ const WithdrawCardModal: React.FC<WithdrawCardModalProps> = ({ isOpen, onClose, 
                 onClick={handleConfirm}
                 disabled={walletPin.length !== 4 || withdrawing}
                 isLoading={withdrawing}
-                className="flex-1 bg-[#D4B139] hover:bg-[#c7a42f] text-black rounded-lg py-2.5"
+                className="flex-1 bg-[#FF6B2C] hover:bg-[#FF7A3D] text-white rounded-lg py-2.5"
               >
                 Confirm
               </CustomButton>

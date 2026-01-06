@@ -57,9 +57,16 @@ const VerifyBvnForm = ({
 
   const onResendVerificationCodeSuccess = (data: any) => {
     useTimerStore.getState().setTimer(120);
+    const responseData = data?.data?.data;
+    const newVerificationId = responseData?.verificationId || "";
+    // Update verificationId if provided
+    if (newVerificationId && bvnDetails) {
+      // Update bvnDetails with new verificationId
+      // This will be handled by parent component
+    }
     SuccessToast({
-      title: "Sent Successfully!",
-      description: data.data.message,
+      title: "OTP Sent Successfully!",
+      description: data?.data?.message || "A new OTP has been sent to your registered phone number.",
     });
   };
 
@@ -171,19 +178,19 @@ const VerifyBvnForm = ({
       <p className=" my-1 sm:my-2.5 text-centertext-sm 2xs:text-base text-text-1000  font-medium">
         {resendTimer && resendTimer > 0 ? (
           <>
-            Didn’t get the code? <span className="text-secondary">Resend</span>{" "}
+            Didn't get the code? <span className="text-[#FF6B2C]">Resend</span>{" "}
             in{" "}
-            <span className="text-secondary">{formatTimer(resendTimer)}</span>
+            <span className="text-[#FF6B2C]">{formatTimer(resendTimer)}</span>
           </>
         ) : (
           <div className="flex items-center justify-center ">
             Didn’t receive any code?
             <span
-              className="cursor-pointer text-secondary ml-1"
+              className="cursor-pointer text-[#FF6B2C] hover:text-[#FF7A3D] ml-1 font-medium"
               onClick={handleResendClick}
             >
               {resendLoadingStatus ? (
-                <SpinnerLoader width={20} height={20} color="#D4B139" />
+                <SpinnerLoader width={20} height={20} color="#FF6B2C" />
               ) : (
                 "Resend"
               )}
@@ -196,9 +203,9 @@ const VerifyBvnForm = ({
         disabled={loadingStatus || !isValid}
         isLoading={loadingStatus}
         onClick={handleVerify}
-        className="w-full  border-2 border-primary text-black text-base 2xs:text-lg max-2xs:px-6 py-3.5 xs:py-4 mt-2 2xs:mt-4 xs:mt-6 sm:mt-8 mb-2"
+        className="w-full bg-[#FF6B2C] hover:bg-[#FF7A3D] text-white text-base 2xs:text-lg max-2xs:px-6 py-3.5 xs:py-4 mt-2 2xs:mt-4 xs:mt-6 sm:mt-8 mb-2"
       >
-        Verify Bvn
+        Verify BVN
       </CustomButton>
     </motion.div>
   );

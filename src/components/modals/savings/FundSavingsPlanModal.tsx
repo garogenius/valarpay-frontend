@@ -130,9 +130,9 @@ export default function FundSavingsPlanModal({
             className="w-full py-3 rounded-full text-sm"
             onClick={() => {
               if (planType === "easylife-savings") {
-                fundPlan({ planId: planId.toString(), amount: amountNum, walletPin });
+                fundPlan({ planId: planId.toString(), amount: amountNum, currency, walletPin });
               } else {
-                fundPlan({ planId, amount: amountNum, walletPin });
+                fundPlan({ planId: planId.toString(), amount: amountNum, currency, walletPin });
               }
             }}
           >

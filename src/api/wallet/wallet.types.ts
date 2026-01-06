@@ -6,12 +6,13 @@ export interface IValidateBvnVerification {
   bvn: string;
   verificationId: string;
   otpCode: string;
+  isBusiness?: boolean;
 }
 
 export interface IBvnVerificationWithSelfie {
   bvn: string;
-  selfieImage: string; // base64
-  dateOfBirth: string; // DD-MM-YYYY format
+  selfieImage: string; // base64 data:image/jpeg;base64,...
+  dateOfBirth?: string;
 }
 
 export interface ICreateAccount {

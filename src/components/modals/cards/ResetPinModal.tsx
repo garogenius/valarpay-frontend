@@ -28,7 +28,7 @@ const ResetPinModal: React.FC<ResetPinModalProps> = ({ isOpen, onClose }) => {
           <input value={pin} onChange={e=>setPin(e.target.value)} placeholder="New PIN" type="password" className="w-full rounded-lg border border-white/10 bg-white/5 text-white placeholder-white/50 px-3 py-2 focus:outline-none" />
           <input value={confirm} onChange={e=>setConfirm(e.target.value)} placeholder="Confirm New PIN" type="password" className="w-full rounded-lg border border-white/10 bg-white/5 text-white placeholder-white/50 px-3 py-2 focus:outline-none" />
         </div>
-        <button className="mt-5 w-full bg-[#D4B139] hover:bg-[#c7a42f] text-black py-2.5 rounded-lg font-medium">Update PIN</button>
+        <button className="mt-5 w-full bg-[#FF6B2C] hover:bg-[#FF7A3D] text-white py-2.5 rounded-lg font-medium">Update PIN</button>
       </div>
     </div>
   );

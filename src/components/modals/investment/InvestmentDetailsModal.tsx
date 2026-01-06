@@ -260,9 +260,9 @@ const InvestmentDetailsModal: React.FC<InvestmentDetailsModalProps> = ({
                   <div className="flex justify-between">
                     <span className="text-white/60 text-sm">Transaction Reference</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-white text-sm">{investment.transaction.transactionRef}</span>
+                      <span className="text-white text-sm">{investment.transaction?.transactionRef || "N/A"}</span>
                       <button 
-                        onClick={() => copyToClipboard(investment.transaction.transactionRef || "")}
+                        onClick={() => copyToClipboard(investment.transaction?.transactionRef || "")}
                         className="text-white/50 hover:text-[#f76301] transition-colors"
                       >
                         <FiCopy className="text-sm" />

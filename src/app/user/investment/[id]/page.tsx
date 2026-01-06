@@ -1,8 +1,9 @@
 import React from "react";
 import InvestmentDetailsContent from "@/components/user/investment/InvestmentDetailsContent";
 
-const InvestmentDetailsPage = ({ params }: { params: { id: string } }) => {
-  return <InvestmentDetailsContent id={params.id} />;
+const InvestmentDetailsPage = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = await params;
+  return <InvestmentDetailsContent id={id} />;
 };
 
 export default InvestmentDetailsPage;

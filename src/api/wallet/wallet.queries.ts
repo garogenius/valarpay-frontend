@@ -12,6 +12,7 @@ import {
   getExchangeRateRequest,
   convertCurrencyRequest,
   initiateBvnVerificationRequest,
+  initiateBvnVerificationV2Request,
   initiateTransferRequest,
   validateBvnVerificationRequest,
   verifyAccountRequest,
@@ -47,6 +48,17 @@ export const useInitiateBvnVerification = (
       queryClient.invalidateQueries({ queryKey: ["user"] });
       onSuccess(data);
     },
+  });
+};
+
+export const useInitiateBvnVerificationV2 = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  return useMutation({
+    mutationFn: initiateBvnVerificationV2Request,
+    onError,
+    onSuccess,
   });
 };
 

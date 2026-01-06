@@ -167,3 +167,9 @@ const CloseCardModal: React.FC<CloseCardModalProps> = ({ isOpen, onClose, card, 
 
 export default CloseCardModal;
 
+
+
+
+
+
+

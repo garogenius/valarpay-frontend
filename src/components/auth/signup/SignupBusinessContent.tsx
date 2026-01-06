@@ -143,6 +143,7 @@ const SignupBusinessContent = () => {
     const registerData = {
       ...data,
       countryCode: data.currency,
+      phoneNumber: "", // Business registration may not require phone initially
     };
     signup(registerData);
   };

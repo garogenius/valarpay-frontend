@@ -31,8 +31,8 @@ const AccountsContent: React.FC = () => {
   const hasActivity = recent.length > 0;
 
   // Initialize currency state first
-  type Currency = "NGN" | "USD" | "EUR" | "GBP";
-  const currencies: Currency[] = ["NGN", "USD", "EUR", "GBP"];
+  type Currency = "NGN" | "USD";
+  const currencies: Currency[] = ["NGN", "USD"];
   const initialCurrency = String(user?.wallet?.[0]?.currency || "NGN").toUpperCase() as Currency;
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(initialCurrency);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
@@ -250,7 +250,7 @@ const AccountsContent: React.FC = () => {
     }
 
     createAccount({
-      currency: selectedCurrency as "USD" | "EUR" | "GBP",
+      currency: selectedCurrency as "USD",
       provider: "graph" as WALLET_PROVIDER,
     });
   };

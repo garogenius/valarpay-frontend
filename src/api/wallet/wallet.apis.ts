@@ -23,8 +23,7 @@ export const initiateBvnVerificationRequest = async (
   formdata: IInitiateBvnVerification
 ) => {
   return request({
-    // Backend spec: create NGN virtual account using BVN
-    url: "/user/create-account",
+    url: "/wallet/initiate-bvn-verification",
     method: "post",
     data: formdata,
   });
@@ -158,6 +157,16 @@ export const bvnVerificationWithSelfieRequest = async (
 ) => {
   return request({
     url: "/wallet/bvn-verification",
+    method: "post",
+    data: formdata,
+  });
+};
+
+export const initiateBvnVerificationV2Request = async (
+  formdata: IInitiateBvnVerification
+) => {
+  return request({
+    url: "/wallet/initiate-bvn-verification",
     method: "post",
     data: formdata,
   });

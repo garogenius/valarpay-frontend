@@ -182,3 +182,9 @@ const BlockCardModal: React.FC<BlockCardModalProps> = ({ isOpen, onClose, card, 
 
 export default BlockCardModal;
 
+
+
+
+
+
+

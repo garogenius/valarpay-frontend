@@ -38,8 +38,10 @@ export type BettingTransaction = {
 export type IFundBettingPlatform = {
   amount: number;
   platform: string;
+  platformUserId?: string;
   currency: string;
   remark?: string;
+  description?: string;
   walletPin?: string;
 };
 

@@ -6,6 +6,10 @@ import { FiChevronRight, FiKey, FiLock, FiShield, FiCreditCard, FiTrash2 } from 
 type Props = {
   fingerprint: boolean;
   onToggleFingerprint: () => void;
+  biometricEnabled: boolean;
+  biometricType: "fingerprint" | "faceid" | null;
+  biometricDeviceName: string | null;
+  onToggleBiometric: () => void;
   onOpenChangePin: () => void;
   onOpenChangePassword: () => void;
   onOpenChangePasscode?: () => void;
@@ -17,6 +21,10 @@ type Props = {
 const SecurityPrivacyTab: React.FC<Props> = ({
   fingerprint,
   onToggleFingerprint,
+  biometricEnabled,
+  biometricType,
+  biometricDeviceName,
+  onToggleBiometric,
   onOpenChangePin,
   onOpenChangePassword,
   onOpenChangePasscode,
@@ -61,6 +69,25 @@ const SecurityPrivacyTab: React.FC<Props> = ({
               <span className={`absolute top-0.5 ${fingerprint ? "right-0.5" : "left-0.5"} w-5 h-5 rounded-full bg-white transition-all`} />
             </button>
           </div>
+
+          <div className="w-full flex items-center justify-between gap-3 py-3">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-md bg-white/5 grid place-items-center text-white">
+                <FiLock className="text-[#FF6B2C]" />
+              </div>
+              <div>
+                <p className="text-white text-sm sm:text-base font-medium">
+                  {biometricType === "faceid" ? "Face ID Login" : "Fingerprint Login"}
+                </p>
+                <p className="text-white/60 text-xs sm:text-sm">
+                  Enable biometric login for faster access. {biometricDeviceName ? `Device: ${biometricDeviceName}` : ""}
+                </p>
+              </div>
+            </div>
+            <button onClick={onToggleBiometric} className={`relative w-12 h-6 rounded-full ${biometricEnabled ? "bg-[#FF6B2C]" : "bg-white/20"}`}>
+              <span className={`absolute top-0.5 ${biometricEnabled ? "right-0.5" : "left-0.5"} w-5 h-5 rounded-full bg-white transition-all`} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -101,6 +128,7 @@ const SecurityPrivacyTab: React.FC<Props> = ({
 };
 
 export default SecurityPrivacyTab;
+
 
 
 

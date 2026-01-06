@@ -56,25 +56,15 @@ const CardsContent: React.FC = () => {
   const [cardLabel, setCardLabel] = React.useState("");
   const [selectedCurrency, setSelectedCurrency] = React.useState<CardCurrency>("USD");
 
-  // Get currency accounts (USD, EUR, GBP)
+  // Get currency accounts (USD only)
   const { accounts: currencyAccounts, isPending: accountsLoading } = useGetCurrencyAccounts();
   const usdAccount = React.useMemo(
     () => currencyAccounts?.find((a) => a.currency === "USD"),
     [currencyAccounts]
   );
-  const eurAccount = React.useMemo(
-    () => currencyAccounts?.find((a) => a.currency === "EUR"),
-    [currencyAccounts]
-  );
-  const gbpAccount = React.useMemo(
-    () => currencyAccounts?.find((a) => a.currency === "GBP"),
-    [currencyAccounts]
-  );
 
   const hasAccountForCurrency = (currency: CardCurrency) => {
     if (currency === "USD") return !!usdAccount?.id;
-    if (currency === "EUR") return !!eurAccount?.id;
-    if (currency === "GBP") return !!gbpAccount?.id;
     return false;
   };
 
@@ -180,12 +170,12 @@ const CardsContent: React.FC = () => {
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-2">
           <p className="text-yellow-400 text-xs sm:text-sm font-medium mb-1">Important Notice</p>
           <p className="text-white/80 text-xs sm:text-sm">• NGN cards are not available</p>
-          <p className="text-white/80 text-xs sm:text-sm">• Virtual cards are available for USD, EUR, and GBP</p>
+          <p className="text-white/80 text-xs sm:text-sm">• Virtual cards are available for USD only</p>
           <p className="text-white/80 text-xs sm:text-sm">• You must have a currency account before creating a virtual card</p>
         </div>
-        {!usdAccount && !eurAccount && !gbpAccount ? (
+        {!usdAccount ? (
           <div className="space-y-2">
-            <p className="text-white/60 text-sm">You need a currency account (USD, EUR, or GBP) to create a virtual card.</p>
+            <p className="text-white/60 text-sm">You need a USD account to create a virtual card.</p>
             <p className="text-white/40 text-xs">Please create a currency account in the Accounts page first.</p>
           </div>
         ) : (
@@ -196,7 +186,7 @@ const CardsContent: React.FC = () => {
       </div>
       <CustomButton
         onClick={() => setOpenCreateCard(true)}
-        disabled={!usdAccount && !eurAccount && !gbpAccount}
+        disabled={!usdAccount}
         className="bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Create Virtual Card
@@ -292,9 +282,7 @@ const CardsContent: React.FC = () => {
             rawStatus === "BLOCKED" || rawStatus === "CLOSED" ? "blocked" : isFrozen ? "frozen" : "active";
           
           const currencyAccount = 
-            card.currency === "USD" ? usdAccount :
-            card.currency === "EUR" ? eurAccount :
-            card.currency === "GBP" ? gbpAccount : null;
+            card.currency === "USD" ? usdAccount : null;
 
           return (
             <div key={card.id} className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -609,7 +597,7 @@ const CardsContent: React.FC = () => {
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mb-4">
               <p className="text-blue-400 text-xs font-medium mb-1">Note</p>
               <p className="text-white/80 text-xs">• NGN cards are not available</p>
-              <p className="text-white/80 text-xs">• Virtual cards are available for USD, EUR, and GBP</p>
+              <p className="text-white/80 text-xs">• Virtual cards are available for USD only</p>
             </div>
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
@@ -620,8 +608,6 @@ const CardsContent: React.FC = () => {
                   onChange={(e) => setSelectedCurrency(e.target.value as CardCurrency)}
                 >
                   <option value="USD" disabled={!usdAccount}>USD {!usdAccount ? "(Account Required)" : ""}</option>
-                  <option value="EUR" disabled={!eurAccount}>EUR {!eurAccount ? "(Account Required)" : ""}</option>
-                  <option value="GBP" disabled={!gbpAccount}>GBP {!gbpAccount ? "(Account Required)" : ""}</option>
                 </select>
                 {!hasAccountForCurrency(selectedCurrency) && (
                   <p className="text-yellow-400 text-xs mt-1">

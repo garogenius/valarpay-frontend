@@ -146,7 +146,7 @@ const CreatePinForm = ({
           type="submit"
           disabled={!isValid || pinLoading}
           isLoading={pinLoading}
-          className="w-full border-2 border-primary text-black text-base 2xs:text-lg max-2xs:px-6 py-3.5"
+          className="w-full bg-[#FF6B2C] hover:bg-[#FF7A3D] text-white text-base 2xs:text-lg max-2xs:px-6 py-3.5"
         >
           Create PIN{" "}
         </CustomButton>

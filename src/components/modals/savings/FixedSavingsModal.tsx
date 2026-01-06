@@ -24,7 +24,7 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
 
   const { plans, isPending: plansLoading } = useFixedDepositPlans();
   const [selectedPlanType, setSelectedPlanType] = useState<FixedDepositPlanType>("SHORT_TERM_90");
-  const selectedPlan: FixedDepositPlan | undefined = plans.find((p) => p.planType === selectedPlanType) || plans[0];
+  const selectedPlan: FixedDepositPlan | undefined = plans.find((p: FixedDepositPlan) => p.planType === selectedPlanType) || plans[0];
 
   const minDeposit = selectedPlan?.minimumDeposit ?? 0;
   const [amount, setAmount] = useState<number>(minDeposit || 0);
@@ -276,7 +276,7 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
                   {plansLoading ? (
                     <div className="text-white/60 text-sm">Loading plans...</div>
                   ) : (
-                    plans.map((p) => (
+                     plans.map((p: FixedDepositPlan) => (
                       <button
                         key={p.planType}
                         onClick={() => {
