@@ -183,7 +183,7 @@ const MultiCurrencyAccountDetails: React.FC<MultiCurrencyAccountDetailsProps> = 
             </button>
             <button
               onClick={() => setOpenClose(true)}
-              disabled={account.balance && account.balance > 0}
+              disabled={account.balance > 0}
               className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FiTrash2 className="text-base" />
