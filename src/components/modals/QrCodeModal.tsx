@@ -15,10 +15,11 @@ interface QRCodeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onQRDecoded?: (data: any) => void;
+  defaultTab?: "scan" | "generate";
 }
 
-const QRCodeModal: React.FC<QRCodeModalProps> = ({ isOpen, onClose, onQRDecoded }) => {
-  const [mode, setMode] = useState<"scan" | "generate">("scan");
+const QRCodeModal: React.FC<QRCodeModalProps> = ({ isOpen, onClose, onQRDecoded, defaultTab = "scan" }) => {
+  const [mode, setMode] = useState<"scan" | "generate">(defaultTab);
   const [amount, setAmount] = useState<string>("");
   const [qrCodeData, setQrCodeData] = useState<string>("");
   const [decodedData, setDecodedData] = useState<any>(null);
@@ -29,6 +30,13 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({ isOpen, onClose, onQRDecoded 
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string>("");
   const [cameraLoading, setCameraLoading] = useState(false);
+
+  // Sync mode with defaultTab when modal opens
+  useEffect(() => {
+    if (isOpen && defaultTab) {
+      setMode(defaultTab);
+    }
+  }, [isOpen, defaultTab]);
 
   const { qrCode, isPending: generatingQR, isError: qrError } = useGetQrCode({
     amount: amount ? Number(amount) : undefined,
