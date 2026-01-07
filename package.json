@@ -26,7 +26,7 @@
     "iso-country-currency": "^0.7.2",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
-    "next": "15.3.1",
+    "next": "15.5.9",
     "next-sitemap": "^4.2.3",
     "nextjs-toploader": "^3.8.16",
     "qrcode.react": "^4.2.0",
