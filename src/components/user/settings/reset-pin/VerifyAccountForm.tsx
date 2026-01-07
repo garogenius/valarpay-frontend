@@ -154,7 +154,7 @@ const VerifyAccountForm = () => {
     setPin(value);
     if (value.length === 4 && !isVerifying.current) {
       isVerifying.current = true;
-      verifyEmail({ username: user?.email || "", otpCode: value });
+      verifyEmail({ email: user?.email || "", otpCode: value });
     }
   };
 
@@ -165,7 +165,7 @@ const VerifyAccountForm = () => {
     if (cleanedPin.length === 4 && !isVerifying.current) {
       isVerifying.current = true;
       setPin(cleanedPin);
-      verifyEmail({ username: user?.email || "", otpCode: cleanedPin });
+      verifyEmail({ email: user?.email || "", otpCode: cleanedPin });
     } else {
       setPin(cleanedPin);
     }

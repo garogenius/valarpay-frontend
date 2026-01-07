@@ -10,24 +10,30 @@ export interface ICurrencyAccount {
   providerAccountId?: string;
 }
 
+export interface ICreateCurrencyAccount {
+  currency: "USD" | "EUR" | "GBP";
+  label: string;
+}
+
 export interface IUpdateCurrencyAccount {
   label?: string;
 }
 
 export interface ICloseCurrencyAccount {
-  reason?: string;
+  walletPin: string;
 }
 
 export interface ICreatePayoutDestination {
-  accountName: string;
-  accountNumber: string;
-  bankName?: string;
-  type?: string;
+  type: "wire" | "nip" | "stablecoin";
+  account_number: string;
+  account_name: string;
+  bank_name?: string;
 }
 
 export interface ICreatePayout {
   destinationId: string;
   amount: number;
+  reference?: string;
   description?: string;
   walletPin: string;
 }

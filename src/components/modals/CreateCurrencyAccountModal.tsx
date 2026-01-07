@@ -1,162 +1,158 @@
 "use client";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import React, { useMemo, useState } from "react";
-import { IoClose } from "react-icons/io5";
+import React from "react";
+import Image from "next/image";
+import { CgClose } from "react-icons/cg";
+import { useCreateCurrencyAccount } from "@/api/currency/currency.queries";
 import CustomButton from "@/components/shared/Button";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
-import { useCreateMultiCurrencyAccount } from "@/api/wallet/wallet.queries";
-import type { WALLET_CURRENCY, WALLET_PROVIDER } from "@/api/wallet/wallet.types";
+import { getCurrencyIconByString } from "@/utils/utilityFunctions";
+import useOnClickOutside from "@/hooks/useOnClickOutside";
 
 interface CreateCurrencyAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
-  defaultCurrency?: Exclude<WALLET_CURRENCY, "NGN">;
+  onSuccess: () => void;
 }
 
 const CreateCurrencyAccountModal: React.FC<CreateCurrencyAccountModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  defaultCurrency = "USD",
 }) => {
-  const [currency, setCurrency] = useState<Exclude<WALLET_CURRENCY, "NGN">>(
-    defaultCurrency
-  );
-  const provider: WALLET_PROVIDER = "graph";
+  const [currency, setCurrency] = React.useState<"USD" | "EUR" | "GBP">("USD");
+  const [label, setLabel] = React.useState("");
+  const [currencyOpen, setCurrencyOpen] = React.useState(false);
+  const currencyRef = React.useRef<HTMLDivElement>(null);
 
-  const supportedCurrencies = useMemo(
-    () =>
-      [
-        { code: "USD" as const, name: "US Dollar", enabled: true, badge: "Available" },
-        { code: "EUR" as const, name: "Euro", enabled: true, badge: "Available" },
-        { code: "GBP" as const, name: "British Pound", enabled: true, badge: "Available" },
-      ] as const,
-    []
-  );
+  useOnClickOutside(currencyRef, () => setCurrencyOpen(false));
+
+  const currencies: Array<{ value: "USD" | "EUR" | "GBP"; label: string }> = [
+    { value: "USD", label: "US Dollar" },
+    { value: "EUR", label: "Euro" },
+    { value: "GBP", label: "British Pound" },
+  ];
+
+  const handleClose = () => {
+    setCurrency("USD");
+    setLabel("");
+    setCurrencyOpen(false);
+    onClose();
+  };
 
   const onError = (error: any) => {
-    const errorMessage = error?.response?.data?.message ?? "Something went wrong";
+    const errorMessage = error?.response?.data?.message;
+    const descriptions = Array.isArray(errorMessage)
+      ? errorMessage
+      : [errorMessage || "Failed to create account"];
     ErrorToast({
-      title: "Unable to create account",
-      descriptions: Array.isArray(errorMessage) ? errorMessage : [errorMessage],
+      title: "Account Creation Failed",
+      descriptions,
     });
   };
 
   const onSuccessCallback = (data: any) => {
     SuccessToast({
-      title: "Account created",
-      description: data?.data?.message || "Your currency account has been created successfully",
+      title: "Account Created",
+      description: `${currency} account created successfully`,
     });
-    onClose();
-    onSuccess?.();
+    handleClose();
+    onSuccess();
   };
 
-  const { mutate: createAccount, isPending } = useCreateMultiCurrencyAccount(onError, onSuccessCallback);
+  const { mutate: createAccount, isPending } = useCreateCurrencyAccount(onError, onSuccessCallback);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!label.trim() || !currency) return;
+    createAccount({ currency, label: label.trim() });
+  };
 
   if (!isOpen) return null;
 
-  const selectedMeta = supportedCurrencies.find((c) => c.code === currency);
-  const isEnabled = selectedMeta?.enabled ?? false;
+  const canSubmit = !!currency && label.trim().length > 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={isPending ? undefined : onClose} />
+    <div className="z-[999999] overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 flex justify-center items-center w-full md:inset-0 h-[100dvh]">
+      <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div className="absolute inset-0 bg-black/80 dark:bg-black/60" onClick={handleClose} />
+      </div>
+      <div className="relative mx-2.5 2xs:mx-4 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 px-0 py-4 w-full max-w-md max-h-[92vh] rounded-2xl overflow-hidden">
+        <button
+          onClick={handleClose}
+          className="absolute top-3 right-3 p-2 cursor-pointer bg-bg-1400 rounded-full hover:bg-bg-1200 transition-colors"
+        >
+          <CgClose className="text-xl text-text-200 dark:text-text-400" />
+        </button>
 
-      <div
-        className="relative w-full max-w-md bg-[#0A0A0A] rounded-2xl border border-gray-800 shadow-2xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="px-5 pt-4 pb-4 border-b border-gray-800">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-white text-sm font-semibold">Create Currency Account</p>
-              <p className="text-gray-400 text-xs mt-1">
-                Create a multi-currency wallet account. Only USD is available for now.
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              disabled={isPending}
-              className="text-gray-400 hover:text-white transition-colors disabled:opacity-50"
-              aria-label="Close"
-            >
-              <IoClose className="w-5 h-5" />
-            </button>
-          </div>
+        <div className="px-5 sm:px-6 pt-1 pb-4">
+          <h2 className="text-white text-base sm:text-lg font-semibold">Create Currency Account</h2>
+          <p className="text-white/60 text-sm mt-1">Create a multi-currency wallet account. Only USD is available for now.</p>
         </div>
 
-        <div className="px-5 py-5 space-y-4">
-          <div className="space-y-2">
-            <p className="text-gray-400 text-[11px]">Select Currency</p>
-            <div className="grid grid-cols-1 gap-2">
-              {supportedCurrencies.map((c) => (
+        <form onSubmit={handleSubmit} className="px-5 sm:px-6 pb-6 space-y-4">
+          {/* Currency Selection */}
+          <div>
+            <label className="block text-sm text-white/80 mb-1.5">Select Currency</label>
+            <div className="space-y-2">
+              {currencies.map((curr) => (
                 <button
-                  key={c.code}
+                  key={curr.value}
                   type="button"
-                  disabled={!c.enabled}
-                  onClick={() => setCurrency(c.code)}
-                  className={[
-                    "w-full flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors",
-                    currency === c.code ? "border-[#FF6B2C] bg-white/5" : "border-gray-800 bg-[#141416]",
-                    !c.enabled ? "opacity-60 cursor-not-allowed" : "hover:bg-white/5",
-                  ].join(" ")}
+                  onClick={() => setCurrency(curr.value)}
+                  className={`w-full flex items-center justify-between rounded-xl border-2 px-4 py-3.5 transition-all ${
+                    currency === curr.value
+                      ? "border-[#FF6B2C] bg-[#FF6B2C]/10"
+                      : "border-gray-700 bg-[#1C1C1E] hover:bg-[#2C2C2E]"
+                  }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-white text-sm font-medium">{c.code}</span>
-                    <span className="text-gray-400 text-xs">{c.name}</span>
+                    <span className="text-white text-sm font-semibold">{curr.value}</span>
+                    <span className="text-gray-300 text-sm">{curr.label}</span>
                   </div>
-                  <span
-                    className={[
-                      "px-2 py-1 rounded-full text-[10px] font-medium",
-                      c.enabled ? "bg-green-500/10 text-green-400" : "bg-white/10 text-gray-300",
-                    ].join(" ")}
-                  >
-                    {c.badge}
+                  <span className="px-2.5 py-1 rounded-full bg-green-500/20 text-green-400 text-[10px] font-medium">
+                    Available
                   </span>
                 </button>
               ))}
             </div>
           </div>
 
-          <CustomButton
-            type="button"
-            isLoading={isPending}
-            disabled={!isEnabled || isPending}
-            className="w-full py-3 border-2 border-primary text-black"
-            onClick={() => {
-              if (!isEnabled) return;
-              createAccount({ currency, provider });
-            }}
-          >
-            Create {currency} Account
-          </CustomButton>
-        </div>
+          {/* Account Label */}
+          <div>
+            <label className="block text-sm text-white/80 mb-1.5">Account Label</label>
+            <input
+              type="text"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="e.g., My USD Account"
+              className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3.5 px-3 text-white placeholder:text-white/50 outline-none focus:border-primary"
+              maxLength={50}
+            />
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <CustomButton
+              type="button"
+              onClick={handleClose}
+              className="flex-1 bg-transparent border border-border-600 text-white hover:bg-white/5 py-3 rounded-lg transition-colors"
+            >
+              Cancel
+            </CustomButton>
+            <CustomButton
+              type="submit"
+              isLoading={isPending}
+              disabled={!canSubmit || isPending}
+              className="flex-1 bg-primary hover:bg-primary/90 text-black font-medium py-3 rounded-lg transition-colors"
+            >
+              Create {currency} Account
+            </CustomButton>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
 export default CreateCurrencyAccountModal;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

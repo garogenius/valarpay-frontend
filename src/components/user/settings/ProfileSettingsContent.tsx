@@ -33,7 +33,7 @@ import VerifyWalletPinModal from "@/components/modals/settings/VerifyWalletPinMo
 import SecurityPrivacyTab from "@/components/user/settings/tabs/SecurityPrivacyTab";
 import PreferencesTab from "@/components/user/settings/tabs/PreferencesTab";
 
-import { useUpdateUser, useCreateOvalPerson, useUploadDocument } from "@/api/user/user.queries";
+import { useUpdateUser, useUploadDocument } from "@/api/user/user.queries";
 import { CURRENCY } from "@/constants/types";
 import usePaymentSettingsStore from "@/store/paymentSettings.store";
 import { isFingerprintPaymentAvailable } from "@/services/fingerprintPayment.service";
@@ -282,8 +282,8 @@ const ProfileSettingsContent = () => {
       primaryPurpose: (user as any)?.primaryPurpose || (user as any)?.background_information?.primary_purpose || "",
       sourceOfFunds: (user as any)?.sourceOfFunds || (user as any)?.background_information?.source_of_funds || "",
       expectedMonthlyInflow: (user as any)?.expectedMonthlyInflow || (user as any)?.background_information?.expected_monthly_inflow || 0,
-    },
-    resolver: yupResolver(schema),
+    } as any,
+    resolver: yupResolver(schema) as any,
     mode: "onChange",
   });
 
@@ -1421,6 +1421,10 @@ const ProfileSettingsContent = () => {
           {tab === "security" ? (
             <SecurityPrivacyTab
               fingerprint={fingerprintPaymentEnabled}
+              biometricEnabled={false}
+              biometricType={null}
+              biometricDeviceName={null}
+              onToggleBiometric={() => {}}
               onToggleFingerprint={() => {
                 if (!isFingerprintAvailable) {
                   ErrorToast({
@@ -1507,7 +1511,7 @@ const ProfileSettingsContent = () => {
         onSubmit={(username: string) => {
           setValue("username", username);
           setOpenUpdateUsername(false);
-          SuccessToast({ title: "Username updated" });
+          SuccessToast({ title: "Username updated", description: "Your username has been updated successfully" });
         }}
       />
       <UpdateAddressModal
@@ -1516,14 +1520,14 @@ const ProfileSettingsContent = () => {
         onSubmit={(addr: string) => {
           setAddressDisplay(addr);
           setOpenUpdateAddress(false);
-          SuccessToast({ title: "Address updated" });
+          SuccessToast({ title: "Address updated", description: "Your address has been updated successfully" });
         }}
       />
 
       <ChangeTransactionPinModal isOpen={openChangePin} onClose={() => setOpenChangePin(false)} />
       <ChangePasswordModal isOpen={openChangePassword} onClose={() => setOpenChangePassword(false)} />
       <ChangePasscodeModal isOpen={openChangePasscode} onClose={() => setOpenChangePasscode(false)} />
-      <SetSecurityQuestionsModal isOpen={openSetSecurity} onClose={() => setOpenSetSecurity(false)} onSubmit={() => SuccessToast({ title: "Saved" })} />
+      <SetSecurityQuestionsModal isOpen={openSetSecurity} onClose={() => setOpenSetSecurity(false)} onSubmit={() => SuccessToast({ title: "Saved", description: "Security questions have been saved successfully" })} />
       <LinkedAccountsModal isOpen={openLinked} onClose={() => setOpenLinked(false)} />
       <DeleteAccountModal isOpen={openDelete} onClose={() => setOpenDelete(false)} />
       <VerifyWalletPinModal

@@ -13,7 +13,7 @@ const Content = ({ children }: { children: React.ReactNode }) => {
       )}
     >
       <Navbar />
-      <main className="w-full px-3 2xs:px-5 lg:px-5 xl:px-7 py-5">
+      <main className="w-full flex-1 px-3 2xs:px-5 lg:px-5 xl:px-7 py-5">
         {children}
       </main>
     </div>

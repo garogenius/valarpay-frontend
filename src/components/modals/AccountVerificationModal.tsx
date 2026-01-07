@@ -260,63 +260,75 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
 
                     {/* NIN/BVN Selection */}
                     <div className="w-full max-w-md mx-auto flex flex-col gap-4">
-                      <div className="flex gap-4">
-                        <button
-                          type="button"
-                          onClick={() => setIdentityType("nin")}
-                          className={`flex-1 p-4 rounded-lg border-2 transition-all ${
+                      <div className="flex gap-3">
+                        <label className="flex-1 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="identityType"
+                            value="nin"
+                            checked={identityType === "nin"}
+                            onChange={() => setIdentityType("nin")}
+                            className="hidden"
+                          />
+                          <div className={`w-full p-4 rounded-xl border-2 transition-all ${
                             identityType === "nin"
                               ? "border-[#FF6B2C] bg-[#FF6B2C]/10"
-                              : "border-border-600 bg-bg-2400 dark:bg-bg-2100"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                              identityType === "nin"
-                                ? "border-[#FF6B2C] bg-[#FF6B2C]"
-                                : "border-gray-400 bg-transparent"
-                            }`}>
-                              {identityType === "nin" && (
-                                <div className="w-2 h-2 rounded-full bg-white" />
-                              )}
+                              : "border-gray-700 bg-[#1C1C1E] hover:bg-[#2C2C2E]"
+                          }`}>
+                            <div className="flex items-center justify-center gap-3">
+                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                identityType === "nin"
+                                  ? "border-[#FF6B2C] bg-[#FF6B2C]"
+                                  : "border-gray-500 bg-transparent"
+                              }`}>
+                                {identityType === "nin" && (
+                                  <div className="w-2.5 h-2.5 rounded-full bg-white" />
+                                )}
+                              </div>
+                              <span className={`text-sm font-semibold ${
+                                identityType === "nin"
+                                  ? "text-[#FF6B2C]"
+                                  : "text-gray-300"
+                              }`}>
+                                NIN
+                              </span>
                             </div>
-                            <span className={`text-sm font-medium ${
-                              identityType === "nin"
-                                ? "text-[#FF6B2C]"
-                                : "text-text-200 dark:text-text-800"
-                            }`}>
-                              NIN
-                            </span>
                           </div>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setIdentityType("bvn")}
-                          className={`flex-1 p-4 rounded-lg border-2 transition-all ${
+                        </label>
+                        <label className="flex-1 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="identityType"
+                            value="bvn"
+                            checked={identityType === "bvn"}
+                            onChange={() => setIdentityType("bvn")}
+                            className="hidden"
+                          />
+                          <div className={`w-full p-4 rounded-xl border-2 transition-all ${
                             identityType === "bvn"
                               ? "border-[#FF6B2C] bg-[#FF6B2C]/10"
-                              : "border-border-600 bg-bg-2400 dark:bg-bg-2100"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                              identityType === "bvn"
-                                ? "border-[#FF6B2C] bg-[#FF6B2C]"
-                                : "border-gray-400 bg-transparent"
-                            }`}>
-                              {identityType === "bvn" && (
-                                <div className="w-2 h-2 rounded-full bg-white" />
-                              )}
+                              : "border-gray-700 bg-[#1C1C1E] hover:bg-[#2C2C2E]"
+                          }`}>
+                            <div className="flex items-center justify-center gap-3">
+                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                identityType === "bvn"
+                                  ? "border-[#FF6B2C] bg-[#FF6B2C]"
+                                  : "border-gray-500 bg-transparent"
+                              }`}>
+                                {identityType === "bvn" && (
+                                  <div className="w-2.5 h-2.5 rounded-full bg-white" />
+                                )}
+                              </div>
+                              <span className={`text-sm font-semibold ${
+                                identityType === "bvn"
+                                  ? "text-[#FF6B2C]"
+                                  : "text-gray-300"
+                              }`}>
+                                BVN
+                              </span>
                             </div>
-                            <span className={`text-sm font-medium ${
-                              identityType === "bvn"
-                                ? "text-[#FF6B2C]"
-                                : "text-text-200 dark:text-text-800"
-                            }`}>
-                              BVN
-                            </span>
                           </div>
-                        </button>
+                        </label>
                       </div>
 
                       {/* Show appropriate form based on selection */}

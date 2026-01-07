@@ -132,16 +132,16 @@ const BvnForm = ({
       onSubmit={handleSubmit(onSubmit)}
       noValidate
     >
-      <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+      <div className="flex flex-col justify-center items-center gap-1 w-full text-white">
         <label
-          className="w-full text-sm sm:text-base text-text-200 dark:text-text-800 mb-1 flex items-start "
+          className="w-full text-sm sm:text-base text-white mb-1 flex items-start font-medium"
           htmlFor={"bvn"}
         >
           Your BVN{" "}
         </label>
-        <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+        <div className="w-full flex gap-2 justify-center items-center bg-[#1C1C1E] border border-gray-700 rounded-lg py-4 px-3">
           <input
-            className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-400 dark:placeholder:text-text-1000 placeholder:text-sm"
+            className="w-full bg-transparent p-0 border-none outline-none text-base text-white placeholder:text-gray-500 placeholder:text-sm"
             placeholder={"22212345678"}
             required={true}
             {...register("bvn")}
@@ -159,65 +159,61 @@ const BvnForm = ({
 
       {/* Verification Method Selection */}
       <div className="w-full flex flex-col gap-3 mt-4">
-        <label className="text-sm sm:text-base text-text-200 dark:text-text-800 font-medium">
+        <label className="text-sm sm:text-base text-white font-medium">
           Choose Verification Method
         </label>
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
             onClick={() => setVerificationMethod?.("otp")}
-            className={`p-4 rounded-lg border-2 transition-all ${
+            className={`p-5 rounded-xl border-2 transition-all flex flex-col items-center gap-3 ${
               verificationMethod === "otp" || !verificationMethod
                 ? "border-[#FF6B2C] bg-[#FF6B2C]/10"
-                : "border-border-600 bg-bg-2400 dark:bg-bg-2100"
+                : "border-gray-700 bg-[#1C1C1E] hover:bg-[#2C2C2E]"
             }`}
           >
-            <div className="flex flex-col items-center gap-2">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                verificationMethod === "otp" || !verificationMethod
-                  ? "bg-[#FF6B2C] text-white"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-              }`}>
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <span className={`text-sm font-medium ${
-                verificationMethod === "otp" || !verificationMethod
-                  ? "text-[#FF6B2C]"
-                  : "text-text-200 dark:text-text-800"
-              }`}>
-                OTP Verification
-              </span>
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+              verificationMethod === "otp" || !verificationMethod
+                ? "bg-[#FF6B2C] text-white"
+                : "bg-[#2C2C2E] text-gray-400"
+            }`}>
+              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
             </div>
+            <span className={`text-sm font-semibold ${
+              verificationMethod === "otp" || !verificationMethod
+                ? "text-[#FF6B2C]"
+                : "text-gray-300"
+            }`}>
+              OTP Verification
+            </span>
           </button>
           <button
             type="button"
             onClick={() => setVerificationMethod?.("faceid")}
-            className={`p-4 rounded-lg border-2 transition-all ${
+            className={`p-5 rounded-xl border-2 transition-all flex flex-col items-center gap-3 ${
               verificationMethod === "faceid"
                 ? "border-[#FF6B2C] bg-[#FF6B2C]/10"
-                : "border-border-600 bg-bg-2400 dark:bg-bg-2100"
+                : "border-gray-700 bg-[#1C1C1E] hover:bg-[#2C2C2E]"
             }`}
           >
-            <div className="flex flex-col items-center gap-2">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                verificationMethod === "faceid"
-                  ? "bg-[#FF6B2C] text-white"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-              }`}>
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <span className={`text-sm font-medium ${
-                verificationMethod === "faceid"
-                  ? "text-[#FF6B2C]"
-                  : "text-text-200 dark:text-text-800"
-              }`}>
-                Face ID
-              </span>
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+              verificationMethod === "faceid"
+                ? "bg-[#FF6B2C] text-white"
+                : "bg-[#2C2C2E] text-gray-400"
+            }`}>
+              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
             </div>
+            <span className={`text-sm font-semibold ${
+              verificationMethod === "faceid"
+                ? "text-[#FF6B2C]"
+                : "text-gray-300"
+            }`}>
+              Face ID
+            </span>
           </button>
         </div>
       </div>
@@ -231,7 +227,7 @@ const BvnForm = ({
         >
           {verificationMethod === "faceid" ? "Verify with Face ID" : "Initiate BVN Verification"}
         </CustomButton>
-        <p className="w-full 2xs:w-[90%] sm:w-[80%] font-medium text-sm text-text-200 dark:text-text-800 ">
+        <p className="w-full 2xs:w-[90%] sm:w-[80%] font-medium text-sm text-gray-400">
           Your BVN is secured with us. It only gives us access to your phone
           number, full name, gender, and date of birth.
         </p>

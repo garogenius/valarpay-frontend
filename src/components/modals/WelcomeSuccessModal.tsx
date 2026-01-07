@@ -94,3 +94,10 @@ const WelcomeSuccessModal: React.FC<WelcomeSuccessModalProps> = ({
 
 export default WelcomeSuccessModal;
 
+
+
+
+
+
+
+

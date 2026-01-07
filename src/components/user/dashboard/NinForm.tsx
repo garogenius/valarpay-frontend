@@ -91,16 +91,16 @@ const NinForm = ({
       onSubmit={handleSubmit(onSubmit)}
       noValidate
     >
-      <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+      <div className="flex flex-col justify-center items-center gap-1 w-full text-white">
         <label
-          className="w-full text-sm sm:text-base text-text-200 dark:text-text-800 mb-1 flex items-start "
+          className="w-full text-sm sm:text-base text-white mb-1 flex items-start font-medium"
           htmlFor={"nin"}
         >
           Your NIN{" "}
         </label>
-        <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+        <div className="w-full flex gap-2 justify-center items-center bg-[#1C1C1E] border border-gray-700 rounded-lg py-4 px-3">
           <input
-            className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-400 dark:placeholder:text-text-1000 placeholder:text-sm"
+            className="w-full bg-transparent p-0 border-none outline-none text-base text-white placeholder:text-gray-500 placeholder:text-sm"
             placeholder={"Enter your NIN"}
             required={true}
             maxLength={11}
@@ -126,7 +126,7 @@ const NinForm = ({
         >
           Proceed
         </CustomButton>
-        <div className="flex items-start gap-2 text-text-200 dark:text-text-800">
+        <div className="flex items-start gap-2 text-gray-300">
           <svg className="w-5 h-5 text-[#FF6B2C] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
           </svg>
@@ -134,7 +134,7 @@ const NinForm = ({
             Why we need your NIN
           </p>
         </div>
-        <p className="text-xs text-text-200/70 dark:text-text-800/70">
+        <p className="text-xs text-gray-400">
           To check your NIN, dial *346# using the phone number linked to your bank account
         </p>
       </div>

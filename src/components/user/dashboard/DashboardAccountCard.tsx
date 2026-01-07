@@ -8,6 +8,7 @@ import { RiEyeLine, RiEyeOffLine } from "react-icons/ri";
 import useOnClickOutside from "@/hooks/useOnClickOutside";
 import { Wallet } from "@/constants/types";
 import icons from "../../../../public/icons";
+import AddMoneyModal from "@/components/modals/AddMoneyModal";
 
 const currencyLabel: Record<string, string> = {
   NGN: "NGN Account",
@@ -21,6 +22,7 @@ const DashboardAccountCard = ({ wallets }: { wallets: Wallet[] }) => {
   const [active, setActive] = useState<Wallet | null>(primary || null);
   const [open, setOpen] = useState(false);
   const [showBalance, setShowBalance] = useState(true);
+  const [isAddMoneyModalOpen, setIsAddMoneyModalOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useOnClickOutside(ref, () => setOpen(false));
 
@@ -35,9 +37,9 @@ const DashboardAccountCard = ({ wallets }: { wallets: Wallet[] }) => {
   };
 
   return (
-    <div className="relative bg-[#2C2C2E] dark:bg-[#2C2C2E] rounded-xl p-5">
-      {/* Header with currency selector */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="relative bg-[#2C2C2E] dark:bg-[#2C2C2E] rounded-xl p-4">
+      {/* Header with currency selector and add money button */}
+      <div className="flex items-center justify-between mb-4">
         <button
           className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity"
           onClick={() => setOpen((s) => !s)}
@@ -49,6 +51,12 @@ const DashboardAccountCard = ({ wallets }: { wallets: Wallet[] }) => {
             {currencyLabel[active?.currency || "NGN"]}
           </span>
           <MdKeyboardArrowDown className="text-lg" />
+        </button>
+        <button 
+          onClick={() => setIsAddMoneyModalOpen(true)}
+          className="w-8 h-8 rounded-full bg-[#FF6B2C] hover:bg-[#FF7D3D] flex items-center justify-center transition-colors"
+        >
+          <span className="text-white text-lg font-bold">+</span>
         </button>
       </div>
 
@@ -64,13 +72,10 @@ const DashboardAccountCard = ({ wallets }: { wallets: Wallet[] }) => {
       </div>
 
       {/* Amount */}
-      <div className="flex items-center gap-3">
-        <p className="text-3xl font-bold text-white">
+      <div className="flex items-center">
+        <p className="text-2xl font-bold text-white">
           {showBalance ? `₦${(active?.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "₦•••••••"}
         </p>
-        <button className="w-8 h-8 rounded-full bg-[#FF6B2C] hover:bg-[#FF7D3D] flex items-center justify-center transition-colors">
-          <span className="text-white text-lg font-bold">+</span>
-        </button>
       </div>
 
       {/* Dropdown */}
@@ -108,6 +113,12 @@ const DashboardAccountCard = ({ wallets }: { wallets: Wallet[] }) => {
           </div>
         </div>
       ) : null}
+
+      {/* Add Money Modal */}
+      <AddMoneyModal
+        isOpen={isAddMoneyModalOpen}
+        onClose={() => setIsAddMoneyModalOpen(false)}
+      />
     </div>
   );
 };

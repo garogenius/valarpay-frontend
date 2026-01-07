@@ -638,12 +638,12 @@ const ProfileContent = () => {
       email: user?.email || "",
       username: user?.username || "",
       fullname: user?.fullname || "",
-      businessName: user?.businessName,
-      phoneNumber: user?.phoneNumber,
+      businessName: user?.businessName ?? undefined,
+      phoneNumber: user?.phoneNumber ?? undefined,
       dateOfBirth: user?.dateOfBirth || "",
-      referralCode: user?.referralCode,
-      accountTier: `Tier ${user?.tierLevel}` || undefined,
-      accountNumber: accountNumber,
+      referralCode: user?.referralCode ?? undefined,
+      accountTier: user?.tierLevel ? `Tier ${user.tierLevel}` : undefined,
+      accountNumber: accountNumber || undefined,
       // Address fields - matching actual user response structure
       address: (user as any)?.address,
       state: (user as any)?.state,
@@ -663,8 +663,8 @@ const ProfileContent = () => {
       id_number: (user as any)?.id_number,
       id_country: (user as any)?.id_country,
       bank_id_number: (user as any)?.bank_id_number,
-    },
-    resolver: yupResolver(schema),
+    } as any,
+    resolver: yupResolver(schema) as any,
     mode: "onChange",
   });
 
@@ -1130,7 +1130,7 @@ const ProfileContent = () => {
   //   onOvalPersonSuccess
   // );
   const creatingOvalPerson = false;
-  const createOvalPerson = () => {}; // Stub function
+  const createOvalPerson = (_data: any) => {}; // Stub function
 
   const onSubmit = async (data: UserFormData) => {
     // Store the submitted data to preserve form values after save
@@ -3193,7 +3193,7 @@ const ProfileContent = () => {
             setOpenVerifyPinForFingerprint(false);
             setPendingFingerprintEnable(false);
           }}
-          onSuccess={() => {
+          onVerify={(pin) => {
             if (pendingFingerprintEnable) {
               setFingerprintPaymentEnabled(true);
               SuccessToast({

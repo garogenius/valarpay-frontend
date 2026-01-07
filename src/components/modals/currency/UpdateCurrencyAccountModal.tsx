@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
-import { IoClose } from "react-icons/io5";
+import React from "react";
+import { CgClose } from "react-icons/cg";
+import { useUpdateCurrencyAccount } from "@/api/currency/currency.queries";
 import CustomButton from "@/components/shared/Button";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
-import { useUpdateCurrencyAccount } from "@/api/currency/currency.queries";
 import { ICurrencyAccount } from "@/api/currency/currency.types";
 
 interface UpdateCurrencyAccountModalProps {
@@ -21,91 +21,103 @@ const UpdateCurrencyAccountModal: React.FC<UpdateCurrencyAccountModalProps> = ({
   account,
   onSuccess,
 }) => {
-  const [label, setLabel] = useState(account.label || "");
+  const [label, setLabel] = React.useState(account.label || "");
+
+  React.useEffect(() => {
+    if (isOpen && account) {
+      setLabel(account.label || "");
+    }
+  }, [isOpen, account]);
+
+  const handleClose = () => {
+    setLabel(account.label || "");
+    onClose();
+  };
 
   const onError = (error: any) => {
-    const errorMessage = error?.response?.data?.message ?? "Something went wrong";
+    const errorMessage = error?.response?.data?.message;
+    const descriptions = Array.isArray(errorMessage)
+      ? errorMessage
+      : [errorMessage || "Failed to update account"];
     ErrorToast({
-      title: "Unable to update account",
-      descriptions: Array.isArray(errorMessage) ? errorMessage : [errorMessage],
+      title: "Update Failed",
+      descriptions,
     });
   };
 
   const onSuccessCallback = (data: any) => {
     SuccessToast({
-      title: "Account updated",
-      description: data?.data?.message || "Account label has been updated successfully",
+      title: "Account Updated",
+      description: "Account label updated successfully",
     });
-    onClose();
+    handleClose();
     onSuccess();
   };
 
   const { mutate: updateAccount, isPending } = useUpdateCurrencyAccount(onError, onSuccessCallback);
 
-  if (!isOpen) return null;
-
-  const handleSubmit = () => {
-    if (!label.trim()) {
-      ErrorToast({
-        title: "Validation Error",
-        descriptions: ["Label cannot be empty"],
-      });
-      return;
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!label.trim() || !account.id) return;
     updateAccount({ walletId: account.id, data: { label: label.trim() } });
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={isPending ? undefined : onClose} />
+  if (!isOpen || !account) return null;
 
-      <div
-        className="relative w-full max-w-md bg-[#0A0A0A] rounded-2xl border border-gray-800 shadow-2xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="px-5 pt-4 pb-4 border-b border-gray-800">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-white text-sm font-semibold">Edit Account Label</p>
-              <p className="text-gray-400 text-xs mt-1">Update the label for your {account.currency} account</p>
-            </div>
-            <button
-              onClick={onClose}
-              disabled={isPending}
-              className="text-gray-400 hover:text-white transition-colors disabled:opacity-50"
-              aria-label="Close"
-            >
-              <IoClose className="w-5 h-5" />
-            </button>
-          </div>
+  const canSubmit = label.trim().length > 0;
+
+  return (
+    <div className="z-[999999] overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 flex justify-center items-center w-full md:inset-0 h-[100dvh]">
+      <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div className="absolute inset-0 bg-black/80 dark:bg-black/60" onClick={handleClose} />
+      </div>
+      <div className="relative mx-2.5 2xs:mx-4 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 px-0 py-4 w-full max-w-md max-h-[92vh] rounded-2xl overflow-hidden">
+        <button
+          onClick={handleClose}
+          className="absolute top-3 right-3 p-2 cursor-pointer bg-bg-1400 rounded-full hover:bg-bg-1200 transition-colors"
+        >
+          <CgClose className="text-xl text-text-200 dark:text-text-400" />
+        </button>
+
+        <div className="px-5 sm:px-6 pt-1 pb-4">
+          <h2 className="text-white text-base sm:text-lg font-semibold">Update Account Label</h2>
+          <p className="text-white/60 text-sm mt-1">Change the label for your {account.currency} account</p>
         </div>
 
-        <div className="px-5 py-5 space-y-4">
-          <div className="space-y-2">
-            <label className="text-gray-400 text-[11px]">Account Label</label>
+        <form onSubmit={handleSubmit} className="px-5 sm:px-6 pb-6 space-y-4">
+          <div>
+            <label className="block text-sm text-white/80 mb-1.5">Account Label</label>
             <input
               type="text"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder="Enter account label"
-              className="w-full bg-[#1C1C1E] border border-gray-700 rounded-lg px-4 py-3 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#FF6B2C]"
+              placeholder="e.g., My USD Account"
+              className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3.5 px-3 text-white placeholder:text-white/50 outline-none focus:border-primary"
+              maxLength={50}
             />
           </div>
 
-          <CustomButton
-            type="button"
-            isLoading={isPending}
-            disabled={isPending || !label.trim()}
-            className="w-full py-3 border-2 border-primary text-black"
-            onClick={handleSubmit}
-          >
-            Update Label
-          </CustomButton>
-        </div>
+          <div className="flex gap-3 pt-2">
+            <CustomButton
+              type="button"
+              onClick={handleClose}
+              className="flex-1 bg-transparent border border-border-600 text-white hover:bg-white/5 py-3 rounded-lg transition-colors"
+            >
+              Cancel
+            </CustomButton>
+            <CustomButton
+              type="submit"
+              isLoading={isPending}
+              disabled={!canSubmit || isPending}
+              className="flex-1 bg-primary hover:bg-primary/90 text-black font-medium py-3 rounded-lg transition-colors"
+            >
+              Update Account
+            </CustomButton>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
 export default UpdateCurrencyAccountModal;
-

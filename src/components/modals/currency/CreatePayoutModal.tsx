@@ -1,19 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
-import { IoClose } from "react-icons/io5";
+import React from "react";
+import { CgClose } from "react-icons/cg";
+import { useCreateCurrencyAccountPayout, useGetTransferFee } from "@/api/currency/currency.queries";
 import CustomButton from "@/components/shared/Button";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
-import { useCreatePayout } from "@/api/currency/currency.queries";
-import { ICurrencyAccount } from "@/api/currency/currency.types";
-import VerifyWalletPinModal from "@/components/modals/settings/VerifyWalletPinModal";
+import { ICurrencyAccount, IPayoutDestination } from "@/api/currency/currency.types";
+import PinInputWithFingerprint from "@/components/shared/PinInputWithFingerprint";
+import useOnClickOutside from "@/hooks/useOnClickOutside";
 
 interface CreatePayoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   account: ICurrencyAccount;
-  destinations: any[];
+  destinations: IPayoutDestination[];
   onSuccess: () => void;
 }
 
@@ -24,182 +25,261 @@ const CreatePayoutModal: React.FC<CreatePayoutModalProps> = ({
   destinations,
   onSuccess,
 }) => {
-  const [selectedDestination, setSelectedDestination] = useState("");
-  const [amount, setAmount] = useState("");
-  const [description, setDescription] = useState("");
-  const [openPinModal, setOpenPinModal] = useState(false);
-  const [pin, setPin] = useState("");
+  const [selectedDestination, setSelectedDestination] = React.useState<IPayoutDestination | null>(null);
+  const [amount, setAmount] = React.useState("");
+  const [reference, setReference] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [walletPin, setWalletPin] = React.useState("");
+  const [destinationOpen, setDestinationOpen] = React.useState(false);
+  const destinationRef = React.useRef<HTMLDivElement>(null);
+
+  useOnClickOutside(destinationRef, () => setDestinationOpen(false));
+
+  const currency = account.currency || "USD";
+  const accountNumber = account.accountNumber || "";
+
+  // Calculate fee when amount and destination are selected
+  const { feeData, isPending: feeLoading } = useGetTransferFee({
+    currency,
+    amount: Number(amount) || 0,
+    accountNumber: selectedDestination?.accountNumber || "",
+    enabled: !!selectedDestination && Number(amount) > 0 && !!selectedDestination.accountNumber,
+  });
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setSelectedDestination(null);
+      setAmount("");
+      setReference("");
+      setDescription("");
+      setWalletPin("");
+      setDestinationOpen(false);
+    }
+  }, [isOpen]);
+
+  const handleClose = () => {
+    setSelectedDestination(null);
+    setAmount("");
+    setReference("");
+    setDescription("");
+    setWalletPin("");
+    setDestinationOpen(false);
+    onClose();
+  };
 
   const onError = (error: any) => {
-    const errorMessage = error?.response?.data?.message ?? "Something went wrong";
+    const errorMessage = error?.response?.data?.message;
+    const descriptions = Array.isArray(errorMessage)
+      ? errorMessage
+      : [errorMessage || "Failed to create payout"];
     ErrorToast({
-      title: "Unable to create payout",
-      descriptions: Array.isArray(errorMessage) ? errorMessage : [errorMessage],
+      title: "Payout Failed",
+      descriptions,
     });
-    setOpenPinModal(false);
-    setPin("");
   };
 
   const onSuccessCallback = (data: any) => {
     SuccessToast({
-      title: "Payout created",
-      description: data?.data?.message || "Payout has been created successfully",
+      title: "Payout Created",
+      description: "Payout created successfully",
     });
-    onClose();
-    setSelectedDestination("");
-    setAmount("");
-    setDescription("");
-    setPin("");
+    handleClose();
     onSuccess();
   };
 
-  const { mutate: createPayout, isPending } = useCreatePayout(onError, onSuccessCallback);
+  const { mutate: createPayout, isPending } = useCreateCurrencyAccountPayout(onError, onSuccessCallback);
 
-  if (!isOpen) return null;
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDestination || !amount || Number(amount) <= 0 || walletPin.length !== 4) return;
 
-  const handleSubmit = () => {
-    if (!selectedDestination) {
-      ErrorToast({
-        title: "Validation Error",
-        descriptions: ["Please select a payout destination"],
-      });
-      return;
-    }
-    const amountNum = parseFloat(amount);
-    if (!amountNum || amountNum <= 0) {
-      ErrorToast({
-        title: "Validation Error",
-        descriptions: ["Please enter a valid amount"],
-      });
-      return;
-    }
-    if (account.balance && amountNum > account.balance) {
-      ErrorToast({
-        title: "Insufficient Balance",
-        descriptions: [`Insufficient balance. Available: ${account.currency} ${account.balance.toFixed(2)}`],
-      });
-      return;
-    }
-    setOpenPinModal(true);
-  };
-
-  const handlePinVerified = () => {
-    const amountNum = parseFloat(amount);
     createPayout({
-      currency: account.currency,
-      data: {
-        destinationId: selectedDestination,
-        amount: amountNum,
+      currency,
+      formdata: {
+        destinationId: selectedDestination.id,
+        amount: Number(amount),
+        reference: reference.trim() || undefined,
         description: description.trim() || undefined,
-        walletPin: pin,
+        walletPin,
       },
     });
-    setPin("");
-    setOpenPinModal(false);
   };
 
-  return (
-    <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={isPending ? undefined : onClose} />
+  if (!isOpen || !account) return null;
 
-        <div
-          className="relative w-full max-w-md bg-[#0A0A0A] rounded-2xl border border-gray-800 shadow-2xl overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
+  const canSubmit =
+    !!selectedDestination &&
+    Number(amount) > 0 &&
+    Number(amount) <= (account.balance || 0) &&
+    walletPin.length === 4;
+  const totalAmount = feeData ? Number(amount) + feeData.fee : Number(amount);
+  const hasInsufficientBalance = Number(amount) > (account.balance || 0);
+
+  return (
+    <div className="z-[999999] overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 flex justify-center items-center w-full md:inset-0 h-[100dvh]">
+      <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div className="absolute inset-0 bg-black/80 dark:bg-black/60" onClick={handleClose} />
+      </div>
+      <div className="relative mx-2.5 2xs:mx-4 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 px-0 py-4 w-full max-w-md max-h-[92vh] rounded-2xl overflow-hidden">
+        <button
+          onClick={handleClose}
+          className="absolute top-3 right-3 p-2 cursor-pointer bg-bg-1400 rounded-full hover:bg-bg-1200 transition-colors"
         >
-          <div className="px-5 pt-4 pb-4 border-b border-gray-800">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-white text-sm font-semibold">Create Payout</p>
-                <p className="text-gray-400 text-xs mt-1">Send {account.currency} to a payout destination</p>
-              </div>
+          <CgClose className="text-xl text-text-200 dark:text-text-400" />
+        </button>
+
+        <div className="px-5 sm:px-6 pt-1 pb-4">
+          <h2 className="text-white text-base sm:text-lg font-semibold">Create Payout</h2>
+          <p className="text-white/60 text-sm mt-1">Send funds from your {currency} account</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="px-5 sm:px-6 pb-6 space-y-4">
+          {/* Destination Selection */}
+          <div>
+            <label className="block text-sm text-white/80 mb-1.5">Payout Destination</label>
+            <div className="relative" ref={destinationRef}>
               <button
-                onClick={onClose}
-                disabled={isPending}
-                className="text-gray-400 hover:text-white transition-colors disabled:opacity-50"
-                aria-label="Close"
+                type="button"
+                onClick={() => setDestinationOpen(!destinationOpen)}
+                className="w-full flex items-center justify-between bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3.5 px-3 text-white"
               >
-                <IoClose className="w-5 h-5" />
+                <span>
+                  {selectedDestination
+                    ? `${selectedDestination.accountName} - ${selectedDestination.accountNumber}`
+                    : "Select destination"}
+                </span>
+                <svg
+                  className={`w-5 h-5 text-white/60 transition-transform ${destinationOpen ? "rotate-180" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
+              {destinationOpen && (
+                <div className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto bg-bg-600 dark:bg-bg-1100 border border-border-600 rounded-lg">
+                  {destinations.length === 0 ? (
+                    <div className="p-3 text-white/60 text-sm">No destinations available</div>
+                  ) : (
+                    destinations.map((dest) => (
+                      <button
+                        key={dest.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedDestination(dest);
+                          setDestinationOpen(false);
+                        }}
+                        className="w-full px-3 py-3 text-left hover:bg-white/5 transition-colors text-white border-b border-white/5 last:border-b-0"
+                      >
+                        <div className="font-medium">{dest.accountName}</div>
+                        <div className="text-xs text-white/60">{dest.accountNumber}</div>
+                        {dest.bankName && <div className="text-xs text-white/60">{dest.bankName}</div>}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="px-5 py-5 space-y-4">
-            <div className="space-y-2">
-              <label className="text-gray-400 text-[11px]">Payout Destination *</label>
-              <select
-                value={selectedDestination}
-                onChange={(e) => setSelectedDestination(e.target.value)}
-                className="w-full bg-[#1C1C1E] border border-gray-700 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF6B2C] appearance-none"
-              >
-                <option value="" className="text-gray-500">
-                  Select destination
-                </option>
-                {destinations.map((dest) => (
-                  <option key={dest.id} value={dest.id} className="text-white">
-                    {dest.account_name} - {dest.account_number}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Amount */}
+          <div>
+            <label className="block text-sm text-white/80 mb-1.5">Amount ({currency})</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
+                  setAmount(value);
+                }
+              }}
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+              className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3.5 px-3 text-white placeholder:text-white/50 outline-none focus:border-primary"
+            />
+            {hasInsufficientBalance && (
+              <p className="text-red-400 text-xs mt-1">Insufficient balance</p>
+            )}
+            <p className="text-white/60 text-xs mt-1">Available: {currency} {account.balance?.toLocaleString() || "0.00"}</p>
+          </div>
 
-            <div className="space-y-2">
-              <label className="text-gray-400 text-[11px]">Amount *</label>
-              <div className="flex">
-                <input
-                  type="text"
-                  value={amount}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/[^\d.]/g, "");
-                    setAmount(value);
-                  }}
-                  placeholder="0.00"
-                  className="w-full bg-[#1C1C1E] border border-gray-700 border-r-0 rounded-l-lg px-4 py-3 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#FF6B2C]"
-                />
-                <span className="bg-[#FF6B2C] rounded-r-lg px-4 py-3 text-white text-sm font-medium flex items-center">
-                  {account.currency}
-                </span>
+          {/* Fee Display */}
+          {feeData && Number(amount) > 0 && (
+            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+              <div className="flex items-center justify-between text-sm mb-1">
+                <span className="text-white/60">Amount</span>
+                <span className="text-white">{currency} {Number(amount).toLocaleString()}</span>
               </div>
-              {account.balance !== undefined && (
-                <p className="text-white/60 text-xs">Available: {account.currency} {account.balance.toFixed(2)}</p>
-              )}
+              <div className="flex items-center justify-between text-sm mb-1">
+                <span className="text-white/60">Fee</span>
+                <span className="text-white">{currency} {feeData.fee.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm pt-2 border-t border-white/10">
+                <span className="text-white font-medium">Total</span>
+                <span className="text-white font-bold">{currency} {totalAmount.toLocaleString()}</span>
+              </div>
             </div>
+          )}
 
-            <div className="space-y-2">
-              <label className="text-gray-400 text-[11px]">Description (Optional)</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Enter description"
-                rows={3}
-                className="w-full bg-[#1C1C1E] border border-gray-700 rounded-lg px-4 py-3 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#FF6B2C] resize-none"
-              />
-            </div>
+          {/* Reference (Optional) */}
+          <div>
+            <label className="block text-sm text-white/80 mb-1.5">Reference (Optional)</label>
+            <input
+              type="text"
+              value={reference}
+              onChange={(e) => setReference(e.target.value)}
+              placeholder="Enter reference"
+              className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3.5 px-3 text-white placeholder:text-white/50 outline-none focus:border-primary"
+            />
+          </div>
 
+          {/* Description (Optional) */}
+          <div>
+            <label className="block text-sm text-white/80 mb-1.5">Description (Optional)</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter description"
+              rows={3}
+              className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3.5 px-3 text-white placeholder:text-white/50 outline-none focus:border-primary resize-none"
+            />
+          </div>
+
+          {/* PIN */}
+          <div>
+            <label className="block text-sm text-white/80 mb-1.5">Enter Wallet PIN</label>
+            <PinInputWithFingerprint
+              value={walletPin}
+              onChange={setWalletPin}
+              placeholder="••••"
+              disabled={isPending}
+            />
+          </div>
+
+          <div className="flex gap-3 pt-2">
             <CustomButton
               type="button"
+              onClick={handleClose}
+              className="flex-1 bg-transparent border border-border-600 text-white hover:bg-white/5 py-3 rounded-lg transition-colors"
+            >
+              Cancel
+            </CustomButton>
+            <CustomButton
+              type="submit"
               isLoading={isPending}
-              disabled={isPending || !selectedDestination || !amount || parseFloat(amount) <= 0}
-              className="w-full py-3 border-2 border-primary text-black"
-              onClick={handleSubmit}
+              disabled={!canSubmit || isPending || hasInsufficientBalance}
+              className="flex-1 bg-primary hover:bg-primary/90 text-black font-medium py-3 rounded-lg transition-colors"
             >
               Create Payout
             </CustomButton>
           </div>
-        </div>
+        </form>
       </div>
-
-      <VerifyWalletPinModal
-        isOpen={openPinModal}
-        onClose={() => {
-          setOpenPinModal(false);
-          setPin("");
-        }}
-        onVerify={handlePinVerified}
-      />
-    </>
+    </div>
   );
 };
 
 export default CreatePayoutModal;
-

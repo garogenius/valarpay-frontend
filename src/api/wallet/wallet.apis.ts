@@ -74,12 +74,25 @@ export const changeWalletPinRequest = async (formdata: IChangeWalletPin) => {
 export const getTransferFee = ({
   currency,
   amount,
+  accountNumber,
 }: {
   currency: string;
   amount: number;
+  accountNumber?: string;
 }) => {
+  const queryParams = new URLSearchParams();
+  queryParams.set("currency", currency);
+  queryParams.set("amount", amount.toString());
+  if (accountNumber) queryParams.set("accountNumber", accountNumber);
   return request({
-    url: `/wallet/get-transfer-fee?currency=${currency}&amount=${amount}`,
+    url: `/wallet/get-transfer-fee?${queryParams.toString()}`,
+  });
+};
+
+export const getMatchedBanksByAccountNumber = (accountNumber: string) => {
+  return request({
+    url: `/wallet/get-matched-banks/${accountNumber}`,
+    method: "get",
   });
 };
 
@@ -183,6 +196,54 @@ export const createAccountRequest = async (formdata: ICreateAccount) => {
 export const getWalletAccountsRequest = () => {
   return request({
     url: "/wallet/accounts",
+  });
+};
+
+export const getGraphAccountsRequest = () => {
+  return request({
+    url: "/wallet/accounts/graph",
+    method: "get",
+  });
+};
+
+export const updateGraphAccountRequest = async (
+  walletId: string,
+  data: any
+) => {
+  return request({
+    url: `/wallet/account/${walletId}`,
+    method: "patch",
+    data,
+  });
+};
+
+export const closeGraphAccountRequest = async (walletId: string) => {
+  return request({
+    url: `/wallet/account/${walletId}`,
+    method: "delete",
+  });
+};
+
+export const createMockDepositRequest = async (data: any) => {
+  return request({
+    url: "/wallet/account/mock-deposit",
+    method: "post",
+    data,
+  });
+};
+
+export const getPersonDetailsRequest = () => {
+  return request({
+    url: "/wallet/person/details",
+    method: "get",
+  });
+};
+
+export const updatePersonDetailsRequest = async (data: any) => {
+  return request({
+    url: "/wallet/person/update",
+    method: "patch",
+    data,
   });
 };
 

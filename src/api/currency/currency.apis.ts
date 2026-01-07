@@ -1,6 +1,7 @@
 import { request } from "@/utils/axios-utils";
 import {
   ICurrencyAccount,
+  ICreateCurrencyAccount,
   IUpdateCurrencyAccount,
   ICloseCurrencyAccount,
   ICreatePayoutDestination,
@@ -10,16 +11,24 @@ import {
   IGetCurrencyAccountPayoutsQuery,
 } from "./currency.types";
 
+export const createCurrencyAccountRequest = async (data: ICreateCurrencyAccount) => {
+  return request({
+    url: "/wallet/create-account",
+    method: "post",
+    data,
+  });
+};
+
 export const getCurrencyAccountsRequest = async () => {
   return request({
-    url: "/wallet/accounts/graph",
+    url: "/wallet/accounts",
     method: "get",
   });
 };
 
 export const getCurrencyAccountByCurrencyRequest = async (currency: "USD" | "EUR" | "GBP") => {
   return request({
-    url: `/wallet/accounts/graph?currency=${currency}`,
+    url: `/wallet/accounts?currency=${currency}`,
     method: "get",
   });
 };
@@ -51,13 +60,11 @@ export const updateCurrencyAccountRequest = async (
 };
 
 export const closeCurrencyAccountRequest = async (
-  walletId: string,
-  data: ICloseCurrencyAccount
+  walletId: string
 ) => {
   return request({
     url: `/wallet/account/${walletId}`,
     method: "delete",
-    data,
   });
 };
 
@@ -69,7 +76,7 @@ export const getCurrencyAccountTransactionsRequest = async (
   if (query.limit) queryParams.set("limit", query.limit.toString());
   if (query.offset) queryParams.set("offset", query.offset.toString());
   return request({
-    url: `/wallet/account/${currency}/transactions?${queryParams.toString()}`,
+    url: `/currency/accounts/${currency}/transactions?${queryParams.toString()}`,
     method: "get",
   });
 };
@@ -82,7 +89,7 @@ export const getCurrencyAccountDepositsRequest = async (
   if (query.limit) queryParams.set("limit", query.limit.toString());
   if (query.offset) queryParams.set("offset", query.offset.toString());
   return request({
-    url: `/wallet/account/${currency}/deposits?${queryParams.toString()}`,
+    url: `/currency/accounts/${currency}/deposits?${queryParams.toString()}`,
     method: "get",
   });
 };
@@ -95,7 +102,7 @@ export const getCurrencyAccountPayoutsRequest = async (
   if (query.limit) queryParams.set("limit", query.limit.toString());
   if (query.offset) queryParams.set("offset", query.offset.toString());
   return request({
-    url: `/wallet/account/${currency}/payouts?${queryParams.toString()}`,
+    url: `/currency/accounts/${currency}/payouts?${queryParams.toString()}`,
     method: "get",
   });
 };
@@ -104,7 +111,7 @@ export const getCurrencyAccountPayoutDestinationsRequest = async (
   currency: "USD" | "EUR" | "GBP"
 ) => {
   return request({
-    url: `/wallet/account/${currency}/payout-destinations`,
+    url: `/currency/accounts/${currency}/payout-destinations`,
     method: "get",
   });
 };
@@ -114,7 +121,7 @@ export const createPayoutDestinationRequest = async (
   data: ICreatePayoutDestination
 ) => {
   return request({
-    url: `/wallet/account/${currency}/payout-destinations`,
+    url: `/currency/accounts/${currency}/payout-destinations`,
     method: "post",
     data,
   });
@@ -125,7 +132,7 @@ export const createPayoutRequest = async (
   data: ICreatePayout
 ) => {
   return request({
-    url: `/wallet/account/${currency}/payouts`,
+    url: `/currency/accounts/${currency}/payouts`,
     method: "post",
     data,
   });

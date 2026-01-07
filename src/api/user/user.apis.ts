@@ -110,7 +110,7 @@ export const validatePhoneNumberRequest = async (
   formdata: IValidatePhoneNumber
 ) => {
   return request({
-    url: "/user/validate-phoneNumber",
+    url: "/user/validate-phonenumber",
     method: "post",
     data: formdata,
   });
@@ -120,7 +120,7 @@ export const verifyPhoneNumberRequest = async (
   formdata: IVerifyPhoneNumber
 ) => {
   return request({
-    url: "/user/verify-phoneNumber",
+    url: "/user/verify-phonenumber",
     method: "post",
     data: formdata,
   });
@@ -180,6 +180,102 @@ export const biometricDisableRequest = async (formdata: IBiometricDisable) => {
 export const biometricStatusRequest = async (deviceId: string) => {
   return request({
     url: `/auth/biometric/status?deviceId=${deviceId}`,
+    method: "get",
+  });
+};
+
+export const createBusinessAccountRequest = async (formdata: any) => {
+  return request({
+    url: "/user/create-business-account",
+    method: "post",
+    data: formdata,
+  });
+};
+
+export const verifyNinRequest = async (formdata: any) => {
+  return request({
+    url: "/user/verify-nin",
+    method: "post",
+    data: formdata,
+  });
+};
+
+export const checkUserExistenceRequest = async (formdata: any) => {
+  return request({
+    url: "/user/existance-check",
+    method: "post",
+    data: formdata,
+  });
+};
+
+export const validateEmailRequest = async (formdata: any) => {
+  return request({
+    url: "/user/validate-email",
+    method: "post",
+    data: formdata,
+  });
+};
+
+export const verifyEmailRequest = async (formdata: any) => {
+  return request({
+    url: "/user/verify-email",
+    method: "post",
+    data: formdata,
+  });
+};
+
+export const changePinRequest = async (formdata: any) => {
+  return request({
+    url: "/user/change-pin",
+    method: "put",
+    data: formdata,
+  });
+};
+
+export const changePasscodeRequest = async (formdata: any) => {
+  return request({
+    url: "/user/change-passcode",
+    method: "put",
+    data: formdata,
+  });
+};
+
+export const deleteUserRequest = async (userId: string) => {
+  return request({
+    url: `/user/${userId}`,
+    method: "delete",
+  });
+};
+
+export const getStatisticsLineChartRequest = async (query?: {
+  startDate?: string;
+  endDate?: string;
+}) => {
+  const queryParams = new URLSearchParams();
+  if (query?.startDate) queryParams.set("startDate", query.startDate);
+  if (query?.endDate) queryParams.set("endDate", query.endDate);
+  return request({
+    url: `/user/statistics-line-chart${queryParams.toString() ? `?${queryParams.toString()}` : ""}`,
+    method: "get",
+  });
+};
+
+export const getStatisticsPieChartRequest = async (query?: {
+  startDate?: string;
+  endDate?: string;
+}) => {
+  const queryParams = new URLSearchParams();
+  if (query?.startDate) queryParams.set("startDate", query.startDate);
+  if (query?.endDate) queryParams.set("endDate", query.endDate);
+  return request({
+    url: `/user/statistics-pie-chart${queryParams.toString() ? `?${queryParams.toString()}` : ""}`,
+    method: "get",
+  });
+};
+
+export const requestChangePasswordRequest = async () => {
+  return request({
+    url: "/user/request-change-password",
     method: "get",
   });
 };
