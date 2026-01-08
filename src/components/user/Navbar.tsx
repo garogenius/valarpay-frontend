@@ -8,7 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { CURRENCY } from "@/constants/types";
+import { CURRENCY, TIER_LEVEL } from "@/constants/types";
 import Toggler from "../shared/Toggler";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import useOnClickOutside from "@/hooks/useOnClickOutside";
@@ -18,7 +18,6 @@ import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
 } from "@/api/notification/notification.queries";
-import SearchDropdown from "@/components/shared/SearchDropdown";
 
 const Navbar = () => {
   const { user } = useUserStore();
@@ -139,54 +138,75 @@ const Navbar = () => {
   const { mutate: markRead } = useMarkNotificationRead();
   const { mutate: markAllRead } = useMarkAllNotificationsRead();
 
+  // Helper function to format tier level display
+  const getTierDisplayText = (tierLevel?: TIER_LEVEL): string => {
+    if (!tierLevel || tierLevel === TIER_LEVEL.notSet) {
+      return "Tier Not Set";
+    }
+    const tierNumber = tierLevel === TIER_LEVEL.one ? "1" : tierLevel === TIER_LEVEL.two ? "2" : tierLevel === TIER_LEVEL.three ? "3" : "1";
+    return `Tier ${tierNumber} Account`;
+  };
+
   return (
     <div className="w-full z-40 xs:z-50 sticky top-0 flex justify-between items-center gap-2 sm:gap-4 bg-[#0A0A0A] px-3 sm:px-6 py-3 sm:py-4">
-      {/* Mobile Menu Button */}
-      <button
-        aria-label="Open menu"
+      {/* Left: menu + search */}
+      <FiMenu
         onClick={toggleMenu}
-        className="lg:hidden p-2 rounded-md hover:bg-[#1C1C1E] text-white"
-      >
-        <FiMenu className="text-xl" />
-      </button>
+        className="lg:hidden text-2xl text-text-200 dark:text-text-400 mr-1"
+      />
+      <div className="flex-1 max-w-[820px]" ref={searchRef}>
+        <div className="relative">
+          <div className="w-full flex items-center gap-2 bg-bg-600 dark:bg-bg-1100 border border-[#2C3947] rounded-xl px-4 py-2.5">
+            <FiSearch className="text-text-200 dark:text-text-400" />
+            <input
+              aria-label="search"
+              placeholder="Search transactions, bills or payments..."
+              className="bg-transparent outline-none w-full text-text-200 dark:text-text-800 placeholder-white"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onFocus={() => setSearchOpen(true)}
+              onKeyDown={(e) => { if (e.key === 'Enter') onSubmitSearch(); }}
+            />
+            {searchOpen && (
+              <button aria-label="close" onClick={() => setSearchOpen(false)} className="text-white/70 hover:text-white">
+                <FiX />
+              </button>
+            )}
+          </div>
 
-      {/* Search - Left Side */}
-      <div className="flex-1 max-w-[520px] relative">
-        <div className="w-full relative">
-          <svg className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => {
-              const value = e.target.value;
-              setSearchTerm(value);
-              if (!value.trim()) {
-                setSearchDropdownOpen(true);
-              } else {
-                setSearchDropdownOpen(false);
-              }
-            }}
-            onFocus={() => {
-              if (!searchTerm.trim()) {
-                setSearchDropdownOpen(true);
-              }
-            }}
-            placeholder="Search transactions, bills or payments..."
-            className="w-full rounded-lg bg-transparent border border-gray-800 text-xs sm:text-sm pl-9 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-2.5 text-white placeholder:text-gray-600 outline-none focus:border-gray-700"
-          />
+          {searchOpen && (
+            <div className="absolute left-0 right-0 mt-2 rounded-2xl bg-bg-600 dark:bg-bg-1100 shadow-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 pt-4 pb-2">
+                <p className="text-white/80 text-sm">Recent Search</p>
+                {recent.length > 0 && (
+                  <button className="text-[#f76301] text-sm hover:text-[#e55a00]" onClick={() => persistRecent([])}>Clear All</button>
+                )}
+              </div>
+              <div className="h-px bg-[#2C3947]" />
+              <div className="max-h-80 overflow-auto scroll-area py-2">
+                {recent.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
+                    <FiClock className="text-white/30 text-2xl" />
+                    <p className="text-white/60 text-sm">No recent searches</p>
+                  </div>
+                ) : recent.map((r, idx) => (
+                  <div key={idx} className="flex items-center justify-between gap-3 px-3 py-2 hover:bg-white/5">
+                    <button
+                      className="flex items-center gap-3 flex-1 text-left"
+                      onClick={() => { setSearchValue(r); onSubmitSearch(); }}
+                    >
+                      <FiClock className="text-white/50" />
+                      <span className="text-sm text-white/80">{r}</span>
+                    </button>
+                    <button aria-label="remove" onClick={() => persistRecent(recent.filter((x) => x !== r))} className="text-white/40 hover:text-white/70">
+                      <FiX />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-        
-        {/* Search Dropdown - Only shows recent searches */}
-        <SearchDropdown
-          isOpen={searchDropdownOpen && !searchTerm.trim()}
-          onClose={() => setSearchDropdownOpen(false)}
-          onSearch={(term) => {
-            setSearchTerm(term);
-            setSearchDropdownOpen(false);
-          }}
-        />
       </div>
 
       <div className="flex items-center gap-4">
@@ -274,7 +294,7 @@ const Navbar = () => {
               <p className="text-sm font-semibold text-white">
                 {user?.fullname || "User"}
               </p>
-              <p className="text-xs text-gray-400">Tier 2 Account</p>
+              <p className="text-xs text-gray-400">{getTierDisplayText(user?.tierLevel)}</p>
             </div>
             <MdKeyboardArrowDown className="hidden lg:block text-gray-400 text-lg" />
           </div>
