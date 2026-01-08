@@ -10,6 +10,7 @@ interface PinInputWithFingerprintProps {
   onChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  onBiometricSuccess?: (pin: string) => void;
 }
 
 const PinInputWithFingerprint: React.FC<PinInputWithFingerprintProps> = ({
@@ -17,6 +18,7 @@ const PinInputWithFingerprint: React.FC<PinInputWithFingerprintProps> = ({
   onChange,
   placeholder = "••••",
   disabled = false,
+  onBiometricSuccess,
 }) => {
   const fingerprintEnabled = useFingerprintForPayments();
 
@@ -26,10 +28,21 @@ const PinInputWithFingerprint: React.FC<PinInputWithFingerprintProps> = ({
   };
 
   const handleFingerprintClick = () => {
-    ErrorToast({
-      title: "Fingerprint not available",
-      descriptions: ["Fingerprint sign-in isn't enabled on web yet."],
-    });
+    // For web, this is stubbed. In a real mobile app, this would trigger biometric authentication
+    // For now, we'll show an error, but if onBiometricSuccess is provided, we could simulate it
+    if (onBiometricSuccess) {
+      // In a real implementation, this would be called after successful biometric auth
+      // For web, we'll just show the error
+      ErrorToast({
+        title: "Fingerprint not available",
+        descriptions: ["Fingerprint sign-in isn't enabled on web yet."],
+      });
+    } else {
+      ErrorToast({
+        title: "Fingerprint not available",
+        descriptions: ["Fingerprint sign-in isn't enabled on web yet."],
+      });
+    }
   };
 
   return (
@@ -60,4 +73,7 @@ const PinInputWithFingerprint: React.FC<PinInputWithFingerprintProps> = ({
 };
 
 export default PinInputWithFingerprint;
+
+
+
 

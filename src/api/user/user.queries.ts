@@ -21,6 +21,9 @@ import {
   biometricLoginRequest,
   biometricDisableRequest,
   biometricStatusRequest,
+  changePinRequest,
+  createPasscodeRequest,
+  changePasscodeRequest,
 } from "./user.apis";
 import {
   BENEFICIARY_TYPE,
@@ -283,4 +286,49 @@ export const useBiometricStatus = (deviceId: string) => {
     isPending, 
     isError 
   };
+};
+
+export const useChangePin = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { oldPin: string; newPin: string }) => changePinRequest(payload),
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      onSuccess(data);
+    },
+  });
+};
+
+export const useCreatePasscode = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { passcode: string }) => createPasscodeRequest(payload),
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      onSuccess(data);
+    },
+  });
+};
+
+export const useChangePasscode = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { oldPasscode: string; newPasscode: string }) => changePasscodeRequest(payload),
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      onSuccess(data);
+    },
+  });
 };

@@ -124,7 +124,7 @@ const RedeemGiftCardModal: React.FC<RedeemGiftCardModalProps> = ({ isOpen, onClo
                   setSuccess(false);
                   reset();
                 }}
-                className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black font-medium py-3 rounded-lg"
+                className="w-full bg-[#f76301] hover:bg-[#f76301]/90 text-black font-medium py-3 rounded-lg"
               >
                 Continue
               </CustomButton>
@@ -177,7 +177,7 @@ const RedeemGiftCardModal: React.FC<RedeemGiftCardModalProps> = ({ isOpen, onClo
             <CustomButton
               type="submit"
               isLoading={loading}
-              className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black font-medium py-3 rounded-lg"
+              className="w-full bg-[#f76301] hover:bg-[#f76301]/90 text-black font-medium py-3 rounded-lg"
             >
               Redeem
             </CustomButton>
@@ -189,4 +189,3 @@ const RedeemGiftCardModal: React.FC<RedeemGiftCardModalProps> = ({ isOpen, onClo
 };
 
 export default RedeemGiftCardModal;
-

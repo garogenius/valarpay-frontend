@@ -38,10 +38,10 @@ const SecurityPrivacyTab: React.FC<Props> = ({
         <p className="text-white font-semibold mb-3">Security</p>
         <div className="divide-y divide-white/10">
           {[
-            { icon: <FiKey className="text-[#FF6B2C]" />, title: "Change Transaction PIN", desc: "Secure your payments by updating your transaction PIN", onClick: onOpenChangePin },
-            { icon: <FiLock className="text-[#FF6B2C]" />, title: "Change Password", desc: "Protect your account by setting a new, stronger password", onClick: onOpenChangePassword },
-            ...(onOpenChangePasscode ? [{ icon: <FiLock className="text-[#FF6B2C]" />, title: "Change Login Passcode", desc: "Update your 6-digit login passcode", onClick: onOpenChangePasscode }] : []),
-            { icon: <FiShield className="text-[#FF6B2C]" />, title: "Set Security Question", desc: "Add an extra layer of protection with a security question", onClick: onOpenSetSecurity },
+            { icon: <FiKey className="text-[#f76301]" />, title: "Change Transaction PIN", desc: "Secure your payments by updating your transaction PIN", onClick: onOpenChangePin },
+            { icon: <FiLock className="text-[#f76301]" />, title: "Change Password", desc: "Protect your account by setting a new, stronger password", onClick: onOpenChangePassword },
+            ...(onOpenChangePasscode ? [{ icon: <FiLock className="text-[#f76301]" />, title: "Change Login Passcode", desc: "Update your 6-digit login passcode", onClick: onOpenChangePasscode }] : []),
+            { icon: <FiShield className="text-[#f76301]" />, title: "Set Security Question", desc: "Add an extra layer of protection with a security question", onClick: onOpenSetSecurity },
           ].map((it, i) => (
             <button key={i} onClick={it.onClick} className="w-full flex items-center justify-between gap-3 py-3 text-left">
               <div className="flex items-start gap-3">
@@ -55,17 +55,18 @@ const SecurityPrivacyTab: React.FC<Props> = ({
             </button>
           ))}
 
-          <div className="w-full flex items-center justify-between gap-3 py-3">
+          {/* Fingerprint features hidden - not in use */}
+          {/* <div className="w-full flex items-center justify-between gap-3 py-3">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-md bg-white/5 grid place-items-center text-white">
-                <FiShield className="text-[#FF6B2C]" />
+                <FiShield className="text-[#f76301]" />
               </div>
               <div>
                 <p className="text-white text-sm sm:text-base font-medium">Use Fingerprint for Payment</p>
                 <p className="text-white/60 text-xs sm:text-sm">Enable quick and secure payments with your fingerprint.</p>
               </div>
             </div>
-            <button onClick={onToggleFingerprint} className={`relative w-12 h-6 rounded-full ${fingerprint ? "bg-[#FF6B2C]" : "bg-white/20"}`}>
+            <button onClick={onToggleFingerprint} className={`relative w-12 h-6 rounded-full ${fingerprint ? "bg-[#f76301]" : "bg-white/20"}`}>
               <span className={`absolute top-0.5 ${fingerprint ? "right-0.5" : "left-0.5"} w-5 h-5 rounded-full bg-white transition-all`} />
             </button>
           </div>
@@ -73,7 +74,7 @@ const SecurityPrivacyTab: React.FC<Props> = ({
           <div className="w-full flex items-center justify-between gap-3 py-3">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-md bg-white/5 grid place-items-center text-white">
-                <FiLock className="text-[#FF6B2C]" />
+                <FiLock className="text-[#f76301]" />
               </div>
               <div>
                 <p className="text-white text-sm sm:text-base font-medium">
@@ -84,10 +85,10 @@ const SecurityPrivacyTab: React.FC<Props> = ({
                 </p>
               </div>
             </div>
-            <button onClick={onToggleBiometric} className={`relative w-12 h-6 rounded-full ${biometricEnabled ? "bg-[#FF6B2C]" : "bg-white/20"}`}>
+            <button onClick={onToggleBiometric} className={`relative w-12 h-6 rounded-full ${biometricEnabled ? "bg-[#f76301]" : "bg-white/20"}`}>
               <span className={`absolute top-0.5 ${biometricEnabled ? "right-0.5" : "left-0.5"} w-5 h-5 rounded-full bg-white transition-all`} />
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -97,7 +98,7 @@ const SecurityPrivacyTab: React.FC<Props> = ({
           <button onClick={onOpenLinked} className="w-full flex items-center justify-between gap-3 py-3 text-left">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-md bg-white/5 grid place-items-center text-white">
-                <FiCreditCard className="text-[#FF6B2C]" />
+                <FiCreditCard className="text-[#f76301]" />
               </div>
               <div>
                 <p className="text-white text-sm sm:text-base font-medium">Linked Cards/ Account</p>

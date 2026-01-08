@@ -83,6 +83,52 @@ export const queryBettingTransactionRequest = async (params: IQueryBettingTransa
   });
 };
 
+export const placeBetRequest = async (formdata: {
+  amount: number;
+  currency: string;
+  betType: "SINGLE" | "MULTIPLE" | "SYSTEM";
+  odds: number;
+  description?: string;
+  metadata?: {
+    sport?: string;
+    event?: string;
+    selection?: string;
+    eventDate?: string;
+    [key: string]: any;
+  };
+  walletPin: string;
+}) => {
+  return request({
+    url: "/betting/bets",
+    method: "post",
+    data: formdata,
+  });
+};
+
+export const getBetsRequest = async (params: {
+  status?: "PENDING" | "WON" | "LOST" | "CANCELLED" | "REFUNDED";
+  betType?: "SINGLE" | "MULTIPLE" | "SYSTEM";
+  page?: number;
+  limit?: number;
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params.status) queryParams.set("status", params.status);
+  if (params.betType) queryParams.set("betType", params.betType);
+  if (params.page) queryParams.set("page", params.page.toString());
+  if (params.limit) queryParams.set("limit", params.limit.toString());
+  return request({
+    url: `/betting/bets${queryParams.toString() ? `?${queryParams.toString()}` : ""}`,
+    method: "get",
+  });
+};
+
+export const getBetByIdRequest = async (betId: string) => {
+  return request({
+    url: `/betting/bets/${betId}`,
+    method: "get",
+  });
+};
+
 
 
 

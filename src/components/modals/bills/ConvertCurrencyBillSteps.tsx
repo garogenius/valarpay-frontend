@@ -124,7 +124,7 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
                     <span className="text-gray-500 dark:text-gray-500">▾</span>
                   </button>
                   {fromOpen ? (
-                    <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-2xl z-20">
+                    <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-2xl z-[9999]">
                       {CURRENCIES.map((c) => (
                         <button
                           key={c}
@@ -153,7 +153,7 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
                     <span className="text-gray-500 dark:text-gray-500">▾</span>
                   </button>
                   {toOpen ? (
-                    <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-2xl z-20">
+                    <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-2xl z-[9999]">
                       {CURRENCIES.map((c) => (
                         <button
                           key={c}

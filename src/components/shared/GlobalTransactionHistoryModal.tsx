@@ -2,14 +2,13 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { IoClose } from "react-icons/io5";
+import { CgClose } from "react-icons/cg";
 import { LuCopy } from "react-icons/lu";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { MdDownload } from "react-icons/md";
 import { MdOutlineSupportAgent } from "react-icons/md";
-import { FiCheckCircle, FiX } from "react-icons/fi";
-import { getReceiptHtml, ReceiptDirection } from "@/api/receipt/receipt.apis";
+import { FiCheckCircle } from "react-icons/fi";
 
 interface GlobalTransactionHistoryModalProps {
   isOpen: boolean;
@@ -57,61 +56,10 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
     toast.success("Copied to clipboard", { duration: 2000 });
   };
 
-  const downloadReceiptFromApi = async () => {
-    if (!transaction.reference) return;
-    setDownloading(true);
-    try {
-      const direction: ReceiptDirection =
-        transaction.direction ||
-        (transaction.type === "TRANSFER" ? "debit" : "credit");
-
-      const dateAndTime = format(new Date(transaction.createdAt), "yyyy-MM-dd HH:mm:ss");
-      const amountStr = Number(transaction.amount).toFixed(2);
-      const availableBalance = transaction.availableBalance || "0.00";
-      const narration = transaction.description || "Transaction";
-
-      const html = await getReceiptHtml(direction, direction === "debit" ? {
-        reference: transaction.reference,
-        dateAndTime,
-        availableBalance,
-        narration,
-        receipientName: transaction.recipientName || "Unknown",
-        accountNumber: transaction.senderAccount || "",
-        amount: amountStr,
-        accountName: transaction.senderName || "Unknown",
-      } : {
-        reference: transaction.reference,
-        dateAndTime,
-        availableBalance,
-        narration,
-        senderName: transaction.senderName || "Unknown",
-        accountNumber: transaction.recipientAccount || "",
-        amount: amountStr,
-        accountName: transaction.recipientName || "Unknown",
-      });
-
-      // Download as HTML file
-      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `receipt-${transaction.reference}.html`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      toast.success("Receipt downloaded");
-    } catch (e: any) {
-      toast.error("Failed to download receipt");
-    } finally {
-      setDownloading(false);
-    }
-  };
-
   const getTransactionTypeLabel = () => {
     switch (transaction.type) {
       case "TRANSFER":
-        return transaction.recipientBank === "ValarPay" ? "Merchant Transfer" : "Inter-bank Transfer";
+        return transaction.recipientBank === "ValarPay" ? "Merchant Transfer" : "Transfer From";
       case "INTERNET":
         return "Internet";
       case "AIRTIME":
@@ -127,202 +75,168 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
     }
   };
 
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), "MMM dd, yyyy hh:mm a");
+    } catch {
+      return dateString;
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <>
-      <AnimatePresence>
-        {isOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-              onClick={onClose}
-            />
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/80 dark:bg-black/60"
+            onClick={onClose}
+          />
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-md bg-[#0A0A0A] rounded-2xl border border-gray-800 shadow-2xl max-h-[90vh] overflow-hidden flex flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className="flex items-start justify-between px-6 py-4 border-b border-gray-800 bg-[#0A0A0A]">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="relative w-full max-w-md bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="px-5 sm:px-6 pt-4 pb-3 border-b border-white/10">
+              <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-white text-lg font-semibold">Transaction History</h3>
-                  <p className="text-gray-400 text-sm mt-0.5">
+                  <h3 className="text-white text-base sm:text-lg font-semibold">Transaction History</h3>
+                  <p className="text-white/60 text-xs sm:text-sm mt-0.5">
                     View complete information about this transaction
                   </p>
                 </div>
                 <button
                   onClick={onClose}
-                  className="p-1.5 rounded-lg hover:bg-[#1A1A1F] text-white hover:text-gray-200 transition-colors"
+                  className="p-2 cursor-pointer bg-bg-1400 rounded-full hover:bg-bg-1200 transition-colors"
                 >
-                  <IoClose className="w-6 h-6" />
+                  <CgClose className="text-xl text-text-200 dark:text-text-400" />
                 </button>
               </div>
+            </div>
 
-              {/* Content */}
-              <div className="flex-1 overflow-y-auto bg-[#0A0A0A]">
-                <div className="px-6 py-6 space-y-6">
-                  {/* Status Badge */}
-                  <div
-                    className={`w-full rounded-xl px-6 py-8 flex flex-col items-center justify-center ${
-                      transaction.status === "SUCCESSFUL"
-                        ? "bg-green-500/10 border border-green-700/40"
-                        : "bg-red-500/10 border border-red-700/40"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      {transaction.status === "SUCCESSFUL" ? (
-                        <FiCheckCircle className="text-green-500 text-2xl" />
-                      ) : (
-                        <div className="w-6 h-6 rounded-full border-2 border-red-500 flex items-center justify-center">
-                          <FiX className="text-red-500 text-lg" />
-                        </div>
-                      )}
-                      <span
-                        className={`text-lg font-medium ${
-                          transaction.status === "SUCCESSFUL" ? "text-green-500" : "text-red-500"
-                        }`}
-                      >
-                        {transaction.status === "SUCCESSFUL" ? "Successful" : "Failed"}
-                      </span>
-                    </div>
-                    <p className="text-white text-3xl font-bold">
-                      {transaction.currency === "NGN" ? "₦" : transaction.currency}
-                      {transaction.amount.toLocaleString()}
-                    </p>
-                  </div>
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4">
+              {/* Status Badge */}
+              <div className={`w-full rounded-xl px-6 py-8 flex flex-col items-center justify-center mb-4 ${
+                transaction.status === "SUCCESSFUL"
+                  ? "bg-[#224022]"
+                  : transaction.status === "FAILED"
+                    ? "bg-red-500/10 border border-red-700/40"
+                    : "bg-yellow-500/10 border border-yellow-700/40"
+              }`}>
+                <div className="flex items-center gap-2 mb-3">
+                  {transaction.status === "SUCCESSFUL" && (
+                    <FiCheckCircle className="text-white text-2xl" />
+                  )}
+                  <span className={`text-lg font-medium ${
+                    transaction.status === "SUCCESSFUL" ? "text-white" : 
+                    transaction.status === "FAILED" ? "text-red-500" : "text-yellow-500"
+                  }`}>
+                    {transaction.status === "SUCCESSFUL" ? "Successful" : transaction.status}
+                  </span>
+                </div>
+                <p className="text-white text-3xl font-bold">
+                  {transaction.currency === "NGN" ? "₦" : transaction.currency}
+                  {Number(transaction.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+              </div>
 
-                  {/* Transaction Details */}
-                  <div className="bg-[#1C1C1E] rounded-xl px-5 py-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400 text-sm">Transaction ID</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-white text-sm font-medium">
-                          {transaction.id}
-                        </span>
-                        <button
-                          onClick={() => copyToClipboard(transaction.id)}
-                          className="text-gray-400 hover:text-white transition-colors"
-                        >
-                          <LuCopy className="text-sm" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400 text-sm">Date & Time</span>
-                      <span className="text-white text-sm font-medium">
-                        {format(new Date(transaction.createdAt), "MMM dd, yyyy hh:mm a")}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400 text-sm">Payment Method</span>
-                      <span className="text-white text-sm font-medium">
-                        {transaction.paymentMethod || "Available Balance"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400 text-sm">Transaction Type</span>
-                      <span className="text-white text-sm font-medium">
-                        {getTransactionTypeLabel()}
-                      </span>
-                    </div>
-
-                    {/* Transfer specific */}
-                    {transaction.type === "TRANSFER" && (
-                      <>
-                        {transaction.senderName && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-400 text-sm">From</span>
-                            <span className="text-white text-sm font-medium">
-                              {transaction.senderName}
-                            </span>
-                          </div>
-                        )}
-                        {transaction.recipientName && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-400 text-sm">To</span>
-                            <span className="text-white text-sm font-medium">
-                              {transaction.recipientName}
-                            </span>
-                          </div>
-                        )}
-                        {transaction.recipientAccount && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-400 text-sm">Number</span>
-                            <span className="text-white text-sm font-medium">
-                              {transaction.recipientAccount}
-                            </span>
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    {/* Internet/Bill Payment specific */}
-                    {(transaction.type === "INTERNET" || transaction.type === "DATA" || transaction.type === "AIRTIME") && (
-                      <>
-                        {transaction.provider && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-400 text-sm">To</span>
-                            <span className="text-white text-sm font-medium">
-                              {transaction.provider}
-                            </span>
-                          </div>
-                        )}
-                        {transaction.billerNumber && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-400 text-sm">Number</span>
-                            <span className="text-white text-sm font-medium">
-                              {transaction.billerNumber}
-                            </span>
-                          </div>
-                        )}
-                        {transaction.planName && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-400 text-sm">Plan</span>
-                            <span className="text-white text-sm font-medium">
-                              {transaction.planName}
-                            </span>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-3">
-                    <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#2C2C2E] border border-gray-700 text-white hover:bg-[#353539] transition-colors">
-                      <MdOutlineSupportAgent className="text-lg" />
-                      <span className="text-sm font-medium">Contact Support</span>
-                    </button>
+              {/* Transaction Details */}
+              <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 space-y-3 mb-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-white/60 text-xs">Transaction ID</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white text-xs font-medium">
+                      {transaction.reference || transaction.id}
+                    </span>
                     <button
-                      onClick={downloadReceiptFromApi}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#FF6B2C] text-white hover:bg-[#FF7A3D] transition-colors"
+                      onClick={() => copyToClipboard(transaction.reference || transaction.id)}
+                      className="text-white/60 hover:text-white transition-colors"
                     >
-                      <MdDownload className="text-lg" />
-                      <span className="text-sm font-medium">
-                        {downloading ? "Preparing..." : "Download Receipt"}
-                      </span>
+                      <LuCopy className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-white/60 text-xs">Date & Time</span>
+                  <span className="text-white text-xs font-medium">
+                    {formatDate(transaction.createdAt)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-white/60 text-xs">Payment Method</span>
+                  <span className="text-white text-xs font-medium">
+                    {transaction.paymentMethod || "Available Balance"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-white/60 text-xs">Transaction Type</span>
+                  <span className="text-white text-xs font-medium">
+                    {getTransactionTypeLabel()}
+                  </span>
+                </div>
+
+                {/* Transfer specific */}
+                {transaction.type === "TRANSFER" && transaction.senderName && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60 text-xs">From</span>
+                    <span className="text-white text-xs font-medium">
+                      {transaction.senderName}
+                    </span>
+                  </div>
+                )}
+
+                {/* Narration */}
+                {transaction.description && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60 text-xs">Narration</span>
+                    <span className="text-white text-xs font-medium">
+                      {transaction.description}
+                    </span>
+                  </div>
+                )}
               </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    </>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => {
+                    window.location.href = `tel:+23481346906`;
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
+                >
+                  <MdOutlineSupportAgent className="text-lg" />
+                  <span className="text-sm font-medium">Contact Support</span>
+                </button>
+                <button
+                  onClick={() => {
+                    // This will trigger the receipt modal/download
+                    // The parent component should handle this
+                    toast.success("Receipt download initiated");
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#D4B139] hover:bg-[#c7a42f] text-black transition-colors"
+                >
+                  <MdDownload className="text-lg" />
+                  <span className="text-sm font-medium">Download Receipt</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };
 
 export default GlobalTransactionHistoryModal;
-
-

@@ -12,21 +12,52 @@ import { useGetBettingWallet, useGetBettingWalletTransactions } from "@/api/bett
 import FundWalletModal from "@/components/modals/betting/FundWalletModal";
 import FundPlatformModal from "@/components/modals/betting/FundPlatformModal";
 import WithdrawModal from "@/components/modals/betting/WithdrawModal";
+import PlaceBetModal from "@/components/modals/betting/PlaceBetModal";
+import { useGetBettingPlatforms } from "@/api/betting/betting.queries";
 import { formatDistanceToNow } from "date-fns";
+import { useEffect, useMemo } from "react";
 
 const BettingContent = () => {
   const navigate = useNavigate();
   const [isFundWalletOpen, setIsFundWalletOpen] = useState(false);
   const [isFundPlatformOpen, setIsFundPlatformOpen] = useState(false);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+  const [isPlaceBetOpen, setIsPlaceBetOpen] = useState(false);
 
   // Fetch betting wallet
   const { wallet: bettingWallet, isPending: walletLoading, refetch: refetchWallet } = useGetBettingWallet();
+
+  // Fetch platforms
+  const { platforms, isPending: platformsLoading } = useGetBettingPlatforms();
 
   // Fetch transactions
   const { transactions, isPending: transactionsLoading, refetch: refetchTransactions } = useGetBettingWalletTransactions({
     limit: 20,
   });
+
+  // Get active platforms
+  const activePlatforms = useMemo(() => {
+    return (platforms || []).filter((p) => p.isActive !== false);
+  }, [platforms]);
+
+  // Poll pending transactions
+  const pendingTransactions = useMemo(() => {
+    return transactions.filter((tx: any) => 
+      (tx.status === "PENDING" || tx.status === "PROCESSING") && tx.orderReference
+    );
+  }, [transactions]);
+
+  // Refetch transactions periodically if there are pending ones
+  useEffect(() => {
+    if (pendingTransactions.length > 0) {
+      const interval = setInterval(() => {
+        refetchTransactions();
+        refetchWallet();
+      }, 5000); // Poll every 5 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [pendingTransactions.length, refetchTransactions, refetchWallet]);
 
   const handleModalSuccess = () => {
     refetchWallet();
@@ -117,7 +148,7 @@ const BettingContent = () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
         <button
           onClick={() => setIsFundWalletOpen(true)}
           className="flex flex-col items-center justify-center gap-1.5 sm:gap-2 p-3 sm:p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors"
@@ -126,6 +157,18 @@ const BettingContent = () => {
             <IoArrowDownCircleOutline className="text-xl sm:text-2xl text-green-400" />
           </div>
           <span className="text-white text-xs sm:text-sm font-medium text-center">Fund Wallet</span>
+        </button>
+
+        <button
+          onClick={() => setIsPlaceBetOpen(true)}
+          className="flex flex-col items-center justify-center gap-1.5 sm:gap-2 p-3 sm:p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors"
+        >
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#f76301]/20 flex items-center justify-center">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-[#f76301]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <span className="text-white text-xs sm:text-sm font-medium text-center">Place Bet</span>
         </button>
 
         <button
@@ -148,6 +191,52 @@ const BettingContent = () => {
           <span className="text-white text-xs sm:text-sm font-medium text-center">Withdraw</span>
         </button>
       </div>
+
+      {/* Betting Platforms Section */}
+      {activePlatforms.length > 0 && (
+        <div className="bg-bg-600 dark:bg-bg-1100 border border-white/10 rounded-2xl p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-white text-base sm:text-lg font-semibold">Available Platforms</h2>
+            <button
+              onClick={() => navigate("/user/betting/history")}
+              className="text-[#f76301] text-xs sm:text-sm font-medium hover:underline"
+            >
+              View Bet History
+            </button>
+          </div>
+
+          {platformsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <SpinnerLoader width={24} height={24} color="#f76301" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {activePlatforms.map((platform) => (
+                <div
+                  key={platform.code}
+                  className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-white font-semibold text-sm sm:text-base">{platform.name}</h3>
+                    {platform.isActive && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
+                        Active
+                      </span>
+                    )}
+                  </div>
+                  {platform.description && (
+                    <p className="text-white/60 text-xs sm:text-sm mb-3">{platform.description}</p>
+                  )}
+                  <div className="flex items-center justify-between text-xs text-white/50">
+                    <span>Min: ₦{platform.minAmount.toLocaleString()}</span>
+                    <span>Max: ₦{platform.maxAmount.toLocaleString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Transactions Section */}
       <div className="bg-bg-600 dark:bg-bg-1100 border border-white/10 rounded-2xl p-4 sm:p-6">
@@ -228,6 +317,12 @@ const BettingContent = () => {
       <WithdrawModal
         isOpen={isWithdrawOpen}
         onClose={() => setIsWithdrawOpen(false)}
+        onSuccess={handleModalSuccess}
+      />
+
+      <PlaceBetModal
+        isOpen={isPlaceBetOpen}
+        onClose={() => setIsPlaceBetOpen(false)}
         onSuccess={handleModalSuccess}
       />
     </div>

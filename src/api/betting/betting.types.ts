@@ -68,6 +68,75 @@ export type IQueryBettingTransaction = {
   orderReference: string;
 };
 
+export type Bet = {
+  id: string;
+  userId: string;
+  platform?: string;
+  platformCode?: string;
+  betType: "SINGLE" | "MULTIPLE" | "SYSTEM";
+  status: "PENDING" | "WON" | "LOST" | "CANCELLED" | "REFUNDED";
+  amount: number;
+  potentialWinnings: number;
+  odds: number;
+  currency: string;
+  orderReference?: string;
+  transactionRef?: string;
+  description?: string;
+  metadata?: {
+    sport?: string;
+    event?: string;
+    selection?: string;
+    eventDate?: string;
+    [key: string]: any;
+  };
+  createdAt: string;
+  updatedAt?: string;
+};
+
+export type IPlaceBet = {
+  amount: number;
+  currency: string;
+  betType: "SINGLE" | "MULTIPLE" | "SYSTEM";
+  odds: number;
+  description?: string;
+  metadata?: {
+    sport?: string;
+    event?: string;
+    selection?: string;
+    eventDate?: string;
+    [key: string]: any;
+  };
+  walletPin: string;
+};
+
+export type Bet = {
+  id: string;
+  userId: string;
+  platform: string;
+  platformCode: string;
+  betType: "SINGLE" | "MULTIPLE" | "SYSTEM";
+  status: "PENDING" | "WON" | "LOST" | "CANCELLED" | "REFUNDED";
+  amount: number;
+  potentialWinnings: number;
+  odds: number;
+  currency: string;
+  orderReference: string;
+  transactionRef?: string;
+  description?: string;
+  createdAt: string;
+  updatedAt?: string;
+};
+
+export type IPlaceBet = {
+  platform: string;
+  betType: "SINGLE" | "MULTIPLE" | "SYSTEM";
+  amount: number;
+  odds: number;
+  currency: string;
+  description?: string;
+  walletPin: string;
+};
+
 
 
 

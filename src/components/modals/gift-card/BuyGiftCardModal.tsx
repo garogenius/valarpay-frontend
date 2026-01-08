@@ -426,7 +426,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
               <CustomButton
                 type="button"
                 disabled={!canProceed}
-                className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black font-medium py-3 rounded-lg transition-colors mt-2"
+                className="w-full bg-[#f76301] hover:bg-[#f76301]/90 text-black font-medium py-3 rounded-lg transition-colors mt-2"
                 onClick={() => setStep("confirm")}
               >
                 Next
@@ -457,7 +457,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
               </div>
               <div className="flex gap-4 mt-2">
                 <CustomButton onClick={()=> setStep("form")} className="flex-1 bg-transparent border border-border-600 text-white hover:bg-white/5 py-3 rounded-lg">Back</CustomButton>
-                <CustomButton onClick={handleConfirm} disabled={walletPin.length!==4 || paying} isLoading={paying} className="flex-1 bg-[#f76301] hover:bg-[#e55a00] text-black py-3 rounded-lg">Purchase</CustomButton>
+                <CustomButton onClick={handleConfirm} disabled={walletPin.length!==4 || paying} isLoading={paying} className="flex-1 bg-[#f76301] hover:bg-[#f76301]/90 text-black py-3 rounded-lg">Purchase</CustomButton>
               </div>
             </div>
           )}
@@ -485,7 +485,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                     onClick={handleFetchRedeemCodes}
                     disabled={redeemLoading}
                     isLoading={redeemLoading}
-                    className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black font-medium py-3 rounded-lg"
+                    className="w-full bg-[#f76301] hover:bg-[#f76301]/90 text-black font-medium py-3 rounded-lg"
                   >
                     Get Redeem Codes
                   </CustomButton>
@@ -493,7 +493,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
               )}
               <div className="flex gap-3 mt-4 w-full">
                 <CustomButton onClick={handleClose} className="flex-1 bg-transparent border border-border-600 text-white hover:bg-white/5 py-3 rounded-lg">Contact Support</CustomButton>
-                <CustomButton onClick={handleClose} className="flex-1 bg-[#f76301] hover:bg-[#e55a00] text-black py-3 rounded-lg">Download Receipt</CustomButton>
+                <CustomButton onClick={handleClose} className="flex-1 bg-[#f76301] hover:bg-[#f76301]/90 text-black py-3 rounded-lg">Download Receipt</CustomButton>
               </div>
             </div>
           )}
@@ -520,7 +520,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                   </div>
                 ))}
               </div>
-              <CustomButton onClick={handleClose} className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black font-medium py-3 rounded-lg">Done</CustomButton>
+              <CustomButton onClick={handleClose} className="w-full bg-[#f76301] hover:bg-[#f76301]/90 text-black font-medium py-3 rounded-lg">Done</CustomButton>
             </div>
           )}
         </div>
@@ -530,4 +530,3 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
 };
 
 export default BuyGiftCardModal;
-

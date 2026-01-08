@@ -42,13 +42,41 @@ const DashboardContent = () => {
     // Modal will close automatically when isIdentityVerified becomes true
   };
 
+  // Block dashboard access until verification is complete
+  if (!isIdentityVerified) {
+    return (
+      <>
+        {/* Show minimal UI while verification is required */}
+        <div className="flex flex-col gap-4 sm:gap-6 pb-10">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-xl sm:text-2xl font-semibold text-white">
+              Welcome Back, {user?.username || 'User'}
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-400">Please verify your identity to continue</p>
+          </div>
+        </div>
+
+        {/* Account Verification Modal - Non-dismissible until verified */}
+        <AccountVerificationModal
+          isOpen={true}
+          onClose={() => {
+            // Prevent closing until verification is complete
+            // Do nothing - modal cannot be closed
+          }}
+          onSuccess={handleVerificationSuccess}
+          isRequired={true}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <div className="flex flex-col gap-4 sm:gap-6 pb-10">
         {/* Welcome Section */}
         <div className="flex flex-col gap-1">
           <h1 className="text-xl sm:text-2xl font-semibold text-white">
-            Welcome Back, {user?.fullname?.split(' ')[0] || 'User'}
+            Welcome Back, {user?.username || 'User'}
           </h1>
           <p className="text-xs sm:text-sm text-gray-400">Here's what's happening with your finances today</p>
         </div>
@@ -63,18 +91,20 @@ const DashboardContent = () => {
         )}
       </div>
 
-      {/* Account Verification Modal - Non-dismissible if not verified */}
-      <AccountVerificationModal
-        isOpen={showVerificationModal}
-        onClose={() => {
-          // Only allow closing if verification is complete
-          if (isIdentityVerified) {
-            setShowVerificationModal(false);
-          }
-        }}
-        onSuccess={handleVerificationSuccess}
-        isRequired={!isIdentityVerified}
-      />
+      {/* Account Verification Modal - Only show if PIN not created yet */}
+      {!isPinCreated && (
+        <AccountVerificationModal
+          isOpen={showVerificationModal}
+          onClose={() => {
+            // Only allow closing if PIN is created
+            if (isPinCreated) {
+              setShowVerificationModal(false);
+            }
+          }}
+          onSuccess={handleVerificationSuccess}
+          isRequired={!isPinCreated}
+        />
+      )}
     </>
   );
 };

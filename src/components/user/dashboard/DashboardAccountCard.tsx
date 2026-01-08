@@ -82,7 +82,7 @@ const DashboardAccountCard = ({ wallets }: { wallets: Wallet[] }) => {
       {open ? (
         <div
           ref={ref}
-          className="absolute z-20 mt-2 right-4 top-16 w-64 sm:w-72 rounded-xl border border-gray-700 bg-[#1C1C1E] shadow-2xl"
+          className="absolute z-[60] mt-2 right-4 top-16 w-64 sm:w-72 rounded-xl border border-gray-700 bg-[#1C1C1E] shadow-2xl"
         >
           <div className="p-3 border-b border-gray-700">
             <p className="text-sm font-semibold text-gray-300">

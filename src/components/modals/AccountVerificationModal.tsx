@@ -76,17 +76,9 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
   const onFaceVerificationSuccess = (data: any) => {
     const responseData = data?.data?.data;
     if (responseData?.verified) {
-      // Update user data
-      if (responseData?.wallet) {
-        const { user } = useUserStore.getState();
-        const updatedUser = {
-          ...user,
-          isBvnVerified: true,
-          bvn: bvnDetails.bvn,
-          wallet: [...(user?.wallet || []), responseData.wallet],
-        };
-        setUser(updatedUser as any);
-      }
+      // Don't manually update user - let the API refresh handle it
+      // The invalidateQueries in the mutation will refresh user data from API
+      // This ensures we get the actual verification status from the server
       
       setVerificationResultType("success");
       setVerificationResultTitle("BVN Verified Successfully!");
@@ -133,11 +125,13 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
       (isIdentityVerified && !isPinCreated) ? 2 : (isIdentityVerified && isPinCreated) ? 2 : 1
     );
     
-    // If verification is complete and modal is required, close it
+    // If verification is complete and modal is required, call onSuccess
+    // This will trigger user data refresh and modal will close when isIdentityVerified becomes true
     if (isIdentityVerified && isPinCreated && isRequired) {
+      // Wait a bit for user data to refresh from API
       setTimeout(() => {
         onSuccess?.();
-      }, 1000);
+      }, 1500);
     }
   }, [isBvnVerified, isNinVerified, isIdentityVerified, isPinCreated, isRequired, onSuccess]);
 
@@ -149,19 +143,12 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
   };
 
   const onOtpValidationSuccess = (data: any) => {
-    // Update user data - wallet is created by the API
-    const walletData = data?.data?.data;
-    if (walletData) {
-      const { user } = useUserStore.getState();
-      const updatedUser = {
-        ...user,
-        isBvnVerified: true,
-        bvn: bvnDetails.bvn,
-        wallet: walletData.id ? [...(user?.wallet || []), walletData] : user?.wallet || [],
-      };
-      setUser(updatedUser as any);
-    }
+    // Don't manually update user - let the API refresh handle it
+    // The invalidateQueries in the mutation will refresh user data from API
+    // This ensures we get the actual verification status from the server
+    
     // Mark BVN step as complete and move to PIN
+    // User data will be refreshed automatically via query invalidation
     handleComplete(1.5);
   };
 
@@ -197,10 +184,12 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
   };
 
   const handleClose = () => {
-    // Only allow closing if not required or verification is complete
-    if (!isRequired || isIdentityVerified) {
+    // Only allow closing if not required AND verification is complete
+    // If required, never allow closing until verification succeeds
+    if (!isRequired && isIdentityVerified) {
       onClose();
     }
+    // If isRequired is true, do nothing - modal cannot be closed
   };
 
   const handleWelcomeClose = () => {
@@ -223,7 +212,7 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={isRequired ? undefined : handleClose}
+            onClick={isRequired ? () => {} : handleClose}
           />
 
           <motion.div
@@ -275,16 +264,7 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
                               ? "border-[#FF6B2C] bg-[#FF6B2C]/10"
                               : "border-gray-700 bg-[#1C1C1E] hover:bg-[#2C2C2E]"
                           }`}>
-                            <div className="flex items-center justify-center gap-3">
-                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                                identityType === "nin"
-                                  ? "border-[#FF6B2C] bg-[#FF6B2C]"
-                                  : "border-gray-500 bg-transparent"
-                              }`}>
-                                {identityType === "nin" && (
-                                  <div className="w-2.5 h-2.5 rounded-full bg-white" />
-                                )}
-                              </div>
+                            <div className="flex items-center justify-center">
                               <span className={`text-sm font-semibold ${
                                 identityType === "nin"
                                   ? "text-[#FF6B2C]"
@@ -309,16 +289,7 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
                               ? "border-[#FF6B2C] bg-[#FF6B2C]/10"
                               : "border-gray-700 bg-[#1C1C1E] hover:bg-[#2C2C2E]"
                           }`}>
-                            <div className="flex items-center justify-center gap-3">
-                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                                identityType === "bvn"
-                                  ? "border-[#FF6B2C] bg-[#FF6B2C]"
-                                  : "border-gray-500 bg-transparent"
-                              }`}>
-                                {identityType === "bvn" && (
-                                  <div className="w-2.5 h-2.5 rounded-full bg-white" />
-                                )}
-                              </div>
+                            <div className="flex items-center justify-center">
                               <span className={`text-sm font-semibold ${
                                 identityType === "bvn"
                                   ? "text-[#FF6B2C]"

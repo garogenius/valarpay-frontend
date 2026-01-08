@@ -168,7 +168,7 @@ const ElectricityBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                   <span className="text-gray-500 dark:text-gray-500">▾</span>
                 </button>
                 {providerOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-20">
+                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-[9999]">
                     {plansLoading ? (
                       <div className="p-4 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
                         <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...
@@ -221,7 +221,7 @@ const ElectricityBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                   <span className="text-gray-500 dark:text-gray-500">▾</span>
                 </button>
                 {meterTypeOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-20">
+                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-[9999]">
                     {variationsLoading ? (
                       <div className="p-4 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
                         <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...

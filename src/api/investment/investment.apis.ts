@@ -24,7 +24,7 @@ export const getInvestmentsRequest = async ({ page, limit, status, sort }: GetIn
   if (sort) query.set("sort", sort);
 
   return request({
-    url: `/investments?${query.toString()}`,
+    url: `/investment?${query.toString()}`,
     method: "get",
   });
 };

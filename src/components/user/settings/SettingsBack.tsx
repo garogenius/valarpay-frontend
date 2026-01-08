@@ -30,6 +30,11 @@ const HeadingData = [
   },
 
   {
+    title: "Report Scam",
+    path: "/user/settings/report-scam",
+  },
+
+  {
     title: "Tier Levels",
     path: "/user/settings/tiers",
   },

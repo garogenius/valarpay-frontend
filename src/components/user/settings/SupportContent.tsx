@@ -3,7 +3,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import ReportScamModal from "@/components/modals/ReportScamModal";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 import { MdEmail, MdPhone, MdReportProblem } from "react-icons/md";
 import Link from "next/link";
@@ -11,9 +10,9 @@ import Link from "next/link";
 import ErrorToast from "@/components/toast/ErrorToast";
 
 const SUPPORT_EMAIL = "support@valarpay.com";
-const SUPPORT_PHONE_DISPLAY = "+234-800-VALARPAY";
+const SUPPORT_PHONE_DISPLAY = "+23481346906";
 // We have one numeric phone in the codebase (used on receipt).
-const SUPPORT_PHONE_TEL = "+2348134146906";
+const SUPPORT_PHONE_TEL = "+23481346906";
 
 type FaqItem = { q: string; a: string };
 
@@ -46,7 +45,6 @@ const FAQS: FaqItem[] = [
 
 const SupportContent = () => {
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
-  const [reportOpen, setReportOpen] = useState(false);
 
   const cardClass =
     "rounded-2xl bg-[#0F0F10] border border-gray-800 p-5 hover:bg-white/5 transition-colors text-left w-full";
@@ -107,13 +105,13 @@ const SupportContent = () => {
           <p className="text-gray-500 text-[11px] mt-2">{SUPPORT_PHONE_DISPLAY}</p>
         </button>
 
-        <button type="button" className={cardClass} onClick={() => setReportOpen(true)}>
+        <Link href="/user/settings/report-scam" className={cardClass}>
           <div className="w-10 h-10 rounded-full bg-[#1C1C1E] flex items-center justify-center text-[#FF6B2C] mb-3">
             <MdReportProblem className="text-xl" />
           </div>
           <p className="text-white text-sm font-semibold">Report Scam</p>
           <p className="text-gray-400 text-xs mt-1">Report any suspicious activity or fraudulent transaction</p>
-        </button>
+        </Link>
       </div>
 
       {/* FAQs */}
@@ -161,8 +159,6 @@ const SupportContent = () => {
           ))}
         </div>
       </div>
-
-      <ReportScamModal isOpen={reportOpen} onClose={() => setReportOpen(false)} />
     </div>
   );
 };

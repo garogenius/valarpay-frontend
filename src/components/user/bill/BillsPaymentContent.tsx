@@ -15,12 +15,14 @@ import { LuPhoneOutgoing } from "react-icons/lu";
 import { BsPhone } from "react-icons/bs";
 import { TbWorldUp, TbWorldPin } from "react-icons/tb";
 import ComingSoonModal from "@/components/modals/ComingSoonModal";
+import Link from "next/link";
 
 type Tile = {
   label: string;
   icon: any;
   modal?: BillModalKey;
   comingSoonTitle?: string;
+  link?: string;
 };
 
 type Section = {
@@ -80,7 +82,7 @@ const SECTIONS: Section[] = [
     title: "Betting & Currency",
     gridClass: "grid-cols-4",
     tiles: [
-      { label: "Betting", icon: SlTrophy, modal: "betting" },
+      { label: "Betting", icon: SlTrophy, link: "/user/betting" },
       { label: "Convert Currency", icon: LiaRedoAltSolid, modal: "convert" },
       { label: "Sell GiftCards", icon: MdCardGiftcard, modal: "giftcard_redeem" },
       { label: "Buy GiftCards", icon: MdCardGiftcard, modal: "giftcard_buy" },
@@ -127,6 +129,29 @@ const BillsPaymentContent = () => {
               <div className={`w-full grid ${responsiveGrid(section.gridClass)} gap-2 sm:gap-3`}>
                 {section.tiles.map((t) => {
                   const Icon = t.icon;
+                  const content = (
+                    <>
+                      <div className="w-10 h-10 rounded-full bg-[#0A0A0A] dark:bg-[#141416] flex items-center justify-center">
+                        <Icon className="text-[#FF6B2C] text-lg" />
+                      </div>
+                      <p className="text-[11px] sm:text-xs text-gray-700 dark:text-gray-200 text-center leading-tight">
+                        {t.label}
+                      </p>
+                    </>
+                  );
+
+                  if (t.link) {
+                    return (
+                      <Link
+                        key={t.label}
+                        href={t.link}
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-colors px-2 py-3 sm:py-4 flex flex-col items-center justify-center gap-2"
+                      >
+                        {content}
+                      </Link>
+                    );
+                  }
+
                   return (
                     <button
                       key={t.label}
@@ -142,12 +167,7 @@ const BillsPaymentContent = () => {
                       }}
                       className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-colors px-2 py-3 sm:py-4 flex flex-col items-center justify-center gap-2"
                     >
-                      <div className="w-10 h-10 rounded-full bg-[#0A0A0A] dark:bg-[#141416] flex items-center justify-center">
-                        <Icon className="text-[#FF6B2C] text-lg" />
-                      </div>
-                      <p className="text-[11px] sm:text-xs text-gray-700 dark:text-gray-200 text-center leading-tight">
-                        {t.label}
-                      </p>
+                      {content}
                     </button>
                   );
                 })}

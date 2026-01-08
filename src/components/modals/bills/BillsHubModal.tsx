@@ -88,8 +88,8 @@ const BillsHubModal: React.FC<BillsHubModalProps> = ({ isOpen, onClose, initialB
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
 
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0A0A0A] shadow-2xl">
-        <div className="w-full max-h-[90vh] overflow-y-auto">{renderBody()}</div>
+      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-visible rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0A0A0A] shadow-2xl">
+        <div className="w-full max-h-[90vh] overflow-y-auto overflow-x-visible relative">{renderBody()}</div>
       </div>
     </div>
   );

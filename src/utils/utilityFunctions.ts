@@ -205,3 +205,11 @@ export const formatCurrency = (amount: number, currency: string = "NGN"): string
 
   return `${symbol}${formattedAmount}`;
 };
+
+// Format number with commas
+export const formatNumberWithCommas = (value: string | number): string => {
+  const numStr = typeof value === "number" ? value.toString() : value;
+  const parts = numStr.split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+};

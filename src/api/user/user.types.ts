@@ -95,3 +95,17 @@ export interface IValidatePhoneNumber {
 export interface IVerifyWalletPin {
   pin: string;
 }
+
+export interface IChangePin {
+  oldPin: string;
+  newPin: string;
+}
+
+export interface ICreatePasscode {
+  passcode: string;
+}
+
+export interface IChangePasscode {
+  oldPasscode: string;
+  newPasscode: string;
+}

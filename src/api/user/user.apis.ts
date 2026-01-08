@@ -13,6 +13,9 @@ import {
   IBiometricEnroll,
   IBiometricLogin,
   IBiometricDisable,
+  IChangePin,
+  ICreatePasscode,
+  IChangePasscode,
 } from "./user.types";
 import { BENEFICIARY_TYPE, BILL_TYPE, TRANSFER_TYPE } from "@/constants/types";
 
@@ -67,6 +70,9 @@ export const reportScamRequest = async (formdata: FormData) => {
     url: "/user/report-scam",
     method: "post",
     data: formdata,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
   });
 };
 
@@ -224,7 +230,7 @@ export const verifyEmailRequest = async (formdata: any) => {
   });
 };
 
-export const changePinRequest = async (formdata: any) => {
+export const changePinRequest = async (formdata: IChangePin) => {
   return request({
     url: "/user/change-pin",
     method: "put",
@@ -232,7 +238,15 @@ export const changePinRequest = async (formdata: any) => {
   });
 };
 
-export const changePasscodeRequest = async (formdata: any) => {
+export const createPasscodeRequest = async (formdata: ICreatePasscode) => {
+  return request({
+    url: "/user/create-passcode",
+    method: "post",
+    data: formdata,
+  });
+};
+
+export const changePasscodeRequest = async (formdata: IChangePasscode) => {
   return request({
     url: "/user/change-passcode",
     method: "put",

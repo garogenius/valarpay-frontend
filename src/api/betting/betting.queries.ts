@@ -10,6 +10,9 @@ import {
   getBettingTransactionsRequest,
   withdrawBettingWalletRequest,
   queryBettingTransactionRequest,
+  placeBetRequest,
+  getBetsRequest,
+  getBetByIdRequest,
 } from "./betting.apis";
 import type {
   BettingPlatform,
@@ -18,6 +21,8 @@ import type {
   IFundBettingPlatform,
   IFundBettingWallet,
   IWithdrawBettingWallet,
+  Bet,
+  IPlaceBet,
 } from "./betting.types";
 
 export const useGetBettingPlatforms = () => {
@@ -112,6 +117,62 @@ export const useWithdrawBettingWallet = (
       queryClient.invalidateQueries({ queryKey: ["betting-wallet-transactions"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["user"] });
+      onSuccess(data);
+    },
+  });
+};
+
+export const useQueryBettingTransaction = (orderReference: string | null) => {
+  return useQuery({
+    queryKey: ["betting-transaction-query", orderReference],
+    queryFn: () => queryBettingTransactionRequest({ orderReference: orderReference! }),
+    enabled: !!orderReference,
+    refetchInterval: (query) => {
+      const data = query.state.data?.data?.data;
+      // Poll every 3 seconds if status is PENDING or PROCESSING
+      if (data?.status === "PENDING" || data?.status === "PROCESSING") {
+        return 3000;
+      }
+      return false;
+    },
+  });
+};
+
+export const useGetBets = (params: {
+  status?: "PENDING" | "WON" | "LOST" | "CANCELLED" | "REFUNDED";
+  betType?: "SINGLE" | "MULTIPLE" | "SYSTEM";
+  page?: number;
+  limit?: number;
+}) => {
+  const { data, isPending, isError, refetch } = useQuery({
+    queryKey: ["betting-bets", params],
+    queryFn: () => getBetsRequest(params),
+  });
+  const bets: Bet[] = data?.data?.data ?? [];
+  const meta = data?.data?.meta;
+  return { bets, meta, isPending, isError, refetch };
+};
+
+export const useGetBetById = (betId: string | null) => {
+  return useQuery({
+    queryKey: ["betting-bet", betId],
+    queryFn: () => getBetByIdRequest(betId!),
+    enabled: !!betId,
+  });
+};
+
+export const usePlaceBet = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: IPlaceBet) => placeBetRequest(payload),
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["betting-wallet"] });
+      queryClient.invalidateQueries({ queryKey: ["betting-bets"] });
+      queryClient.invalidateQueries({ queryKey: ["betting-wallet-transactions"] });
       onSuccess(data);
     },
   });

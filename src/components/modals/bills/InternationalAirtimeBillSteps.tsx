@@ -202,7 +202,7 @@ const InternationalAirtimeBillSteps: React.FC<{ onClose: () => void }> = ({ onCl
                   </button>
 
                   {planOpen && (
-                    <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-20">
+                    <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-[9999]">
                       {plan.localFixedAmounts.map((a) => (
                         <button
                           key={a}

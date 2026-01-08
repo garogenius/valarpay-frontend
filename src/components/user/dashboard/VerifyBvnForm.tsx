@@ -55,9 +55,12 @@ const VerifyBvnForm = ({
 
   const handleResultModalClose = () => {
     setShowResultModal(false);
+    // Only proceed if verification was successful
+    // Failed verification should keep user on the form to try again
     if (resultType === "success") {
-      handleComplete(2);
+      handleComplete(1.5);
     }
+    // If error, user stays on OTP form to try again
   };
 
   const {
