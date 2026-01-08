@@ -28,7 +28,6 @@ const InvestmentContent = () => {
   const { investmentsData, isPending } = useGetInvestments({
     page: pageNumber,
     limit: pageSize,
-    sort: "newest",
   });
 
   const handleRefresh = () => {
