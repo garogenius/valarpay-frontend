@@ -48,9 +48,9 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
 
-  // Fetch plans based on exam type
-  const { planData: waecPlanData, isPending: waecPlanPending, isError: waecPlanError } = useGetWaecPlan();
-  const { planData: jambPlanData, isPending: jambPlanPending, isError: jambPlanError } = useGetJambPlan();
+  // Fetch plans based on exam type - only fetch when exam type is selected
+  const { planData: waecPlanData, isPending: waecPlanPending, isError: waecPlanError } = useGetWaecPlan(examType === "WAEC");
+  const { planData: jambPlanData, isPending: jambPlanPending, isError: jambPlanError } = useGetJambPlan(examType === "JAMB");
 
   const currentPlanData = examType === "WAEC" ? waecPlanData : examType === "JAMB" ? jambPlanData : null;
   const plansLoading = (examType === "WAEC" && waecPlanPending) || (examType === "JAMB" && jambPlanPending);

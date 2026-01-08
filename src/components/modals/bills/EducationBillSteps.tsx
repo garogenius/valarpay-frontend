@@ -17,6 +17,9 @@ import {
   useGetEducationBillers,
   usePayEducationSchoolFee,
   useVerifyEducationCustomer,
+  useGetSchoolBillInfo,
+  useVerifySchoolBillerNumber,
+  usePaySchoolFee,
 } from "@/api/education/education.queries";
 
 type Step = "details" | "confirm";
@@ -62,8 +65,17 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
   }, [billers, billerNameFilter]);
 
   const billerCode = String(biller?.billerCode || "");
-  const { items, isPending: itemsPending, isError: itemsError } = useGetEducationBillerItems(billerCode);
+  // Use school bill info endpoint to get plans/services
+  const { plans, isPending: itemsPending, isError: itemsError } = useGetSchoolBillInfo(billerCode);
   const itemsLoading = itemsPending && !itemsError;
+  
+  // Map plans to items format for compatibility
+  const items = plans.map((plan: any) => ({
+    itemCode: plan.itemCode || `${billerCode}-${plan.name?.toUpperCase().replace(/\s+/g, "-") || plan.id}`,
+    itemName: plan.name,
+    name: plan.name,
+    amount: plan.amount,
+  }));
 
   const onVerifyError = (error: any) => {
     const errorMessage = error?.response?.data?.message;
@@ -77,7 +89,8 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
     setStep("confirm");
   };
 
-  const { mutate: verifyCustomer, isPending: verifying, isError: verifyErr } = useVerifyEducationCustomer(
+  // Use school verification endpoint
+  const { mutate: verifyCustomer, isPending: verifying, isError: verifyErr } = useVerifySchoolBillerNumber(
     onVerifyError,
     onVerifySuccess
   );
@@ -116,7 +129,8 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
     setShowSuccess(true);
   };
 
-  const { mutate: payEducation, isPending: payPending, isError: payErr } = usePayEducationSchoolFee(onPayError, onPaySuccess);
+  // Use school payment endpoint
+  const { mutate: payEducation, isPending: payPending, isError: payErr } = usePaySchoolFee(onPayError, onPaySuccess);
   const paying = payPending && !payErr;
 
   const billerLabel = String(biller?.billerName || biller?.name || "").trim();
@@ -347,7 +361,11 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
             <button
               onClick={() => {
                 if (!billerCode || !item?.itemCode) return;
-                verifyCustomer({ billerCode, itemCode: String(item.itemCode), customerId });
+                verifyCustomer({ 
+                  billerCode, 
+                  itemCode: String(item.itemCode), 
+                  billerNumber: customerId 
+                });
               }}
               disabled={!canNext || verifyLoading}
               className="w-full px-4 py-3 rounded-full bg-[#FF6B2C] text-black font-semibold hover:bg-[#FF7A3D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -366,15 +384,12 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
                 onClick={() => {
                   if (!billerCode || !item?.itemCode) return;
                   payEducation({
-                    billerCode,
                     itemCode: String(item.itemCode),
-                    customerId,
-                    amount: Number(amount),
+                    billerCode,
                     currency: "NGN",
+                    billerNumber: customerId,
+                    amount: Number(amount),
                     walletPin,
-                    customerName: verifiedCustomerName || user?.fullname || "Customer",
-                    customerEmail,
-                    customerPhone,
                     addBeneficiary: false,
                   });
                 }}

@@ -75,7 +75,6 @@ export interface GetInvestmentsParams {
   page: number;
   limit: number;
   status?: InvestmentStatus;
-  sort?: "newest" | "oldest";
 }
 
 

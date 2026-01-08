@@ -80,6 +80,20 @@ export type IPayJambWaec = {
   addBeneficiary?: boolean;
 };
 
+// School fee bill info types
+export type SchoolFeePlan = {
+  id: number;
+  name: string;
+  amount: number;
+  itemCode?: string;
+};
+
+export type SchoolBillInfo = {
+  billerCode: string;
+  billerName: string;
+  plans: SchoolFeePlan[];
+};
+
 
 
 

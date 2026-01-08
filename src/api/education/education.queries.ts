@@ -12,6 +12,9 @@ import {
   verifyJambBillerNumberRequest,
   payWaecRequest,
   payJambRequest,
+  getSchoolBillInfoRequest,
+  verifySchoolBillerNumberRequest,
+  paySchoolFeeRequest,
 } from "./education.apis";
 import type {
   EducationBiller,
@@ -23,6 +26,8 @@ import type {
   IVerifyJambWaec,
   VerifiedJambWaec,
   IPayJambWaec,
+  SchoolBillInfo,
+  SchoolFeePlan,
 } from "./education.types";
 
 export const useGetEducationBillers = () => {
@@ -44,6 +49,18 @@ export const useGetEducationBillerItems = (billerCode: string) => {
   return { items, isPending, isError };
 };
 
+// School fee bill info (for services/plans)
+export const useGetSchoolBillInfo = (billerCode: string) => {
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["school-bill-info", billerCode],
+    queryFn: () => getSchoolBillInfoRequest(billerCode),
+    enabled: !!billerCode,
+  });
+  const billInfo: SchoolBillInfo | null = data?.data?.data ?? data?.data ?? null;
+  const plans: SchoolFeePlan[] = billInfo?.plans ?? [];
+  return { billInfo, plans, isPending, isError };
+};
+
 export const useVerifyEducationCustomer = (
   onError: (error: any) => void,
   onSuccess: (data: any) => void
@@ -51,6 +68,19 @@ export const useVerifyEducationCustomer = (
   return useMutation({
     mutationFn: (payload: IVerifyEducationCustomer) =>
       verifyEducationCustomerRequest(payload),
+    onError,
+    onSuccess,
+  });
+};
+
+// School fee verification
+export const useVerifySchoolBillerNumber = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  return useMutation({
+    mutationFn: (payload: { itemCode: string; billerCode: string; billerNumber: string }) =>
+      verifySchoolBillerNumberRequest(payload),
     onError,
     onSuccess,
   });
@@ -72,23 +102,67 @@ export const usePayEducationSchoolFee = (
   });
 };
 
+// School fee payment
+export const usePaySchoolFee = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { itemCode: string; billerCode: string; currency: string; billerNumber: string; amount: number; walletPin: string; addBeneficiary?: boolean }) => 
+      paySchoolFeeRequest(payload),
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      onSuccess(data);
+    },
+  });
+};
+
 // JAMB & WAEC Hooks
-export const useGetWaecPlan = () => {
+export const useGetWaecPlan = (enabled: boolean = true) => {
+  // First ensure education billers are fetched
+  const { billers: educationBillers, isPending: billersLoading } = useGetEducationBillers();
+  
+  // Check if WAEC biller exists
+  const waecBillerExists = educationBillers?.some(
+    (biller: EducationBiller) => 
+      biller.billerName?.toUpperCase() === "WAEC" || 
+      biller.name?.toUpperCase() === "WAEC" ||
+      biller.billerCode?.toUpperCase().includes("WAEC")
+  ) ?? false;
+
   const { data, isPending, isError } = useQuery({
     queryKey: ["waec-plan"],
     queryFn: getWaecPlanRequest,
+    enabled: enabled && !billersLoading && waecBillerExists,
+    retry: 2,
   });
   const planData: JambWaecPlanData | null = data?.data?.data ?? null;
-  return { planData, isPending, isError };
+  return { planData, isPending: isPending || billersLoading, isError };
 };
 
-export const useGetJambPlan = () => {
+export const useGetJambPlan = (enabled: boolean = true) => {
+  // First ensure education billers are fetched
+  const { billers: educationBillers, isPending: billersLoading } = useGetEducationBillers();
+  
+  // Check if JAMB biller exists
+  const jambBillerExists = educationBillers?.some(
+    (biller: EducationBiller) => 
+      biller.billerName?.toUpperCase() === "JAMB" || 
+      biller.name?.toUpperCase() === "JAMB" ||
+      biller.billerCode?.toUpperCase().includes("JAMB")
+  ) ?? false;
+
   const { data, isPending, isError } = useQuery({
     queryKey: ["jamb-plan"],
     queryFn: getJambPlanRequest,
+    enabled: enabled && !billersLoading && jambBillerExists,
+    retry: 2,
   });
   const planData: JambWaecPlanData | null = data?.data?.data ?? null;
-  return { planData, isPending, isError };
+  return { planData, isPending: isPending || billersLoading, isError };
 };
 
 export const useVerifyWaecBillerNumber = (

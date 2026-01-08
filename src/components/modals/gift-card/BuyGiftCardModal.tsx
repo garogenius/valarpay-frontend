@@ -3,6 +3,7 @@
 import React, { useRef, useState } from "react";
 import { CgClose } from "react-icons/cg";
 import { IoChevronDown } from "react-icons/io5";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import CustomButton from "@/components/shared/Button";
 import useOnClickOutside from "@/hooks/useOnClickOutside";
 import {
@@ -75,9 +76,11 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
   const [selectedPrice, setSelectedPrice] = useState<GiftCardPriceDetail | null>(null);
   const [quantity, setQuantity] = useState<string>("1");
   const [walletPin, setWalletPin] = useState<string>("");
+  const [showPin, setShowPin] = useState<boolean>(false);
   const [resultSuccess, setResultSuccess] = useState<boolean | null>(null);
   const [transactionId, setTransactionId] = useState<number | null>(null);
   const [redeemCodes, setRedeemCodes] = useState<{cardNumber: string; pinCode: string}[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
 
   const currencyRef = useRef<HTMLDivElement>(null);
   const categoryRef = useRef<HTMLDivElement>(null);
@@ -120,12 +123,14 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
     setProductOpen(false);
     setPriceOpen(false);
     setSelectedCurrency("");
+    setSelectedCountry("");
     setSelectedCategory("");
     setProduct(null);
     setPrices([]);
     setSelectedPrice(null);
     setQuantity("1");
     setWalletPin("");
+    setShowPin(false);
     setResultSuccess(null);
     setTransactionId(null);
     setRedeemCodes([]);
@@ -199,11 +204,11 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
         <div className="flex items-center justify-between p-4 pb-2">
           <div>
             <h2 className="text-white text-lg font-semibold">
-              {step === "form" ? "Gift Card" : step === "confirm" ? "Gift Card" : step === "redeem" ? "Redeem Codes" : "Transaction History"}
+              {step === "form" ? "Buy Giftcards" : step === "confirm" ? "Buy Giftcards" : step === "redeem" ? "Redeem Codes" : "Transaction History"}
             </h2>
             <p className="text-white/60 text-sm">
-              {step === "form" ? "Select gift card to purchase" : 
-               step === "confirm" ? "Confirm purchase" : 
+              {step === "form" ? "Enter payment details to continue" : 
+               step === "confirm" ? "Confirm Transactions" : 
                step === "redeem" ? "Your gift card codes" :
                "View transaction details"}
             </p>
@@ -216,80 +221,13 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
         <div className="px-4 pb-4">
           {step === "form" && (
             <div className="flex flex-col gap-4">
-              {/* Currency - First (matching bills/gift-card page) */}
-              <div className="flex flex-col gap-2" ref={currencyRef}>
-                <label className="text-white/70 text-sm">Select Currency</label>
-                <div onClick={() => setCurrencyOpen(!currencyOpen)} className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3 px-4 text-white text-sm outline-none cursor-pointer flex items-center justify-between">
-                  <span className={selectedCurrency ? "text-white" : "text-white/50"}>{selectedCurrency || "Select currency"}</span>
-                  <IoChevronDown className={`w-4 h-4 text-white/70 transition-transform ${currencyOpen ? 'rotate-180' : ''}`} />
-                </div>
-                {currencyOpen && (
-                  <div className="relative">
-                    <div className="absolute top-1 left-0 right-0 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 rounded-lg shadow-lg z-50 overflow-hidden max-h-60 overflow-y-auto">
-                      {allCurrencies.map((c: any, index: number) => (
-                        <button
-                          key={`${c.countryName}-${c.currency}-${index}`}
-                          onClick={() => {
-                            setSelectedCurrency(c.currency);
-                            setSelectedCategory("");
-                            setProduct(null);
-                            setPrices([]);
-                            setSelectedPrice(null);
-                            setCurrencyOpen(false);
-                          }}
-                          className="w-full text-left px-4 py-3 text-white/80 hover:bg-white/5 text-sm"
-                        >
-                          {c.countryName} - {c.currency}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Category - Only enabled when currency is selected */}
-              {selectedCurrency && (
-                <div className="flex flex-col gap-2" ref={categoryRef}>
-                  <label className="text-white/70 text-sm">Gift Card Category</label>
-                  <div onClick={() => setCategoryOpen(!categoryOpen)} className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3 px-4 text-white text-sm outline-none cursor-pointer flex items-center justify-between">
-                    <span className={selectedCategory ? "text-white" : "text-white/50"}>{selectedCategory || "Select category"}</span>
-                    <IoChevronDown className={`w-4 h-4 text-white/70 transition-transform ${categoryOpen ? 'rotate-180' : ''}`} />
-                  </div>
-                  {categoryOpen && (
-                    <div className="relative">
-                      <div className="absolute top-1 left-0 right-0 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 rounded-lg shadow-lg z-50 overflow-hidden max-h-60 overflow-y-auto">
-                        {categoriesLoading ? (
-                          <div className="flex items-center justify-center py-4">
-                            <SpinnerLoader width={20} height={20} color="#f76301" />
-                          </div>
-                        ) : (categories || []).map((c: any) => (
-                          <button
-                            key={c.name}
-                            onClick={() => {
-                              setSelectedCategory(c.name);
-                              setProduct(null);
-                              setPrices([]);
-                              setSelectedPrice(null);
-                              setCategoryOpen(false);
-                            }}
-                            className="w-full text-left px-4 py-3 text-white/80 hover:bg-white/5 text-sm"
-                          >
-                            {c.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Product - Only enabled when currency and category are selected */}
+              {/* Select Card - Product selection */}
               {selectedCurrency && selectedCategory && (
                 <div className="flex flex-col gap-2" ref={productRef}>
-                  <label className="text-white/70 text-sm">Gift Card Product</label>
+                  <label className="text-white/70 text-sm">Select Card</label>
                   <div onClick={() => selectedCurrency && selectedCategory && setProductOpen(!productOpen)} className={`w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3 px-4 text-white text-sm outline-none cursor-pointer flex items-center justify-between ${!selectedCurrency || !selectedCategory ? 'opacity-60 pointer-events-none' : ''}`}>
                     {!product ? (
-                      <span className="text-white/50">Select product</span>
+                      <span className="text-white/50">Select card</span>
                     ) : (
                       <div className="flex items-center gap-2">
                         {product.logoUrls?.[0] && (
@@ -309,7 +247,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                   </div>
                   {productOpen && (
                     <div className="relative">
-                      <div className="absolute top-1 left-0 right-0 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 rounded-lg shadow-lg z-50 overflow-hidden max-h-60 overflow-y-auto">
+                      <div className="absolute top-1 left-0 right-0 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 rounded-lg shadow-lg z-[999999] overflow-hidden max-h-60 overflow-y-auto">
                         {productsLoading ? (
                           <div className="flex items-center justify-center py-4">
                             <SpinnerLoader width={20} height={20} color="#f76301" />
@@ -348,37 +286,82 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                 </div>
               )}
 
-              {/* Quantity - Only enabled when product is selected */}
-              {product && (
-                <div className="flex flex-col gap-2">
-                  <label className="text-white/70 text-sm">Quantity</label>
-                  <input
-                    className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3 px-4 text-white placeholder:text-white/60 text-sm outline-none"
-                    placeholder="Enter quantity"
-                    type="number"
-                    min="1"
-                    value={quantity}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, "");
-                      setQuantity(val);
-                      // Reset price when quantity changes
-                      if (val !== quantity) {
-                        setSelectedPrice(null);
-                      }
-                    }}
-                  />
+              {/* Select Country - Currency/Country selection */}
+              <div className="flex flex-col gap-2" ref={currencyRef}>
+                <label className="text-white/70 text-sm">Select Country</label>
+                <div onClick={() => setCurrencyOpen(!currencyOpen)} className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3 px-4 text-white text-sm outline-none cursor-pointer flex items-center justify-between">
+                  <span className={selectedCountry ? "text-white" : "text-white/50"}>{selectedCountry || "Select country"}</span>
+                  <IoChevronDown className={`w-4 h-4 text-white/70 transition-transform ${currencyOpen ? 'rotate-180' : ''}`} />
+                </div>
+                {currencyOpen && (
+                  <div className="relative">
+                    <div className="absolute top-1 left-0 right-0 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 rounded-lg shadow-lg z-[999999] overflow-hidden max-h-60 overflow-y-auto">
+                      {allCurrencies.map((c: any, index: number) => (
+                        <button
+                          key={`${c.countryName}-${c.currency}-${index}`}
+                          onClick={() => {
+                            setSelectedCurrency(c.currency);
+                            setSelectedCountry(`${c.countryName} - ${c.currency}`);
+                            setSelectedCategory("");
+                            setProduct(null);
+                            setPrices([]);
+                            setSelectedPrice(null);
+                            setCurrencyOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-3 text-white/80 hover:bg-white/5 text-sm"
+                        >
+                          {c.countryName} - {c.currency}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Gift Card Category - Only enabled when currency is selected */}
+              {selectedCurrency && (
+                <div className="flex flex-col gap-2" ref={categoryRef}>
+                  <label className="text-white/70 text-sm">Gift Card Category</label>
+                  <div onClick={() => setCategoryOpen(!categoryOpen)} className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3 px-4 text-white text-sm outline-none cursor-pointer flex items-center justify-between">
+                    <span className={selectedCategory ? "text-white" : "text-white/50"}>{selectedCategory || "Select category"}</span>
+                    <IoChevronDown className={`w-4 h-4 text-white/70 transition-transform ${categoryOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                  {categoryOpen && (
+                    <div className="relative">
+                      <div className="absolute top-1 left-0 right-0 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 rounded-lg shadow-lg z-[999999] overflow-hidden max-h-60 overflow-y-auto">
+                        {categoriesLoading ? (
+                          <div className="flex items-center justify-center py-4">
+                            <SpinnerLoader width={20} height={20} color="#f76301" />
+                          </div>
+                        ) : (categories || []).map((c: any) => (
+                          <button
+                            key={c.name}
+                            onClick={() => {
+                              setSelectedCategory(c.name);
+                              setProduct(null);
+                              setPrices([]);
+                              setSelectedPrice(null);
+                              setCategoryOpen(false);
+                            }}
+                            className="w-full text-left px-4 py-3 text-white/80 hover:bg-white/5 text-sm"
+                          >
+                            {c.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Price - Only enabled when product and quantity are selected (matching bills/gift-card page) */}
+
+              {/* Card Amount - Price selection */}
               {product && Number(quantity) > 0 && prices.length > 0 && (
                 <div className="flex flex-col gap-2" ref={priceRef}>
-                  <label className="text-white/70 text-sm">
-                    Price {product.recipientCurrencyCode ? `in ${product.recipientCurrencyCode}` : ""}
-                  </label>
+                  <label className="text-white/70 text-sm">Card Amount</label>
                   <div onClick={() => setPriceOpen(!priceOpen)} className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3 px-4 text-white text-sm outline-none cursor-pointer flex items-center justify-between">
                     {!selectedPrice ? (
-                      <span className="text-white/50">Select gift card price</span>
+                      <span className="text-white/50">Select currency</span>
                     ) : (
                       <span className="text-white">
                         {Number(selectedPrice.price).toLocaleString()} {product.recipientCurrencyCode || ""}
@@ -388,7 +371,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                   </div>
                   {priceOpen && (
                     <div className="relative">
-                      <div className="absolute top-1 left-0 right-0 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 rounded-lg shadow-lg z-50 overflow-hidden max-h-60 overflow-y-auto">
+                      <div className="absolute top-1 left-0 right-0 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 rounded-lg shadow-lg z-[999999] overflow-hidden max-h-60 overflow-y-auto">
                         {prices.map((price, index) => (
                           <button
                             key={index}
@@ -404,6 +387,58 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Number of Cards - Quantity with increment/decrement */}
+              {product && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-white/70 text-sm">Number of Cards</label>
+                  <div className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3 px-4 flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newQty = Math.max(1, Number(quantity) - 1);
+                        setQuantity(String(newQty));
+                        if (newQty !== Number(quantity)) {
+                          setSelectedPrice(null);
+                        }
+                      }}
+                      className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-lg font-medium transition-colors"
+                    >
+                      −
+                    </button>
+                    <input
+                      className="flex-1 bg-transparent border-none outline-none text-white text-sm text-center"
+                      type="text"
+                      value={quantity}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "");
+                        if (val === "" || Number(val) >= 1) {
+                          setQuantity(val || "1");
+                          if (val !== quantity) {
+                            setSelectedPrice(null);
+                          }
+                        }
+                      }}
+                      onBlur={(e) => {
+                        if (!e.target.value || Number(e.target.value) < 1) {
+                          setQuantity("1");
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newQty = Number(quantity) + 1;
+                        setQuantity(String(newQty));
+                        setSelectedPrice(null);
+                      }}
+                      className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-lg font-medium transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -426,7 +461,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
               <CustomButton
                 type="button"
                 disabled={!canProceed}
-                className="w-full bg-[#f76301] hover:bg-[#f76301]/90 text-black font-medium py-3 rounded-lg transition-colors mt-2"
+                className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black font-medium py-3 rounded-lg transition-colors mt-2"
                 onClick={() => setStep("confirm")}
               >
                 Next
@@ -438,26 +473,70 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
             <div className="flex flex-col gap-6">
               <div className="space-y-3">
                 {product && (
-                  <div className="flex items-center justify-between"><span className="text-white/60 text-sm">Product</span><span className="text-white text-sm font-medium">{product.productName}</span></div>
+                  <div className="flex items-center justify-between py-2 border-b border-white/10">
+                    <span className="text-white/60 text-sm">Card Type</span>
+                    <span className="text-white text-sm font-medium">{product.productName}</span>
+                  </div>
                 )}
-                <div className="flex items-center justify-between"><span className="text-white/60 text-sm">Quantity</span><span className="text-white text-sm font-medium">{quantity}</span></div>
+                <div className="flex items-center justify-between py-2 border-b border-white/10">
+                  <span className="text-white/60 text-sm">Country</span>
+                  <span className="text-white text-sm font-medium">{selectedCountry || "N/A"}</span>
+                </div>
+                {selectedPrice && (
+                  <div className="flex items-center justify-between py-2 border-b border-white/10">
+                    <span className="text-white/60 text-sm">Card Amount</span>
+                    <span className="text-white text-sm font-medium">{selectedPrice.price} {product?.recipientCurrencyCode || ""}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between py-2 border-b border-white/10">
+                  <span className="text-white/60 text-sm">Number of Cards</span>
+                  <span className="text-white text-sm font-medium">{quantity}</span>
+                </div>
                 {selectedPrice && (
                   <>
-                    <div className="flex items-center justify-between"><span className="text-white/60 text-sm">Unit Price</span><span className="text-white text-sm font-medium">{selectedPrice.price} {product?.recipientCurrencyCode || ""}</span></div>
+                    <div className="flex items-center justify-between py-2 border-b border-white/10">
+                      <span className="text-white/60 text-sm">Rate</span>
+                      <span className="text-white text-sm font-medium">₦{selectedPrice.amount.toLocaleString()}/{product?.recipientCurrencyCode || "$"}</span>
+                    </div>
                     {selectedPrice.fee > 0 && (
-                      <div className="flex items-center justify-between"><span className="text-white/60 text-sm">Fee</span><span className="text-white text-sm font-medium">₦{selectedPrice.fee.toLocaleString()}</span></div>
+                      <div className="flex items-center justify-between py-2 border-b border-white/10">
+                        <span className="text-white/60 text-sm">Charges</span>
+                        <span className="text-white text-sm font-medium">₦{selectedPrice.fee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
                     )}
+                    <div className="flex items-center justify-between py-2 border-b border-white/10">
+                      <span className="text-white/60 text-sm">Amount</span>
+                      <span className="text-white text-sm font-medium">₦{Number(totalAmount).toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-white/60 text-sm">Amount Debited</span>
+                      <span className="text-white text-sm font-medium">₦{Number(totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
                   </>
                 )}
-                <div className="flex items-center justify-between"><span className="text-white/60 text-sm">Total Amount</span><span className="text-white text-sm font-medium">₦{Number(totalAmount).toLocaleString()}</span></div>
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-white/60 text-sm">Enter Transaction PIN</label>
-                <input type="password" maxLength={4} value={walletPin} onChange={(e)=> setWalletPin(e.target.value.replace(/\D/g, ""))} className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3 px-4 text-white text-sm outline-none" />
+                <div className="relative">
+                  <input 
+                    type={showPin ? "text" : "password"} 
+                    maxLength={4} 
+                    value={walletPin} 
+                    onChange={(e)=> setWalletPin(e.target.value.replace(/\D/g, ""))} 
+                    className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3 px-4 pr-10 text-white text-sm outline-none" 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+                  >
+                    {showPin ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
               <div className="flex gap-4 mt-2">
                 <CustomButton onClick={()=> setStep("form")} className="flex-1 bg-transparent border border-border-600 text-white hover:bg-white/5 py-3 rounded-lg">Back</CustomButton>
-                <CustomButton onClick={handleConfirm} disabled={walletPin.length!==4 || paying} isLoading={paying} className="flex-1 bg-[#f76301] hover:bg-[#f76301]/90 text-black py-3 rounded-lg">Purchase</CustomButton>
+                <CustomButton onClick={handleConfirm} disabled={walletPin.length!==4 || paying} isLoading={paying} className="flex-1 bg-[#f76301] hover:bg-[#e55a00] text-black py-3 rounded-lg">Pay</CustomButton>
               </div>
             </div>
           )}

@@ -16,12 +16,11 @@ export const createInvestmentRequest = async (data: CreateInvestmentPayload) => 
   });
 };
 
-export const getInvestmentsRequest = async ({ page, limit, status, sort }: GetInvestmentsParams) => {
+export const getInvestmentsRequest = async ({ page, limit, status }: GetInvestmentsParams) => {
   const query = new URLSearchParams();
   query.set("page", String(page));
   query.set("limit", String(limit));
   if (status) query.set("status", status);
-  if (sort) query.set("sort", sort);
 
   return request({
     url: `/investment?${query.toString()}`,

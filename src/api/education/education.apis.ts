@@ -21,6 +21,14 @@ export const getEducationBillerItemsRequest = async ({
   });
 };
 
+// School fee bill info (returns plans/services)
+export const getSchoolBillInfoRequest = async (billerCode: string) => {
+  return request({
+    url: `/bill/school/get-bill-info?billerCode=${billerCode}`,
+    method: "get",
+  });
+};
+
 export const verifyEducationCustomerRequest = async (
   formdata: IVerifyEducationCustomer
 ) => {
@@ -32,9 +40,39 @@ export const verifyEducationCustomerRequest = async (
   });
 };
 
+// School fee verification (new endpoint)
+export const verifySchoolBillerNumberRequest = async (formdata: {
+  itemCode: string;
+  billerCode: string;
+  billerNumber: string;
+}) => {
+  return request({
+    url: "/bill/school/verify-biller-number",
+    method: "post",
+    data: formdata,
+  });
+};
+
 export const payEducationSchoolFeeRequest = async (formdata: IPayEducation) => {
   return request({
     url: "/bill/education/school-fee/pay",
+    method: "post",
+    data: formdata,
+  });
+};
+
+// School fee payment (new endpoint)
+export const paySchoolFeeRequest = async (formdata: {
+  itemCode: string;
+  billerCode: string;
+  currency: string;
+  billerNumber: string;
+  amount: number;
+  walletPin: string;
+  addBeneficiary?: boolean;
+}) => {
+  return request({
+    url: "/bill/school/pay",
     method: "post",
     data: formdata,
   });
