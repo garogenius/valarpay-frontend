@@ -140,26 +140,58 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
     setShowReceipt(true);
   };
 
-  const convertToReceiptTransaction = () => {
+  const convertToReceiptTransaction = (): {
+    id: string;
+    type: "TRANSFER" | "BILL_PAYMENT" | "AIRTIME" | "DATA" | "CABLE" | "ELECTRICITY" | "INTERNET";
+    status: "SUCCESSFUL" | "FAILED" | "PENDING";
+    amount: number;
+    currency: string;
+    reference: string;
+    description: string;
+    createdAt: string;
+    recipientName?: string;
+    recipientAccount?: string;
+    recipientBank?: string;
+    senderName?: string;
+    senderAccount?: string;
+    billerName?: string;
+    billerNumber?: string;
+    network?: string;
+    planName?: string;
+    validity?: string;
+    provider?: string;
+  } => {
+    const getTransactionType = (): "TRANSFER" | "BILL_PAYMENT" | "AIRTIME" | "DATA" | "CABLE" | "ELECTRICITY" | "INTERNET" => {
+      if (transaction.category === "TRANSFER") {
+        return "TRANSFER";
+      }
+      if (transaction.category === "BILL_PAYMENT") {
+        const billType = String(transaction.billDetails?.type || "").toLowerCase();
+        if (billType === "data") return "DATA";
+        if (billType === "airtime") return "AIRTIME";
+        if (billType === "cable") return "CABLE";
+        if (billType === "electricity") return "ELECTRICITY";
+        if (billType === "internet") return "INTERNET";
+        return "BILL_PAYMENT";
+      }
+      // Default to BILL_PAYMENT for deposits or unknown types
+      return "BILL_PAYMENT";
+    };
+
+    const getTransactionStatus = (): "SUCCESSFUL" | "FAILED" | "PENDING" => {
+      const status = String(transaction.status || "").toLowerCase();
+      if (status === "successful" || status === "success" || status === TRANSACTION_STATUS.success) {
+        return "SUCCESSFUL";
+      } else if (status === "failed" || status === "failure" || status === TRANSACTION_STATUS.failed) {
+        return "FAILED";
+      }
+      return "PENDING";
+    };
+
     return {
       id: transaction.id,
-      type: transaction.category === "TRANSFER" ? "TRANSFER" : 
-            transaction.category === "BILL_PAYMENT" ? 
-              (transaction.billDetails?.type === "data" ? "DATA" :
-               transaction.billDetails?.type === "airtime" ? "AIRTIME" :
-               transaction.billDetails?.type === "cable" ? "CABLE" :
-               transaction.billDetails?.type === "electricity" ? "ELECTRICITY" :
-               transaction.billDetails?.type === "internet" ? "INTERNET" : "BILL_PAYMENT") :
-            "DEPOSIT",
-      status: (() => {
-        const status = String(transaction.status || "").toLowerCase();
-        if (status === "successful" || status === "success" || status === TRANSACTION_STATUS.success) {
-          return "SUCCESSFUL";
-        } else if (status === "failed" || status === "failure" || status === TRANSACTION_STATUS.failed) {
-          return "FAILED";
-        }
-        return "PENDING";
-      })(),
+      type: getTransactionType(),
+      status: getTransactionStatus(),
       amount: getAmount(),
       currency: transaction.currency,
       reference: transaction.transactionRef || transaction.reference || transaction.id,
