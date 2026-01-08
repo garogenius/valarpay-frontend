@@ -1,6 +1,6 @@
 "use client";
 
-import { FiMenu } from "react-icons/fi";
+import { FiMenu, FiSearch, FiX, FiClock } from "react-icons/fi";
 import useUserStore from "@/store/user.store";
 
 import useUserLayoutStore from "@/store/userLayout.store";
@@ -99,8 +99,39 @@ const Navbar = () => {
   const notifRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(notifRef, () => setNotifOpen(false));
 
-  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const searchRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(searchRef, () => setSearchOpen(false));
+
+  // Recent searches from localStorage
+  const [recent, setRecent] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const saved = localStorage.getItem("recentSearches");
+    if (saved) {
+      try {
+        setRecent(JSON.parse(saved));
+      } catch (e) {
+        setRecent([]);
+      }
+    }
+  }, []);
+
+  const persistRecent = (items: string[]) => {
+    setRecent(items);
+    localStorage.setItem("recentSearches", JSON.stringify(items));
+  };
+
+  const onSubmitSearch = () => {
+    if (searchValue.trim()) {
+      const updated = [searchValue.trim(), ...recent.filter((x) => x !== searchValue.trim())].slice(0, 10);
+      persistRecent(updated);
+      setSearchOpen(false);
+      // Navigate to transactions with search
+      // You can implement the actual search logic here
+    }
+  };
 
   // Notifications
   const { notifications } = useGetNotifications();

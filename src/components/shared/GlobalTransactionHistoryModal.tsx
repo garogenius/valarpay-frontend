@@ -143,15 +143,6 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
     try {
       const receiptTransaction = convertToReceiptTransaction();
       
-      // Get logo image as base64
-      const logoResponse = await fetch('/images/single-logo.png');
-      const logoBlob = await logoResponse.blob();
-      const logoBase64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(logoBlob);
-      });
-      
       // Format date as DD-MM-YYYY HH:MM AM/PM
       const formatReceiptDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -179,16 +170,35 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
       // Get sender name from transaction
       const senderName = transaction.depositDetails?.senderName || user?.fullname || "N/A";
       
-      // Get beneficiary details
-      const beneficiaryName = receiptTransaction.recipientName || receiptTransaction.billerName || "N/A";
-      const beneficiaryAccount = receiptTransaction.recipientAccount || receiptTransaction.billerNumber || "0000000000";
-      const beneficiaryBank = receiptTransaction.recipientBank || receiptTransaction.provider || "NattyPay";
+      // Get beneficiary details for transfers
+      const beneficiaryName = receiptTransaction.recipientName || "N/A";
+      const beneficiaryAccount = receiptTransaction.recipientAccount || "";
+      const beneficiaryBank = receiptTransaction.recipientBank || receiptTransaction.provider || "N/A";
+      
+      // Get bill payment details
+      const planName = receiptTransaction.planName || "";
+      const validity = receiptTransaction.validity || "";
+      const provider = receiptTransaction.provider || "";
+      const phoneNumber = receiptTransaction.billerNumber || "";
       
       // Get narration/description
       const narration = receiptTransaction.description || receiptTransaction.reference || "N/A";
       
-      // Status color
+      // Status color and text
       const statusColor = receiptTransaction.status === "SUCCESSFUL" ? "#22C55E" : receiptTransaction.status === "FAILED" ? "#EF4444" : "#F59E0B";
+      const statusText = receiptTransaction.status === "SUCCESSFUL" ? "Successful" : receiptTransaction.status === "FAILED" ? "Failed" : "Pending";
+      
+      // Format amount - remove decimal if whole number for NGN
+      const formatAmount = (amount: number, currency: string) => {
+        if (currency === "NGN") {
+          // For NGN, show without decimals if whole number, otherwise show 2 decimals
+          if (amount % 1 === 0) {
+            return `₦${amount.toLocaleString()}`;
+          }
+          return `₦${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+        return `${currency}${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      };
       
       // Create a temporary receipt element
       const tempDiv = document.createElement("div");
@@ -202,15 +212,19 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
       document.body.appendChild(tempDiv);
 
       // Build receipt HTML matching exact design
+      const isTransfer = receiptTransaction.type === "TRANSFER";
+      
       const receiptHTML = `
         <div style="background: #1A1A1A; color: #FFFFFF; padding: 30px; font-family: system-ui, -apple-system, sans-serif; width: 500px;">
           <!-- Header with Logo and Tagline -->
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <img src="${logoBase64}" alt="VALARPAY" style="height: 40px; width: auto;" />
+              <div style="background: #f76301; width: 40px; height: 40px; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                <span style="color: #FFFFFF; font-size: 24px; font-weight: bold;">V</span>
+              </div>
               <span style="color: #FFFFFF; font-size: 20px; font-weight: bold;">VALARPAY</span>
             </div>
-            <span style="color: #FFFFFF; font-size: 14px;">Beyond Banking</span>
+            <span style="color: #FFFFFF; font-size: 14px; opacity: 0.8;">Beyond Banking</span>
           </div>
 
           <!-- Transaction Receipt Banner -->
@@ -232,7 +246,7 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
             
             <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
               <span style="color: #FFFFFF; font-size: 14px;">Amount:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${receiptTransaction.currency === "NGN" ? "₦" : receiptTransaction.currency}${receiptTransaction.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${formatAmount(receiptTransaction.amount, receiptTransaction.currency)}</span>
             </div>
             
             <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
@@ -245,6 +259,7 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
               <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${getTransactionTypeLabel()}</span>
             </div>
             
+            ${isTransfer ? `
             <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
               <span style="color: #FFFFFF; font-size: 14px;">Sender Name:</span>
               <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${senderName}</span>
@@ -252,7 +267,10 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
             
             <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
               <span style="color: #FFFFFF; font-size: 14px;">Beneficiary Details:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${beneficiaryName} (${beneficiaryAccount})</span>
+              <div style="text-align: right;">
+                <div style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${beneficiaryName}</div>
+                ${beneficiaryAccount ? `<div style="color: #FFFFFF; font-size: 14px; font-weight: 500; margin-top: 2px;">(${beneficiaryAccount})</div>` : ''}
+              </div>
             </div>
             
             <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
@@ -264,10 +282,36 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
               <span style="color: #FFFFFF; font-size: 14px;">Narration:</span>
               <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${narration}</span>
             </div>
+            ` : `
+            ${planName ? `
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px;">Plan:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${planName}</span>
+            </div>
+            ` : ''}
+            ${validity ? `
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px;">Duration:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${validity}</span>
+            </div>
+            ` : ''}
+            ${provider ? `
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px;">Provider:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${provider}</span>
+            </div>
+            ` : ''}
+            ${phoneNumber ? `
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px;">Phone Number:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${phoneNumber}</span>
+            </div>
+            ` : ''}
+            `}
             
             <div style="display: flex; justify-content: space-between; padding: 12px 0;">
               <span style="color: #FFFFFF; font-size: 14px;">Status:</span>
-              <span style="color: ${statusColor}; font-size: 14px; font-weight: bold;">${receiptTransaction.status}</span>
+              <span style="color: ${statusColor}; font-size: 14px; font-weight: bold;">${statusText}</span>
             </div>
           </div>
 
@@ -281,8 +325,8 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
 
       tempDiv.innerHTML = receiptHTML;
 
-      // Wait for images to load
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Wait for content to render
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Convert to canvas
       const canvas = await html2canvas(tempDiv, {

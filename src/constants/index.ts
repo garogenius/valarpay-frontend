@@ -198,6 +198,12 @@ export const SidebarData = [
         icon: RxDashboard,
       },
       {
+        id: 4,
+        title: "Accounts",
+        path: "/user/accounts",
+        icon: MdAccountBalance,
+      },
+      {
         id: 2,
         title: "Payment",
         path: "/user/payment",
@@ -208,12 +214,6 @@ export const SidebarData = [
         title: "Finance",
         path: "/user/finance",
         icon: HiOutlineCurrencyDollar,
-      },
-      {
-        id: 4,
-        title: "Accounts",
-        path: "/user/accounts",
-        icon: MdAccountBalance,
       },
       {
         id: 5,
