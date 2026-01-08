@@ -60,6 +60,9 @@ const CardsContent: React.FC = () => {
   // Get currency accounts
   const { accounts: currencyAccounts, isPending: accountsLoading } = useGetCurrencyAccounts();
   
+  // Get all cards (must be declared before useMemo that uses it)
+  const { cards: virtualCards, isPending: cardLoading, refetch: refetchCards } = useGetCards();
+  
   // Set default currency based on available accounts
   React.useEffect(() => {
     if (!accountsLoading && currencyAccounts) {
@@ -99,9 +102,6 @@ const CardsContent: React.FC = () => {
       (card.currency || "").toUpperCase() === selectedCurrency.toUpperCase()
     );
   }, [virtualCards, selectedCurrency]);
-
-  // Get all cards
-  const { cards: virtualCards, isPending: cardLoading, refetch: refetchCards } = useGetCards();
 
   const cardholderName = (user?.fullname || "CARD HOLDER").toUpperCase();
 
