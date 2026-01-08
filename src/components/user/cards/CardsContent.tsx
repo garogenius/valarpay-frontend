@@ -78,9 +78,9 @@ const CardsContent: React.FC = () => {
   // Fetch all virtual cards (USD, NGN)
   const { cards, isPending: cardsLoading, refetch: refetchCards } = useGetCards();
   const safeCards = Array.isArray(cards) ? cards : [];
+  // All cards from useGetCards() are virtual cards, so we just filter by currency
   const virtualCards = safeCards.filter((card: IVirtualCard) => 
-    card.isVirtual && 
-    (card.currency === "USD" || card.currency === "NGN")
+    card.currency === "USD" || card.currency === "NGN"
   );
 
   // Fetch currency accounts to check for account availability
