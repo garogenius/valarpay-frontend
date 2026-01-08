@@ -24,7 +24,6 @@ import { cn } from "@/utils/cn";
 import useUserStore from "@/store/user.store";
 import SchedulePaymentsContent from "@/components/user/payment/SchedulePaymentsContent";
 import usePaymentSettingsStore from "@/store/paymentSettings.store";
-import useGlobalModalsStore from "@/store/globalModals.store";
 import CustomButton from "@/components/shared/Button";
 import { format } from "date-fns";
 
@@ -64,7 +63,6 @@ const PaymentContent = () => {
   const [transferProcessRef, setTransferProcessRef] = useState<{ fillBeneficiary: (beneficiary: any) => void } | null>(null);
   const { user } = useUserStore();
   const { selectedCurrency } = usePaymentSettingsStore();
-  const { showTransactionHistoryModal } = useGlobalModalsStore();
   const ngnBalance = (user?.wallet || []).find((w: any) => w.currency === "NGN")?.balance || 0;
 
   const pageSize = 8;
@@ -96,10 +94,6 @@ const PaymentContent = () => {
   });
 
   const hasTransactions = transactions && transactions.length > 0;
-
-  const handleViewReceipt = (tx: any) => {
-    showTransactionHistoryModal(tx);
-  };
 
   const renderDestCards = () => (
     <div className="grid grid-cols-3 gap-2 sm:gap-3">
@@ -208,18 +202,20 @@ const PaymentContent = () => {
         ) : transactions && transactions.length > 0 ? (
           <div className="flex flex-col divide-y divide-white/10">
             {transactions.slice(0, 8).map((tx) => {
-              // Get recipient name and account number for transfers
-              const getTransactionLabel = () => {
+              // Get recipient name and account number separately for transfers
+              const getTransactionName = () => {
                 if (tx.category === "TRANSFER" && tx.transferDetails) {
-                  const beneficiaryName = tx.transferDetails?.beneficiaryName || "Unknown";
-                  const accountNumber = tx.transferDetails?.beneficiaryAccountNumber || "";
-                  if (accountNumber) {
-                    return `${beneficiaryName} ${accountNumber}`;
-                  }
-                  return beneficiaryName;
+                  return tx.transferDetails?.beneficiaryName || "Unknown";
                 }
                 // For other transaction types, use description or fallback
                 return tx.description || "Transaction";
+              };
+
+              const getAccountNumber = () => {
+                if (tx.category === "TRANSFER" && tx.transferDetails) {
+                  return tx.transferDetails?.beneficiaryAccountNumber || "";
+                }
+                return "";
               };
 
               return (
@@ -233,20 +229,16 @@ const PaymentContent = () => {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-white text-sm font-medium">{getTransactionLabel()}</p>
-                      <p className="text-white/50 text-xs">
-                        {format(new Date(('created_at' in tx ? tx.created_at : tx.createdAt) || Date.now()), "MMM d, yyyy")}
-                      </p>
+                      <p className="text-white text-sm font-medium">{getTransactionName()}</p>
+                      {getAccountNumber() && (
+                        <p className="text-white/70 text-xs">{getAccountNumber()}</p>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => handleViewReceipt(tx)}
-                      className="text-[#f76301] hover:text-[#e55a00] font-medium text-sm transition-colors"
-                    >
-                      View
-                    </button>
+                  <div className="flex items-center">
+                    <p className="text-white/50 text-xs">
+                      {format(new Date(('created_at' in tx ? tx.created_at : tx.createdAt) || Date.now()), "MMM d, yyyy")}
+                    </p>
                   </div>
                 </div>
               );
