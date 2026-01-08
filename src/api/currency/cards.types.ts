@@ -1,4 +1,4 @@
-export type CardCurrency = "USD";
+export type CardCurrency = "NGN" | "USD";
 export type CardStatus = "ACTIVE" | "FROZEN" | "BLOCKED" | "CLOSED";
 
 export interface IVirtualCard {

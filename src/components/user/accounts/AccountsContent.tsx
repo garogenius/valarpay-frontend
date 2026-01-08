@@ -31,10 +31,32 @@ const AccountsContent: React.FC = () => {
   const recent = (notifications || []).slice(0, 6);
   const hasActivity = recent.length > 0;
 
-  // Initialize currency state first
-  type Currency = "NGN" | "USD";
-  const currencies: Currency[] = ["NGN", "USD"];
-  const initialCurrency = String(user?.wallet?.[0]?.currency || "NGN").toUpperCase() as Currency;
+  // Get all available currencies dynamically
+  const allAvailableCurrencies = useMemo(() => {
+    const currenciesSet = new Set<string>();
+    
+    // Add NGN from wallet
+    if (user?.wallet?.some(w => (w.currency || "").toUpperCase() === "NGN")) {
+      currenciesSet.add("NGN");
+    }
+    
+    // Add all currencies from wallet accounts
+    walletAccounts?.forEach((acc: WalletAccount) => {
+      const currency = (acc.currency || "").toUpperCase();
+      if (currency) {
+        currenciesSet.add(currency);
+      }
+    });
+    
+    // Always include common currencies even if not created yet
+    ["NGN", "USD", "EUR", "GBP"].forEach(curr => currenciesSet.add(curr));
+    
+    return Array.from(currenciesSet).sort();
+  }, [user?.wallet, walletAccounts]);
+
+  // Initialize currency state
+  type Currency = string;
+  const initialCurrency = String(user?.wallet?.[0]?.currency || "NGN").toUpperCase();
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(initialCurrency);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [accountLabel, setAccountLabel] = useState("");
@@ -250,8 +272,17 @@ const AccountsContent: React.FC = () => {
       return;
     }
 
+    // Only allow creating accounts for USD, EUR, GBP (API supported currencies)
+    if (!["USD", "EUR", "GBP"].includes(selectedCurrency)) {
+      ErrorToast({
+        title: "Currency Not Supported",
+        descriptions: [`Account creation for ${selectedCurrency} is not available. Only USD, EUR, and GBP accounts can be created.`],
+      });
+      return;
+    }
+
     createAccount({
-      currency: selectedCurrency as "USD",
+      currency: selectedCurrency as "USD" | "EUR" | "GBP",
       provider: "graph" as WALLET_PROVIDER,
     });
   };
@@ -307,14 +338,14 @@ const AccountsContent: React.FC = () => {
             <FiChevronDown className="text-black/80" />
           </button>
           {menuOpen && (
-            <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[#0A0A0A] border border-gray-800 shadow-2xl p-2 text-white z-50">
-              {currencies.map((k) => {
+            <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[#0A0A0A] border border-gray-800 shadow-2xl p-2 text-white z-50 max-h-96 overflow-y-auto">
+              {allAvailableCurrencies.map((k) => {
                 const isNGN = k === "NGN";
                 const hasWallet = isNGN && user?.wallet?.some(w => (w.currency || "").toUpperCase() === k);
                 const hasCurrencyAccount = !isNGN && currencyAccounts.some((acc: WalletAccount) => 
                   (acc.currency || "").toUpperCase() === k
                 );
-                const isSetup = !hasWallet && !hasCurrencyAccount;
+                const hasAccount = hasWallet || hasCurrencyAccount;
                 
                 return (
             <button
@@ -330,10 +361,14 @@ const AccountsContent: React.FC = () => {
                       className="w-5 h-5" 
                     />
                     <span className="text-sm flex-1 text-white">{k} Account</span>
-                    {isSetup && (
+                    {hasAccount ? (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
                         Setup
-              </span>
+                      </span>
                     )}
             </button>
                 );

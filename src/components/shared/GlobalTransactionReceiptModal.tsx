@@ -149,7 +149,7 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
             <div className="px-6 pt-5 pb-4 border-b border-white/10">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-[#D4B139] rounded-sm flex items-center justify-center">
+                  <div className="w-6 h-6 bg-[#f76301] rounded-sm flex items-center justify-center">
                     <span className="text-black font-bold text-[10px]">V</span>
                   </div>
                   <span className="text-white font-semibold text-sm">VALARPAY</span>
@@ -167,7 +167,7 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
               </div>
 
               <div className="flex justify-center">
-                <span className="px-4 py-1.5 rounded-lg bg-[#D4B139] text-black text-xs font-semibold">
+                <span className="px-4 py-1.5 rounded-lg bg-[#f76301] text-black text-xs font-semibold">
                   Transaction Receipt
                 </span>
               </div>
@@ -178,14 +178,14 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
               <div id="global-transaction-receipt" className="text-white">
                 {/* Rows with dotted orange separators */}
                 <div className="space-y-0">
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#D4B139]/60">
+                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/60">
                     <span className="text-xs text-white/60">Transaction Date</span>
                     <span className="text-xs text-white font-medium">
                       {format(new Date(transaction.createdAt), "dd-MM-yyyy hh:mm a")}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#D4B139]/60">
+                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/60">
                     <span className="text-xs text-white/60">Transaction ID</span>
                     <div className="flex items-center gap-2 max-w-[210px]">
                       <span className="text-xs text-white font-medium truncate">
@@ -201,7 +201,7 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#D4B139]/60">
+                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/60">
                     <span className="text-xs text-white/60">Amount</span>
                     <span className="text-xs text-white font-medium">
                       {transaction.currency === "NGN" ? "₦" : transaction.currency}
@@ -209,12 +209,12 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#D4B139]/60">
+                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/60">
                     <span className="text-xs text-white/60">Currency</span>
                     <span className="text-xs text-white font-medium">{transaction.currency}</span>
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#D4B139]/60">
+                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/60">
                     <span className="text-xs text-white/60">Transaction Date</span>
                     <span className="text-xs text-white font-medium">{getTransactionTypeLabel()}</span>
                   </div>
@@ -288,7 +288,7 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
                 <button
                   onClick={downloadReceiptAsPNG}
                   disabled={isDownloading}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#D4B139] hover:bg-[#c7a42f] text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#f76301] hover:bg-[#e55a00] text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="text-sm font-medium">
                     {isDownloading ? "Downloading..." : "Download Receipt"}

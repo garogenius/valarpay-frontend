@@ -10,6 +10,7 @@ import {
   FiDollarSign,
   FiArrowDownLeft,
   FiArrowUpRight,
+  FiChevronDown,
 } from "react-icons/fi";
 import useUserStore from "@/store/user.store";
 import CardPreview from "@/components/user/cards/CardPreview";
@@ -54,19 +55,51 @@ const CardsContent: React.FC = () => {
 
   const [selectedCard, setSelectedCard] = React.useState<IVirtualCard | null>(null);
   const [cardLabel, setCardLabel] = React.useState("");
-  const [selectedCurrency, setSelectedCurrency] = React.useState<CardCurrency>("USD");
+  const [selectedCurrency, setSelectedCurrency] = React.useState<CardCurrency>("NGN");
 
-  // Get currency accounts (USD only)
+  // Get currency accounts
   const { accounts: currencyAccounts, isPending: accountsLoading } = useGetCurrencyAccounts();
+  const { user } = useUserStore();
+  
+  // Set default currency based on available accounts
+  React.useEffect(() => {
+    if (!accountsLoading && currencyAccounts) {
+      const hasUsd = !!currencyAccounts.find((a) => a.currency === "USD");
+      const hasNgn = !!user?.wallet?.find((w) => (w.currency || "").toUpperCase() === "NGN");
+      
+      // Default to USD if available, otherwise NGN if available, otherwise stay on current
+      if (hasUsd && selectedCurrency === "NGN") {
+        setSelectedCurrency("USD");
+      } else if (!hasUsd && hasNgn && selectedCurrency === "USD") {
+        setSelectedCurrency("NGN");
+      }
+    }
+  }, [accountsLoading, currencyAccounts, user?.wallet, selectedCurrency]);
+  
+  // Get NGN account from wallet
+  const ngnAccount = React.useMemo(
+    () => user?.wallet?.find((w) => (w.currency || "").toUpperCase() === "NGN"),
+    [user?.wallet]
+  );
+  
+  // Get USD account from currency accounts
   const usdAccount = React.useMemo(
     () => currencyAccounts?.find((a) => a.currency === "USD"),
     [currencyAccounts]
   );
 
   const hasAccountForCurrency = (currency: CardCurrency) => {
+    if (currency === "NGN") return !!ngnAccount?.id;
     if (currency === "USD") return !!usdAccount?.id;
     return false;
   };
+
+  // Filter cards by selected currency
+  const filteredCards = React.useMemo(() => {
+    return virtualCards.filter((card) => 
+      (card.currency || "").toUpperCase() === selectedCurrency.toUpperCase()
+    );
+  }, [virtualCards, selectedCurrency]);
 
   // Get all cards
   const { cards: virtualCards, isPending: cardLoading, refetch: refetchCards } = useGetCards();
@@ -130,6 +163,21 @@ const CardsContent: React.FC = () => {
       return;
     }
 
+    // For NGN, we need to use wallet account, for USD use currency account
+    const accountId = selectedCurrency === "NGN" 
+      ? ngnAccount?.id 
+      : selectedCurrency === "USD"
+      ? usdAccount?.id
+      : null;
+
+    if (!accountId) {
+      ErrorToast({
+        title: "Account Not Found",
+        descriptions: [`${selectedCurrency} account not found. Please create an account first.`],
+      });
+      return;
+    }
+
     createCard({
       currency: selectedCurrency,
       label: cardLabel.trim(),
@@ -169,27 +217,29 @@ const CardsContent: React.FC = () => {
       <div className="text-center max-w-md space-y-3">
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-2">
           <p className="text-yellow-400 text-xs sm:text-sm font-medium mb-1">Important Notice</p>
-          <p className="text-white/80 text-xs sm:text-sm">• NGN cards are not available</p>
-          <p className="text-white/80 text-xs sm:text-sm">• Virtual cards are available for USD only</p>
+          <p className="text-white/80 text-xs sm:text-sm">• Virtual cards are available for NGN and USD only</p>
           <p className="text-white/80 text-xs sm:text-sm">• You must have a currency account before creating a virtual card</p>
         </div>
-        {!usdAccount ? (
+        {!hasAccountForCurrency(selectedCurrency) ? (
           <div className="space-y-2">
-            <p className="text-white/60 text-sm">You need a USD account to create a virtual card.</p>
+            <p className="text-white/60 text-sm">You need a {selectedCurrency} account to create a virtual card.</p>
             <p className="text-white/40 text-xs">Please create a currency account in the Accounts page first.</p>
           </div>
-        ) : (
-          <p className="text-white text-sm sm:text-base mb-2">
-            You currently do not have any virtual cards.
-          </p>
-        )}
+        ) : filteredCards.length === 0 ? (
+          <div className="space-y-2">
+            <p className="text-white text-sm sm:text-base mb-2">
+              You currently do not have any {selectedCurrency} virtual cards.
+            </p>
+            <p className="text-white/60 text-xs">Click the button below to create your first {selectedCurrency} card.</p>
+          </div>
+        ) : null}
       </div>
       <CustomButton
         onClick={() => setOpenCreateCard(true)}
-        disabled={!usdAccount}
-        className="bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={!hasAccountForCurrency(selectedCurrency)}
+        className="bg-[#f76301] hover:bg-[#f76301]/90 text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Create Virtual Card
+        Create {selectedCurrency} Virtual Card
       </CustomButton>
     </div>
   );
@@ -271,18 +321,19 @@ const CardsContent: React.FC = () => {
       );
     }
 
-    if (virtualCards.length === 0) return renderEmptyVirtual();
+    if (filteredCards.length === 0) return renderEmptyVirtual();
 
     return (
       <div className="flex flex-col gap-4">
-        {virtualCards.map((card) => {
+        {filteredCards.map((card) => {
           const rawStatus = (card.status || "").toUpperCase();
           const isFrozen = rawStatus === "FROZEN";
           const status: "active" | "frozen" | "blocked" =
             rawStatus === "BLOCKED" || rawStatus === "CLOSED" ? "blocked" : isFrozen ? "frozen" : "active";
           
           const currencyAccount = 
-            card.currency === "USD" ? usdAccount : null;
+            card.currency === "USD" ? usdAccount : 
+            card.currency === "NGN" ? ngnAccount : null;
 
           return (
             <div key={card.id} className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -465,6 +516,40 @@ const CardsContent: React.FC = () => {
             <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-white">Cards</h1>
             <p className="text-white/60 text-xs sm:text-sm">Manage your virtual and physical cards</p>
           </div>
+          
+          {/* Currency Dropdown - Only NGN and USD */}
+          {tab === "virtual" && (
+            <div className="flex flex-col gap-2">
+              <div className="relative">
+                <select
+                  value={selectedCurrency}
+                  onChange={(e) => setSelectedCurrency(e.target.value as CardCurrency)}
+                  className="bg-[#1C1C1E] border border-gray-700 rounded-lg py-2.5 px-4 text-white text-sm outline-none focus:border-[#f76301] cursor-pointer appearance-none pr-8 min-w-[120px]"
+                >
+                  <option value="NGN">NGN</option>
+                  <option value="USD">USD</option>
+                </select>
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <FiChevronDown className="text-white/60 text-sm" />
+                </div>
+              </div>
+              
+              {/* Badge for account status */}
+              {!hasAccountForCurrency(selectedCurrency) ? (
+                <div className="flex items-center justify-center">
+                  <span className="px-2 py-1 bg-red-500/10 text-red-400 text-xs font-medium rounded-full border border-red-500/20">
+                    No Account
+                  </span>
+                </div>
+              ) : filteredCards.length === 0 ? (
+                <div className="flex items-center justify-center">
+                  <span className="px-2 py-1 bg-yellow-500/10 text-yellow-400 text-xs font-medium rounded-full border border-yellow-500/20">
+                    Add Card
+                  </span>
+                </div>
+              ) : null}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-6">
@@ -593,26 +678,36 @@ const CardsContent: React.FC = () => {
             }}
           />
           <div className="relative w-full max-w-md bg-[#0A0A0A] border border-white/10 rounded-2xl p-5 z-10">
-            <h2 className="text-white text-base font-semibold mb-4">Create Virtual USD Card</h2>
+            <h2 className="text-white text-base font-semibold mb-4">Create Virtual Card</h2>
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mb-4">
               <p className="text-blue-400 text-xs font-medium mb-1">Note</p>
-              <p className="text-white/80 text-xs">• NGN cards are not available</p>
-              <p className="text-white/80 text-xs">• Virtual cards are available for USD only</p>
+              <p className="text-white/80 text-xs">• Virtual cards are available for NGN and USD only</p>
+              <p className="text-white/80 text-xs">• You must have a currency account before creating a card</p>
             </div>
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
                 <label className="text-white/70 text-xs">Currency</label>
                 <select
-                  className="w-full bg-[#1C1C1E] border border-gray-700 rounded-lg py-3 px-3 text-white text-sm outline-none focus:border-[#FF6B2C]"
+                  className="w-full bg-[#1C1C1E] border border-gray-700 rounded-lg py-3 px-3 text-white text-sm outline-none focus:border-[#f76301]"
                   value={selectedCurrency}
                   onChange={(e) => setSelectedCurrency(e.target.value as CardCurrency)}
                 >
-                  <option value="USD" disabled={!usdAccount}>USD {!usdAccount ? "(Account Required)" : ""}</option>
+                  <option value="NGN" disabled={!hasAccountForCurrency("NGN")}>
+                    NGN {!hasAccountForCurrency("NGN") ? "(Account Required)" : ""}
+                  </option>
+                  <option value="USD" disabled={!hasAccountForCurrency("USD")}>
+                    USD {!hasAccountForCurrency("USD") ? "(Account Required)" : ""}
+                  </option>
                 </select>
                 {!hasAccountForCurrency(selectedCurrency) && (
-                  <p className="text-yellow-400 text-xs mt-1">
-                    You need a {selectedCurrency} account. Create one in the Accounts page.
-                  </p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="px-2 py-1 bg-red-500/10 text-red-400 text-xs font-medium rounded-full border border-red-500/20">
+                      No Account
+                    </span>
+                    <p className="text-yellow-400 text-xs">
+                      Create a {selectedCurrency} account in the Accounts page first.
+                    </p>
+                  </div>
                 )}
               </div>
               <div className="flex flex-col gap-1">
