@@ -53,11 +53,11 @@ export const useGetCurrencyAccounts = () => {
   return { accounts, isPending, isError, refetch };
 };
 
-export const useGetCurrencyAccountByCurrency = (currency: "USD" | "EUR" | "GBP") => {
+export const useGetCurrencyAccountByCurrency = (currency: "USD" | "EUR" | "GBP" | undefined) => {
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: ["currency-account", currency],
-    queryFn: () => getCurrencyAccountByCurrencyRequest(currency),
-    enabled: !!currency,
+    queryFn: () => getCurrencyAccountByCurrencyRequest(currency!),
+    enabled: !!currency && (currency === "USD" || currency === "EUR" || currency === "GBP"),
   });
 
   const account: ICurrencyAccount | undefined = data?.data?.data || data?.data;

@@ -26,7 +26,7 @@ const PaymentSettingsModal: React.FC<PaymentSettingsModalProps> = ({ isOpen, onC
   
   // Get selected currency account (only for non-NGN currencies)
   const { account: selectedCurrencyAccount, isPending: accountLoading } = useGetCurrencyAccountByCurrency(
-    selectedCurrency !== "NGN" ? selectedCurrency : ""
+    selectedCurrency !== "NGN" ? (selectedCurrency as "USD" | "EUR" | "GBP") : undefined
   );
 
   // Combine all available accounts
