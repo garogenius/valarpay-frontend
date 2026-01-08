@@ -36,7 +36,7 @@ export const useGetInternationalAirtimePlan = (
   payload: IInternationalAirtimePlan
 ) => {
   // Only enable query if phone number is valid (at least 7 characters)
-  const isValidPhone = payload.phone && payload.phone.length >= 7;
+  const isValidPhone = !!(payload.phone && payload.phone.length >= 7);
   return useQuery({
     queryKey: ["international-airtime-plan", payload],
     queryFn: () => internationalAirtimePlanRequest(payload),
