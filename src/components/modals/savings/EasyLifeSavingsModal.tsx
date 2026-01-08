@@ -45,13 +45,27 @@ const EasyLifeSavingsModal: React.FC<EasyLifeSavingsModalProps> = ({ isOpen, onC
         const goalAmount = parseFloat(cleanAmount);
         if (!goalAmount || isNaN(goalAmount)) return;
         
+        // Calculate duration days from start and end dates
+        if (!startDate || !endDate) return;
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) return;
+        const durationDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+        
+        const contributionFrequency: EasyLifeContributionFrequency =
+          frequency === "Daily"
+            ? "DAILY"
+            : frequency === "Weekly"
+            ? "WEEKLY"
+            : "MONTHLY";
+        
         createPlan({
           name: name.trim(),
           description: description.trim() || undefined,
           goalAmount,
-          startDate,
-          endDate,
-          contributionFrequency: frequency.toUpperCase() as EasyLifeContributionFrequency,
+          currency: "NGN",
+          durationDays,
+          contributionFrequency,
           autoDebitEnabled,
           earlyWithdrawalEnabled,
         });
