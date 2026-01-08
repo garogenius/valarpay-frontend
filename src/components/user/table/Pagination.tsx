@@ -32,7 +32,7 @@ const Pagination = ({
         previousLinkClassName="text-[#46484F] mr-1.5 md:mr-2 px-2 2xs:px-2.5 md:px-3 py-1.5 xs:py-2 md:py-2.5 text-center rounded sm:rounded-md bg-[#F9F9F9] dark:bg-[#141414] border border-[#46484F] text-[#46484F]"
         nextLinkClassName="text-[#46484F] ml-1.5 md:ml-2 px-2 2xs:px-2.5 md:px-3 py-1.5 xs:py-2 md:py-2.5 text-center rounded sm:rounded-md bg-[#F9F9F9] dark:bg-[#141414] border border-[#46484F] text-[#46484F]"
         pageLinkClassName="px-3 md:px-4 py-1.5 xs:py-2 md:py-2.5 rounded-md bg-[#F9F9F9] dark:bg-[#141414] border border-[#46484F] text-[#46484F]"
-        activeLinkClassName="border border-[#D4B139] rounded-md text-[#D4B139]"
+        activeLinkClassName="border border-[#f76301] rounded-md text-[#f76301]"
         disabledLinkClassName="border rounded-md"
         className="flex items-center gap-0.5 2xs:gap-1 text-center text-xs 2xs:text-sm "
       />

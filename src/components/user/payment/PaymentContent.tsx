@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import { IoWalletOutline, IoSettingsOutline } from "react-icons/io5";
 import { RiBankLine } from "react-icons/ri";
 import { MdStorefront } from "react-icons/md";
@@ -28,7 +27,6 @@ import usePaymentSettingsStore from "@/store/paymentSettings.store";
 import useGlobalModalsStore from "@/store/globalModals.store";
 import CustomButton from "@/components/shared/Button";
 import { format } from "date-fns";
-import images from "../../../../public/images";
 
 
 type TabKey = "transfer" | "bills" | "schedule";
@@ -228,7 +226,11 @@ const PaymentContent = () => {
                 <div key={tx.id} className="flex items-center justify-between py-3 hover:bg-white/5 rounded px-2 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-[#f76301]/20 grid place-items-center">
-                      <Image src={images.singleLogo} alt="logo" className="w-5 h-5" />
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f76301" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M4 21v-2a4 4 0 0 1 3-3.87"/>
+                        <circle cx="12" cy="7" r="4"/>
+                      </svg>
                     </div>
                     <div>
                       <p className="text-white text-sm font-medium">{getTransactionLabel()}</p>
