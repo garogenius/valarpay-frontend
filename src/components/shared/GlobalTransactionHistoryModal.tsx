@@ -9,7 +9,7 @@ import { format } from "date-fns";
 import toast from "react-hot-toast";
 import CustomButton from "./Button";
 import GlobalTransactionReceiptModal from "./GlobalTransactionReceiptModal";
-import { Transaction } from "@/constants/types";
+import { Transaction, TRANSACTION_STATUS } from "@/constants/types";
 import useNavigate from "@/hooks/useNavigate";
 
 interface GlobalTransactionHistoryModalProps {
@@ -34,27 +34,30 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
   };
 
   const getStatusIcon = () => {
-    if (transaction.status === "SUCCESSFUL" || transaction.status === "SUCCESS") {
+    const status = String(transaction.status || "").toLowerCase();
+    if (status === "successful" || status === "success" || status === TRANSACTION_STATUS.success) {
       return <FiCheckCircle className="text-2xl text-green-500" />;
-    } else if (transaction.status === "FAILED" || transaction.status === "FAILURE") {
+    } else if (status === "failed" || status === "failure" || status === TRANSACTION_STATUS.failed) {
       return <FiXCircle className="text-2xl text-red-500" />;
     }
     return <FiClock className="text-2xl text-yellow-500" />;
   };
 
   const getStatusColor = () => {
-    if (transaction.status === "SUCCESSFUL" || transaction.status === "SUCCESS") {
+    const status = String(transaction.status || "").toLowerCase();
+    if (status === "successful" || status === "success" || status === TRANSACTION_STATUS.success) {
       return "bg-green-500/20 border-green-500/30";
-    } else if (transaction.status === "FAILED" || transaction.status === "FAILURE") {
+    } else if (status === "failed" || status === "failure" || status === TRANSACTION_STATUS.failed) {
       return "bg-red-500/20 border-red-500/30";
     }
     return "bg-yellow-500/20 border-yellow-500/30";
   };
 
   const getStatusText = () => {
-    if (transaction.status === "SUCCESSFUL" || transaction.status === "SUCCESS") {
+    const status = String(transaction.status || "").toLowerCase();
+    if (status === "successful" || status === "success" || status === TRANSACTION_STATUS.success) {
       return "Successful";
-    } else if (transaction.status === "FAILED" || transaction.status === "FAILURE") {
+    } else if (status === "failed" || status === "failure" || status === TRANSACTION_STATUS.failed) {
       return "Failed";
     }
     return "Pending";
