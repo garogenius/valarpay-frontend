@@ -18,7 +18,6 @@ const InvestmentStatCard = () => {
   const { investmentsData } = useGetInvestments({
     page: 1,
     limit: 100, // Get all investments to calculate total
-    sort: "newest",
   });
   
   const investments = investmentsData?.investments || [];
