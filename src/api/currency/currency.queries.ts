@@ -125,12 +125,12 @@ export const useCloseCurrencyAccount = (
 };
 
 export const useGetCurrencyAccountTransactions = (
-  currency: "USD" | "EUR" | "GBP",
+  currency: "" | "USD" | "EUR" | "GBP",
   query: IGetCurrencyAccountTransactionsQuery
 ) => {
   const { data, isPending, isError } = useQuery({
     queryKey: ["currency-account-transactions", currency, query],
-    queryFn: () => getCurrencyAccountTransactionsRequest(currency, query),
+    queryFn: () => getCurrencyAccountTransactionsRequest(currency as "USD" | "EUR" | "GBP", query),
     enabled: !!currency,
   });
 
