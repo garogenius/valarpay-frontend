@@ -31,6 +31,9 @@ const AccountsContent: React.FC = () => {
   const recent = (notifications || []).slice(0, 6);
   const hasActivity = recent.length > 0;
 
+  // Fetch currency accounts (must be declared before useMemo that uses it)
+  const { accounts: walletAccounts, isPending: accountsLoading, refetch: refetchAccounts } = useGetWalletAccounts();
+
   // Get all available currencies dynamically
   const allAvailableCurrencies = useMemo(() => {
     const currenciesSet = new Set<string>();
@@ -60,9 +63,6 @@ const AccountsContent: React.FC = () => {
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(initialCurrency);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [accountLabel, setAccountLabel] = useState("");
-
-  // Fetch currency accounts
-  const { accounts: walletAccounts, isPending: accountsLoading, refetch: refetchAccounts } = useGetWalletAccounts();
   
   // Filter for non-NGN currency accounts
   const currencyAccounts = useMemo(() => {
