@@ -109,34 +109,6 @@ export type IPlaceBet = {
   walletPin: string;
 };
 
-export type Bet = {
-  id: string;
-  userId: string;
-  platform: string;
-  platformCode: string;
-  betType: "SINGLE" | "MULTIPLE" | "SYSTEM";
-  status: "PENDING" | "WON" | "LOST" | "CANCELLED" | "REFUNDED";
-  amount: number;
-  potentialWinnings: number;
-  odds: number;
-  currency: string;
-  orderReference: string;
-  transactionRef?: string;
-  description?: string;
-  createdAt: string;
-  updatedAt?: string;
-};
-
-export type IPlaceBet = {
-  platform: string;
-  betType: "SINGLE" | "MULTIPLE" | "SYSTEM";
-  amount: number;
-  odds: number;
-  currency: string;
-  description?: string;
-  walletPin: string;
-};
-
 
 
 
