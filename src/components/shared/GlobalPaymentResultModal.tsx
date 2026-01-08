@@ -334,41 +334,6 @@ Thank you for using ValarPay!
               Retry
             </CustomButton>
           )}
-          {data.status === "failed" && (
-            <CustomButton
-              onClick={() => {
-                // Generate error receipt
-                const receiptContent = `
-ValarPay Investment Receipt
-============================
-
-Transaction Type: ${data.transactionType || "Investment"}
-Date: ${new Date().toLocaleString()}
-Status: FAILED
-
-Amount: ${data.currency || "NGN"} ${data.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-
-Error: ${data.errorDetails || "Transaction failed"}
-
-Please contact support if you need assistance.
-                `.trim();
-                
-                const blob = new Blob([receiptContent], { type: "text/plain" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `investment-error-${Date.now()}.txt`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-              }}
-              className="flex-1 w-full sm:w-auto py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium transition-colors flex items-center justify-center gap-2"
-            >
-              <FiDownload className="text-base" />
-              Download Receipt
-            </CustomButton>
-          )}
         </div>
       </div>
     </div>

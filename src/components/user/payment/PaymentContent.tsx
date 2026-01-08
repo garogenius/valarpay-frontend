@@ -209,30 +209,46 @@ const PaymentContent = () => {
           </div>
         ) : transactions && transactions.length > 0 ? (
           <div className="flex flex-col divide-y divide-white/10">
-            {transactions.slice(0, 8).map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between py-3 hover:bg-white/5 rounded px-2 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#f76301]/20 grid place-items-center">
-                    <Image src={images.singleLogo} alt="logo" className="w-5 h-5" />
+            {transactions.slice(0, 8).map((tx) => {
+              // Get recipient name and account number for transfers
+              const getTransactionLabel = () => {
+                if (tx.category === "TRANSFER" && tx.transferDetails) {
+                  const beneficiaryName = tx.transferDetails?.beneficiaryName || "Unknown";
+                  const accountNumber = tx.transferDetails?.beneficiaryAccountNumber || "";
+                  if (accountNumber) {
+                    return `${beneficiaryName} ${accountNumber}`;
+                  }
+                  return beneficiaryName;
+                }
+                // For other transaction types, use description or fallback
+                return tx.description || "Transaction";
+              };
+
+              return (
+                <div key={tx.id} className="flex items-center justify-between py-3 hover:bg-white/5 rounded px-2 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#f76301]/20 grid place-items-center">
+                      <Image src={images.singleLogo} alt="logo" className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">{getTransactionLabel()}</p>
+                      <p className="text-white/50 text-xs">
+                        {format(new Date(('created_at' in tx ? tx.created_at : tx.createdAt) || Date.now()), "MMM d, yyyy")}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-white text-sm font-medium">{tx.description || "Transfer"}</p>
-                    <p className="text-white/50 text-xs">
-                      {format(new Date(('created_at' in tx ? tx.created_at : tx.createdAt) || Date.now()), "MMM d, yyyy")}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleViewReceipt(tx)}
+                      className="text-[#f76301] hover:text-[#e55a00] font-medium text-sm transition-colors"
+                    >
+                      View
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <CustomButton 
-                    type="button" 
-                    className="border border-[#f76301] text-white px-3 py-1.5 rounded-lg bg-transparent hover:bg-[#f76301]/10" 
-                    onClick={() => handleViewReceipt(tx)}
-                  >
-                    View
-                  </CustomButton>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-12 gap-4">

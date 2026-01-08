@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { CgClose } from "react-icons/cg";
-import { useCreateInvestment } from "@/api/investment/investment.queries";
+import { useCreateInvestment, useGetInvestmentProduct } from "@/api/investment/investment.queries";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
 import CustomButton from "@/components/shared/Button";
@@ -15,8 +15,6 @@ interface InvestmentModalProps {
 }
 
 const MINIMUM_AMOUNT = 100000000; // ₦100,000,000
-const ROI_PERCENTAGE = 10; // 10%
-const LOCK_PERIOD_MONTHS = 12; // 12 months
 
 const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) => {
   const { user } = useUserStore();
@@ -33,15 +31,30 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
   const wallets = user?.wallet || [];
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(wallets.length > 0 ? wallets[0].id : null);
 
+  // Fetch investment product data
+  const { product, isPending: productLoading } = useGetInvestmentProduct();
+
   // Get NGN wallet balance
   const ngnWallet = user?.wallet?.find((w) => w.currency?.toUpperCase() === "NGN");
   const currentBalance = ngnWallet?.balance || 0;
+
+  // Use real data from API or fallback to defaults
+  const ROI_PERCENTAGE = product?.roiRate ? product.roiRate * 100 : 10;
+  const LOCK_PERIOD_MONTHS = product?.tenureMonths || 12;
+  const actualMinimumAmount = product?.minimumInvestmentAmount || MINIMUM_AMOUNT;
+
+  // Update amount when product loads and sets minimum
+  useEffect(() => {
+    if (product?.minimumInvestmentAmount && amount < product.minimumInvestmentAmount) {
+      setAmount(product.minimumInvestmentAmount);
+    }
+  }, [product?.minimumInvestmentAmount, amount]);
 
   // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       setStep(1);
-      setAmount(MINIMUM_AMOUNT);
+      setAmount(actualMinimumAmount);
       setAgreementReference("");
       setLegalDocumentUrl("");
       setLegalDocumentFile(null);
@@ -50,7 +63,7 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
         fileInputRef.current.value = "";
       }
     }
-  }, [isOpen]);
+  }, [isOpen, actualMinimumAmount]);
 
   const onCreateError = (error: any) => {
     handleError(error, {
@@ -110,27 +123,14 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
   };
 
   const handleNext = () => {
-    if (amount < MINIMUM_AMOUNT) {
+    if (amount < actualMinimumAmount) {
       ErrorToast({
         title: "Validation Error",
-        descriptions: [`Minimum investment amount is ₦${MINIMUM_AMOUNT.toLocaleString()}`],
+        descriptions: [`Minimum investment amount is ₦${actualMinimumAmount.toLocaleString()}`],
       });
       return;
     }
-    if (!agreementReference || agreementReference.trim() === "") {
-      ErrorToast({
-        title: "Validation Error",
-        descriptions: ["Agreement Reference is required"],
-      });
-      return;
-    }
-    if (!legalDocumentUrl || legalDocumentUrl.trim() === "") {
-      ErrorToast({
-        title: "Validation Error",
-        descriptions: ["Legal Document is required. Please upload a PDF or provide a URL"],
-      });
-      return;
-    }
+    // Agreement Reference and Legal Document are validated in step 2, not step 1
     setStep(2);
   };
 
@@ -196,7 +196,7 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
 
   const resetAndClose = () => {
     setStep(1);
-    setAmount(MINIMUM_AMOUNT);
+    setAmount(actualMinimumAmount);
     setAgreementReference("");
     setLegalDocumentUrl("");
     setLegalDocumentFile(null);
@@ -216,10 +216,24 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
   const displayAmount = transactionResult?.amount || amount;
   const displayInterestAmount = transactionResult?.interestAmount || interestAmount;
   const displayExpectedReturn = transactionResult?.expectedReturn || expectedReturn;
-  const displayRoiRate = transactionResult?.roiRate ? `${(transactionResult.roiRate * 100).toFixed(0)}%` : `${ROI_PERCENTAGE}%`;
+  const displayRoiRate = transactionResult?.roiRate ? `${(transactionResult.roiRate * 100).toFixed(0)}%` : `${ROI_PERCENTAGE.toFixed(1)}%`;
+  
+  // Use real maturity date from API response, or calculate from real tenure
   const displayMaturityDate = transactionResult?.maturityDate 
-    ? new Date(transactionResult.maturityDate).toLocaleDateString('en-GB')
-    : new Date(new Date().setMonth(new Date().getMonth() + LOCK_PERIOD_MONTHS)).toLocaleDateString('en-GB');
+    ? new Date(transactionResult.maturityDate).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      })
+    : (() => {
+        const maturityDate = new Date();
+        maturityDate.setMonth(maturityDate.getMonth() + LOCK_PERIOD_MONTHS);
+        return maturityDate.toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
+      })();
 
   if (!isOpen) return null;
 
@@ -243,7 +257,7 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
             <div className="space-y-3 sm:space-y-4 md:space-y-6">
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">
-                  Investment Amount (Minimum ₦{MINIMUM_AMOUNT.toLocaleString()})
+                  Investment Amount (Minimum ₦{actualMinimumAmount.toLocaleString()})
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">₦</span>
@@ -254,9 +268,9 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
                     className="w-full bg-bg-500 dark:bg-bg-1000 border border-border-700 dark:border-border-600 rounded-lg py-3 pl-8 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-[#FF6B2C] focus:border-transparent"
                   />
                 </div>
-                {amount < MINIMUM_AMOUNT && (
+                {amount < actualMinimumAmount && (
                   <p className="text-red-400 text-xs mt-1">
-                    Minimum investment is ₦{MINIMUM_AMOUNT.toLocaleString()}
+                    Minimum investment is ₦{actualMinimumAmount.toLocaleString()}
                   </p>
                 )}
               </div>
@@ -319,7 +333,7 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
 
               <CustomButton
                 onClick={handleNext}
-                disabled={amount < MINIMUM_AMOUNT || !selectedWalletId}
+                disabled={amount < actualMinimumAmount || !selectedWalletId}
                 className="w-full bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue

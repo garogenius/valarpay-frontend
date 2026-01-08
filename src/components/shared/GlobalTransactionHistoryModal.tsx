@@ -7,10 +7,11 @@ import { FiDownload, FiMessageCircle, FiCheckCircle, FiXCircle, FiClock } from "
 import { LuCopy } from "react-icons/lu";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
+import html2canvas from "html2canvas";
 import CustomButton from "./Button";
-import GlobalTransactionReceiptModal from "./GlobalTransactionReceiptModal";
 import { Transaction, TRANSACTION_STATUS } from "@/constants/types";
 import useNavigate from "@/hooks/useNavigate";
+import useUserStore from "@/store/user.store";
 
 interface GlobalTransactionHistoryModalProps {
   isOpen: boolean;
@@ -24,7 +25,8 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
   transaction,
 }) => {
   const navigate = useNavigate();
-  const [showReceipt, setShowReceipt] = useState(false);
+  const { user } = useUserStore();
+  const [isDownloading, setIsDownloading] = useState(false);
 
   if (!isOpen || !transaction) return null;
 
@@ -136,8 +138,178 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
     navigate("/user/settings/support", "push");
   };
 
-  const handleDownloadReceipt = () => {
-    setShowReceipt(true);
+  const handleDownloadReceipt = async () => {
+    setIsDownloading(true);
+    try {
+      const receiptTransaction = convertToReceiptTransaction();
+      
+      // Get logo image as base64
+      const logoResponse = await fetch('/images/single-logo.png');
+      const logoBlob = await logoResponse.blob();
+      const logoBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(logoBlob);
+      });
+      
+      // Format date as DD-MM-YYYY HH:MM AM/PM
+      const formatReceiptDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const displayHours = hours % 12 || 12;
+        return `${day}-${month}-${year} ${displayHours}:${minutes} ${ampm}`;
+      };
+
+      // Get transaction type label
+      const getTransactionTypeLabel = () => {
+        if (receiptTransaction.type === "TRANSFER") return "Inter-bank Transfer";
+        if (receiptTransaction.type === "AIRTIME") return "Airtime";
+        if (receiptTransaction.type === "DATA") return "Mobile Data";
+        if (receiptTransaction.type === "CABLE") return "Cable / TV";
+        if (receiptTransaction.type === "ELECTRICITY") return "Electricity";
+        if (receiptTransaction.type === "INTERNET") return "Internet";
+        return "Bill Payment";
+      };
+
+      // Get sender name from transaction
+      const senderName = transaction.depositDetails?.senderName || user?.fullname || "N/A";
+      
+      // Get beneficiary details
+      const beneficiaryName = receiptTransaction.recipientName || receiptTransaction.billerName || "N/A";
+      const beneficiaryAccount = receiptTransaction.recipientAccount || receiptTransaction.billerNumber || "0000000000";
+      const beneficiaryBank = receiptTransaction.recipientBank || receiptTransaction.provider || "NattyPay";
+      
+      // Get narration/description
+      const narration = receiptTransaction.description || receiptTransaction.reference || "N/A";
+      
+      // Status color
+      const statusColor = receiptTransaction.status === "SUCCESSFUL" ? "#22C55E" : receiptTransaction.status === "FAILED" ? "#EF4444" : "#F59E0B";
+      
+      // Create a temporary receipt element
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.width = "500px";
+      tempDiv.style.backgroundColor = "#1A1A1A";
+      tempDiv.style.padding = "30px";
+      tempDiv.style.color = "#FFFFFF";
+      tempDiv.style.fontFamily = "system-ui, -apple-system, sans-serif";
+      document.body.appendChild(tempDiv);
+
+      // Build receipt HTML matching exact design
+      const receiptHTML = `
+        <div style="background: #1A1A1A; color: #FFFFFF; padding: 30px; font-family: system-ui, -apple-system, sans-serif; width: 500px;">
+          <!-- Header with Logo and Tagline -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <img src="${logoBase64}" alt="VALARPAY" style="height: 40px; width: auto;" />
+              <span style="color: #FFFFFF; font-size: 20px; font-weight: bold;">VALARPAY</span>
+            </div>
+            <span style="color: #FFFFFF; font-size: 14px;">Beyond Banking</span>
+          </div>
+
+          <!-- Transaction Receipt Banner -->
+          <div style="background: #f76301; padding: 12px; text-align: center; margin-bottom: 30px; border-radius: 4px;">
+            <span style="color: #FFFFFF; font-size: 16px; font-weight: bold;">Transaction Receipt</span>
+          </div>
+
+          <!-- Transaction Details with Dotted Lines -->
+          <div style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px;">Transaction Date:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${formatReceiptDate(receiptTransaction.createdAt)}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px;">Transaction ID:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${receiptTransaction.reference}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px;">Amount:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${receiptTransaction.currency === "NGN" ? "₦" : receiptTransaction.currency}${receiptTransaction.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px;">Currency:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${receiptTransaction.currency}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px;">Transaction Type:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${getTransactionTypeLabel()}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px;">Sender Name:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${senderName}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px;">Beneficiary Details:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${beneficiaryName} (${beneficiaryAccount})</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px;">Beneficiary Bank:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${beneficiaryBank}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px;">Narration:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${narration}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; padding: 12px 0;">
+              <span style="color: #FFFFFF; font-size: 14px;">Status:</span>
+              <span style="color: ${statusColor}; font-size: 14px; font-weight: bold;">${receiptTransaction.status}</span>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div style="text-align: center; color: #FFFFFF; font-size: 12px; margin-top: 30px; line-height: 1.6;">
+            <p style="margin: 0 0 8px 0;">Thank you for banking with ValarPay. For support, contact us at Support@valarpay.com,</p>
+            <p style="margin: 0 0 8px 0;">call +2348134146906 or Head Office: C3&C4 Suite 2nd Floor Ejison Plaza 9a New Market Road Main Market Onitsha</p>
+          </div>
+        </div>
+      `;
+
+      tempDiv.innerHTML = receiptHTML;
+
+      // Wait for images to load
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Convert to canvas
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#1A1A1A",
+        width: 500,
+        height: tempDiv.scrollHeight,
+        allowTaint: true,
+      });
+
+      // Convert canvas to PNG and download
+      const link = document.createElement("a");
+      link.download = `receipt-${receiptTransaction.reference || receiptTransaction.id}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+
+      // Clean up
+      document.body.removeChild(tempDiv);
+      toast.success("Receipt downloaded as PNG");
+    } catch (error) {
+      console.error("Error generating PNG:", error);
+      toast.error("Failed to download receipt");
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const convertToReceiptTransaction = (): {
@@ -250,28 +422,30 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
               <div className="flex-1 overflow-y-auto px-6 py-4">
                 {/* Status Section */}
                 <div className={`mb-6 rounded-xl p-4 border ${getStatusColor()}`}>
-                  <div className="flex items-center gap-3 mb-2">
-                    {getStatusIcon()}
-                    <span className={`text-lg font-semibold ${
-                      (() => {
-                        const status = String(transaction.status || "").toLowerCase();
-                        if (status === "successful" || status === "success" || status === TRANSACTION_STATUS.success) {
-                          return "text-green-500";
-                        } else if (status === "failed" || status === "failure" || status === TRANSACTION_STATUS.failed) {
-                          return "text-red-500";
-                        }
-                        return "text-yellow-500";
-                      })()
-                    }`}>
-                      {getStatusText()}
-                    </span>
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="flex items-center gap-3">
+                      {getStatusIcon()}
+                      <span className={`text-lg font-semibold ${
+                        (() => {
+                          const status = String(transaction.status || "").toLowerCase();
+                          if (status === "successful" || status === "success" || status === TRANSACTION_STATUS.success) {
+                            return "text-green-500";
+                          } else if (status === "failed" || status === "failure" || status === TRANSACTION_STATUS.failed) {
+                            return "text-red-500";
+                          }
+                          return "text-yellow-500";
+                        })()
+                      }`}>
+                        {getStatusText()}
+                      </span>
+                    </div>
+                    <p className="text-white text-xl font-bold">
+                      {getCurrencySymbol()}{getAmount().toLocaleString(undefined, { 
+                        minimumFractionDigits: 2, 
+                        maximumFractionDigits: 2 
+                      })}
+                    </p>
                   </div>
-                  <p className="text-white text-xl font-bold">
-                    {getCurrencySymbol()}{getAmount().toLocaleString(undefined, { 
-                      minimumFractionDigits: 2, 
-                      maximumFractionDigits: 2 
-                    })}
-                  </p>
                 </div>
 
                 {/* Transaction Details */}
@@ -355,10 +529,12 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
                   </CustomButton>
                   <CustomButton
                     onClick={handleDownloadReceipt}
-                    className="flex-1 bg-[#f76301] hover:bg-[#e55a00] text-black font-semibold rounded-xl py-3 flex items-center justify-center gap-2"
+                    disabled={isDownloading}
+                    isLoading={isDownloading}
+                    className="flex-1 bg-[#f76301] hover:bg-[#e55a00] text-black font-semibold rounded-xl py-3 flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <FiDownload className="text-base" />
-                    <span>Download Receipt</span>
+                    <span>{isDownloading ? "Downloading..." : "Download Receipt"}</span>
                   </CustomButton>
                 </div>
               </div>
@@ -366,13 +542,6 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
           </div>
         )}
       </AnimatePresence>
-
-      {/* Receipt Modal */}
-      <GlobalTransactionReceiptModal
-        isOpen={showReceipt}
-        onClose={() => setShowReceipt(false)}
-        transaction={convertToReceiptTransaction()}
-      />
     </>
   );
 };

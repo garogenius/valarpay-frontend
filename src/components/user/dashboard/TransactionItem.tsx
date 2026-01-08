@@ -2,7 +2,7 @@
 
 import { Transaction, TRANSACTION_CATEGORY } from "@/constants/types";
 import { format } from "date-fns";
-import { FiSmartphone, FiWifi, FiArrowUp, FiArrowDown, FiEye } from "react-icons/fi";
+import { FiSmartphone, FiWifi, FiArrowUp, FiArrowDown } from "react-icons/fi";
 import useGlobalModalsStore from "@/store/globalModals.store";
 
 interface TransactionItemProps {
@@ -48,14 +48,26 @@ const TransactionItem = ({ transaction }: TransactionItemProps) => {
 
   const getTitle = () => {
     if (transaction.category === TRANSACTION_CATEGORY.TRANSFER) {
-      return transaction.type === "DEBIT"
-        ? `Transfer to ${transaction.transferDetails?.beneficiaryName || "Unknown"}`
-        : `Transfer From ${transaction.depositDetails?.senderName || "Unknown"}`;
+      if (transaction.type === "DEBIT") {
+        const beneficiaryName = transaction.transferDetails?.beneficiaryName || "Unknown";
+        const accountNumber = transaction.transferDetails?.beneficiaryAccountNumber || "";
+        if (accountNumber) {
+          return `${beneficiaryName} ${accountNumber}`;
+        }
+        return beneficiaryName;
+      } else {
+        const senderName = transaction.depositDetails?.senderName || "Unknown";
+        const accountNumber = transaction.depositDetails?.senderAccountNumber || "";
+        if (accountNumber) {
+          return `${senderName} ${accountNumber}`;
+        }
+        return senderName;
+      }
     } else if (transaction.category === TRANSACTION_CATEGORY.BILL_PAYMENT) {
       const billType = transaction.billDetails?.type;
       return billType === "airtime" ? "Airtime Purchase" : "Mobile Data Purchase";
     }
-    return "Transaction";
+    return transaction.description || "Transaction";
   };
 
   const getAmount = () => {
@@ -87,10 +99,10 @@ const TransactionItem = ({ transaction }: TransactionItemProps) => {
         </p>
         <button
           onClick={() => showTransactionHistoryModal(transaction)}
-          className="text-[#f76301] hover:text-[#e55a00] transition-colors"
+          className="text-[#f76301] hover:text-[#e55a00] font-medium text-xs sm:text-sm transition-colors"
           aria-label="View transaction"
         >
-          <FiEye className="w-4 h-4" />
+          View
         </button>
       </div>
     </div>
