@@ -2190,7 +2190,10 @@ const ProfileContent = () => {
                     <div ref={businessRegistrationDatePickerRef} className="absolute z-10 mt-1">
                       <DatePicker
                         selected={
-                          watch("businessRegistrationDate") ? new Date(watch("businessRegistrationDate")) : null
+                          (() => {
+                            const dateValue = watch("businessRegistrationDate");
+                            return dateValue && typeof dateValue === "string" ? new Date(dateValue) : null;
+                          })()
                         }
                         onChange={(date: Date | null) => {
                           if (date) {
