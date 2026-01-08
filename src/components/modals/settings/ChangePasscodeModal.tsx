@@ -15,7 +15,7 @@ interface Props {
 
 const ChangePasscodeModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { user } = useUserStore();
-  const hasPasscode = !!user?.passcode; // Check if user already has a passcode
+  const hasPasscode = !!user?.isPasscodeSet; // Check if user already has a passcode
   
   const [oldPasscode, setOldPasscode] = useState("");
   const [passcode, setPasscode] = useState("");
