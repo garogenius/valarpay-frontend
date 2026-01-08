@@ -59,7 +59,6 @@ const CardsContent: React.FC = () => {
 
   // Get currency accounts
   const { accounts: currencyAccounts, isPending: accountsLoading } = useGetCurrencyAccounts();
-  const { user } = useUserStore();
   
   // Set default currency based on available accounts
   React.useEffect(() => {
