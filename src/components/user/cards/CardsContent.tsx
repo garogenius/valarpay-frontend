@@ -87,7 +87,7 @@ const CardsContent: React.FC = () => {
   const { accounts: currencyAccounts } = useGetCurrencyAccounts();
   
   // Also fetch the specific account for the selected currency to ensure we have the latest data
-  const { account: fetchedCurrencyAccount, isNotFound: accountNotFound } = useGetCurrencyAccountByCurrency(
+  const { account: fetchedCurrencyAccount, isError: accountFetchError } = useGetCurrencyAccountByCurrency(
     selectedCurrency === "NGN" ? undefined : selectedCurrency === "USD" ? "USD" : undefined
   );
   
@@ -120,9 +120,9 @@ const CardsContent: React.FC = () => {
     // Also check if we have a fetched account for the selected currency
     const hasFetched = currency === selectedCurrency && 
       fetchedCurrencyAccount && 
+      !accountFetchError &&
       fetchedCurrencyAccount.currency &&
-      String(fetchedCurrencyAccount.currency).toUpperCase().trim() === currency.toUpperCase().trim() &&
-      !accountNotFound;
+      String(fetchedCurrencyAccount.currency).toUpperCase().trim() === currency.toUpperCase().trim();
     
     return hasInList || hasFetched;
   };
@@ -136,8 +136,8 @@ const CardsContent: React.FC = () => {
     
     // For USD, check fetched account first
     if (currency === selectedCurrency && fetchedCurrencyAccount && 
-        String(fetchedCurrencyAccount.currency).toUpperCase().trim() === currency.toUpperCase().trim() &&
-        !accountNotFound) {
+        !accountFetchError &&
+        String(fetchedCurrencyAccount.currency).toUpperCase().trim() === currency.toUpperCase().trim()) {
       return fetchedCurrencyAccount;
     }
     
