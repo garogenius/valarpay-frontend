@@ -9,6 +9,7 @@ import { useFundEasyLifePlan } from "@/api/easylife-savings/easylife-savings.que
 import { useVerifyWalletPin } from "@/api/user/user.queries";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
+import useGlobalModalsStore from "@/store/globalModals.store";
 
 interface SavingsDepositModalProps {
   isOpen: boolean;
