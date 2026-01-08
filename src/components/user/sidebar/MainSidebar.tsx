@@ -33,8 +33,8 @@ const MainSidebar = () => {
   }, null);
 
   return (
-    <div className={`w-full h-full overflow-auto relative no-scrollbar bg-[#0A0A0A]`}>
-      <div className="w-full flex justify-center items-center py-6 border-b border-gray-800">
+    <div className={`w-full h-full overflow-auto relative no-scrollbar bg-white dark:bg-[#0A0A0A]`}>
+      <div className="w-full flex justify-center items-center py-6 border-b border-gray-200 dark:border-gray-800">
         <div
           className="flex items-center gap-2 cursor-pointer select-none"
           onClick={() => {
@@ -48,7 +48,7 @@ const MainSidebar = () => {
             height={32}
             className="w-8 h-8"
           />
-          <span className="text-xl font-bold text-white uppercase tracking-wide">
+          <span className="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-wide">
             VALARPAY
           </span>
         </div>
@@ -109,8 +109,8 @@ const MainSidebar = () => {
                   }}
                   className={`${(item as any)?.mobileHidden ? "hidden md:flex" : ""} ${
                     isActive
-                      ? "bg-[#FF6B2C] text-white font-semibold"
-                      : "text-gray-400 hover:text-white hover:bg-[#1C1C1E] font-medium"
+                      ? "bg-[#f76301] text-white font-semibold"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#1C1C1E] font-medium"
                   } rounded-lg cursor-pointer flex items-center gap-3 py-3 px-4 transition-all`}
                 >
                   <item.icon className="text-xl" />

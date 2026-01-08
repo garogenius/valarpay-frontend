@@ -6,7 +6,7 @@ const Content = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       className={cn(
-        "flex flex-col overflow-y-auto transition-all duration-300 bg-[#000000]",
+        "flex flex-col overflow-y-auto transition-all duration-300 bg-white dark:bg-black",
         {
           "w-full lg:flex-1 lg:ml-2": true,
         }
