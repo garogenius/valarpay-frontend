@@ -20,9 +20,12 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DownloadStatementModal from "@/components/modals/DownloadStatementModal";
 
+import { TRANSACTION_TYPE } from "@/constants/types";
+
 type FilterChangeEvent = {
   category?: TRANSACTION_CATEGORY;
   status?: TRANSACTION_STATUS;
+  type?: TRANSACTION_TYPE;
 };
 
 const TransactionsContent = () => {
@@ -40,6 +43,7 @@ const TransactionsContent = () => {
   const [downloadOpen, setDownloadOpen] = useState(false);
 
   const [uiType, setUiType] = useState<string>("All Types");
+  const [selectedType, setSelectedType] = useState<TRANSACTION_TYPE | undefined>(undefined);
   const [uiCalendar, setUiCalendar] = useState<string>("Calendar");
 
   // Download statement fields moved into modal (UI only)
@@ -57,6 +61,7 @@ const TransactionsContent = () => {
     page: pageNumber,
     limit: pageSize,
     search,
+    type: selectedType,
     ...filter,
   });
 
@@ -254,18 +259,24 @@ const TransactionsContent = () => {
   const TypeMenu = () => (
     <div className="absolute left-0 top-full mt-2 w-full sm:w-56 bg-[#0A0A0A] border border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50">
       <div className="py-1">
-        {["All Types", "Credit", "Debit"].map((opt) => (
+        {[
+          { label: "All Types", value: undefined },
+          { label: "Credit", value: TRANSACTION_TYPE.CREDIT },
+          { label: "Debit", value: TRANSACTION_TYPE.DEBIT },
+        ].map((opt) => (
           <button
-            key={opt}
+            key={opt.label}
             type="button"
             onClick={() => {
-              // UI-only; do not change query params
-              setUiType(opt);
+              setUiType(opt.label);
+              setSelectedType(opt.value);
               setTypeOpen(false);
             }}
-            className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors"
+            className={`w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors ${
+              selectedType === opt.value ? "bg-white/5" : ""
+            }`}
           >
-            {opt}
+            {opt.label}
           </button>
         ))}
       </div>

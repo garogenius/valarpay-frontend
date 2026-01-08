@@ -13,6 +13,19 @@ export interface IUpdateUser {
   expectedMonthlyInflow?: number;
   passportNumber?: string;
   passportCountry?: string;
+  // Business account fields
+  businessName?: string;
+  companyRegistrationNumber?: string;
+  businessType?: string;
+  businessIndustry?: string;
+  businessAddress?: string;
+  taxIdentificationNumber?: string;
+  businessRegistrationDate?: string;
+  businessLicenseNumber?: string;
+  businessWebsite?: string;
+  numberOfEmployees?: number;
+  annualRevenue?: number;
+  businessDescription?: string;
 }
 
 export interface IUploadDocument {

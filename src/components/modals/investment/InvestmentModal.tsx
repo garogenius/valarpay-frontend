@@ -14,7 +14,7 @@ interface InvestmentModalProps {
   onClose: () => void;
 }
 
-const MINIMUM_AMOUNT = 25000000; // ₦25,000,000
+const MINIMUM_AMOUNT = 100000000; // ₦100,000,000
 const ROI_PERCENTAGE = 10; // 10%
 const LOCK_PERIOD_MONTHS = 12; // 12 months
 
@@ -56,11 +56,18 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
     handleError(error, {
       currency: "NGN",
       onRetry: () => {
+        if (!agreementReference || !legalDocumentUrl) {
+          ErrorToast({
+            title: "Validation Error",
+            descriptions: ["Agreement Reference and Legal Document are required"],
+          });
+          return;
+        }
         createInvestment({
           amount,
           currency: "NGN",
-          ...(agreementReference && { agreementReference }),
-          ...(legalDocumentUrl && { legalDocumentUrl }),
+          agreementReference: agreementReference.trim(),
+          legalDocumentUrl: legalDocumentUrl.trim(),
         });
       },
     });
@@ -110,6 +117,20 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
       });
       return;
     }
+    if (!agreementReference || agreementReference.trim() === "") {
+      ErrorToast({
+        title: "Validation Error",
+        descriptions: ["Agreement Reference is required"],
+      });
+      return;
+    }
+    if (!legalDocumentUrl || legalDocumentUrl.trim() === "") {
+      ErrorToast({
+        title: "Validation Error",
+        descriptions: ["Legal Document is required. Please upload a PDF or provide a URL"],
+      });
+      return;
+    }
     setStep(2);
   };
 
@@ -151,11 +172,25 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
   };
 
   const handleSubmit = () => {
+    if (!agreementReference || agreementReference.trim() === "") {
+      ErrorToast({
+        title: "Validation Error",
+        descriptions: ["Agreement Reference is required"],
+      });
+      return;
+    }
+    if (!legalDocumentUrl || legalDocumentUrl.trim() === "") {
+      ErrorToast({
+        title: "Validation Error",
+        descriptions: ["Legal Document is required. Please upload a PDF or provide a URL"],
+      });
+      return;
+    }
     createInvestment({
       amount,
       currency: "NGN",
-      ...(agreementReference && { agreementReference }),
-      ...(legalDocumentUrl && { legalDocumentUrl }),
+      agreementReference: agreementReference.trim(),
+      legalDocumentUrl: legalDocumentUrl.trim(),
     });
   };
 
@@ -285,7 +320,7 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
               <CustomButton
                 onClick={handleNext}
                 disabled={amount < MINIMUM_AMOUNT || !selectedWalletId}
-                className="w-full bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black py-3 rounded-lg font-medium"
+                className="w-full bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue
               </CustomButton>
@@ -298,20 +333,21 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
             <div className="space-y-3 sm:space-y-4 md:space-y-6">
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">
-                  Agreement Reference (Optional)
+                  Agreement Reference <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={agreementReference}
                   onChange={(e) => setAgreementReference(e.target.value)}
                   placeholder="e.g., INV-2025-001"
+                  required
                   className="w-full bg-bg-500 dark:bg-bg-1000 border border-border-700 dark:border-border-600 rounded-lg py-3 px-4 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FF6B2C] focus:border-transparent"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">
-                  Legal Document (Optional)
+                  Legal Document <span className="text-red-400">*</span>
                 </label>
                 <div className="space-y-2">
                   <input
@@ -365,7 +401,7 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
                   />
                 </div>
                 <p className="text-white/50 text-xs mt-1">
-                  Upload a PDF file or provide a URL to the legal document
+                  Upload a PDF file or provide a URL to the legal document (Required)
                 </p>
               </div>
 
@@ -378,9 +414,9 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
                 </CustomButton>
                 <CustomButton
                   onClick={handleSubmit}
-                  disabled={creating}
+                  disabled={creating || !agreementReference?.trim() || !legalDocumentUrl?.trim()}
                   isLoading={creating}
-                  className="flex-1 bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black py-3 rounded-lg font-medium"
+                  className="flex-1 bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Create Investment
                 </CustomButton>

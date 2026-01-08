@@ -20,7 +20,6 @@ const StatsCardsRow = () => {
   const { investmentsData } = useGetInvestments({
     page: 1,
     limit: 1,
-    sort: "newest",
   });
 
   const hasFixedDeposit = useMemo(() => {

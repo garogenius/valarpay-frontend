@@ -6,6 +6,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { Toaster } from "react-hot-toast";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import UserProvider from "@/providers/UserProvider";
+import GlobalModalsProvider from "@/components/shared/GlobalModalsProvider";
 import "react-datepicker/dist/react-datepicker.css";
 // Removed next/font/google due to Turbopack resolution error; using Tailwind's font-sans instead
 
@@ -43,6 +44,7 @@ export default function RootLayout({
         <ThemeProvider>
           <ReactQueryProvider>
             <UserProvider>
+              <GlobalModalsProvider />
               <Toaster
                 position="top-center"
                 reverseOrder={false}

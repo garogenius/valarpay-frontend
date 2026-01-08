@@ -366,6 +366,18 @@ const schema = yup.object().shape({
   primaryPurpose: yup.string().optional(),
   sourceOfFunds: yup.string().optional(),
   expectedMonthlyInflow: yup.number().optional(),
+  // Business account fields
+  companyRegistrationNumber: yup.string().optional(),
+  businessType: yup.string().optional(),
+  businessIndustry: yup.string().optional(),
+  businessAddress: yup.string().optional(),
+  taxIdentificationNumber: yup.string().optional(),
+  businessRegistrationDate: yup.string().optional(),
+  businessLicenseNumber: yup.string().optional(),
+  businessWebsite: yup.string().url("Must be a valid URL").optional(),
+  numberOfEmployees: yup.number().min(0, "Must be a positive number").optional(),
+  annualRevenue: yup.number().min(0, "Must be a positive number").optional(),
+  businessDescription: yup.string().optional(),
 });
 
 type UserFormData = yup.InferType<typeof schema>;
@@ -373,6 +385,7 @@ type UserFormData = yup.InferType<typeof schema>;
 const ProfileContent = () => {
   const { user } = useUserStore();
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showBusinessRegistrationDatePicker, setShowBusinessRegistrationDatePicker] = useState(false);
   const [showPassportIssueDatePicker, setShowPassportIssueDatePicker] = useState(false);
   const [showPassportExpiryDatePicker, setShowPassportExpiryDatePicker] = useState(false);
   const [showBankStatementIssueDatePicker, setShowBankStatementIssueDatePicker] = useState(false);
@@ -380,6 +393,7 @@ const ProfileContent = () => {
   const [showUtilityBillIssueDatePicker, setShowUtilityBillIssueDatePicker] = useState(false);
   const [showUtilityBillExpiryDatePicker, setShowUtilityBillExpiryDatePicker] = useState(false);
   const datePickerRef = useRef<HTMLDivElement>(null);
+  const businessRegistrationDatePickerRef = useRef<HTMLDivElement>(null);
   const passportIssueDatePickerRef = useRef<HTMLDivElement>(null);
   const passportExpiryDatePickerRef = useRef<HTMLDivElement>(null);
   const bankStatementIssueDatePickerRef = useRef<HTMLDivElement>(null);
@@ -595,6 +609,9 @@ const ProfileContent = () => {
   useOnClickOutside(datePickerRef as React.RefObject<HTMLElement>, () =>
     setShowDatePicker(false)
   );
+  useOnClickOutside(businessRegistrationDatePickerRef as React.RefObject<HTMLElement>, () =>
+    setShowBusinessRegistrationDatePicker(false)
+  );
   useOnClickOutside(passportIssueDatePickerRef as React.RefObject<HTMLElement>, () =>
     setShowPassportIssueDatePicker(false)
   );
@@ -663,6 +680,18 @@ const ProfileContent = () => {
       id_number: (user as any)?.id_number,
       id_country: (user as any)?.id_country,
       bank_id_number: (user as any)?.bank_id_number,
+      // Business account fields
+      companyRegistrationNumber: (user as any)?.companyRegistrationNumber ?? undefined,
+      businessType: (user as any)?.businessType ?? undefined,
+      businessIndustry: (user as any)?.businessIndustry ?? undefined,
+      businessAddress: (user as any)?.businessAddress ?? undefined,
+      taxIdentificationNumber: (user as any)?.taxIdentificationNumber ?? undefined,
+      businessRegistrationDate: (user as any)?.businessRegistrationDate ?? undefined,
+      businessLicenseNumber: (user as any)?.businessLicenseNumber ?? undefined,
+      businessWebsite: (user as any)?.businessWebsite ?? undefined,
+      numberOfEmployees: (user as any)?.numberOfEmployees ?? undefined,
+      annualRevenue: (user as any)?.annualRevenue ?? undefined,
+      businessDescription: (user as any)?.businessDescription ?? undefined,
     } as any,
     resolver: yupResolver(schema) as any,
     mode: "onChange",
@@ -746,6 +775,18 @@ const ProfileContent = () => {
         id_number: (user as any)?.id_number || "",
         id_country: (user as any)?.id_country || "",
         bank_id_number: (user as any)?.bank_id_number || "",
+        // Business account fields
+        companyRegistrationNumber: (user as any)?.companyRegistrationNumber || "",
+        businessType: (user as any)?.businessType || "",
+        businessIndustry: (user as any)?.businessIndustry || "",
+        businessAddress: (user as any)?.businessAddress || "",
+        taxIdentificationNumber: (user as any)?.taxIdentificationNumber || "",
+        businessRegistrationDate: (user as any)?.businessRegistrationDate || "",
+        businessLicenseNumber: (user as any)?.businessLicenseNumber || "",
+        businessWebsite: (user as any)?.businessWebsite || "",
+        numberOfEmployees: (user as any)?.numberOfEmployees || undefined,
+        annualRevenue: (user as any)?.annualRevenue || undefined,
+        businessDescription: (user as any)?.businessDescription || "",
       }, { keepDefaultValues: false });
     }
   }, [user, reset]);
@@ -1145,6 +1186,43 @@ const ProfileContent = () => {
     // Add business name if it's a business account
     if (isBusinessAccount && data.businessName) {
       formData.append("businessName", data.businessName);
+    }
+
+    // Add business account specific fields
+    if (isBusinessAccount) {
+      if (data.companyRegistrationNumber) {
+        formData.append("companyRegistrationNumber", data.companyRegistrationNumber);
+      }
+      if (data.businessType) {
+        formData.append("businessType", data.businessType);
+      }
+      if (data.businessIndustry) {
+        formData.append("businessIndustry", data.businessIndustry);
+      }
+      if (data.businessAddress) {
+        formData.append("businessAddress", data.businessAddress);
+      }
+      if (data.taxIdentificationNumber) {
+        formData.append("taxIdentificationNumber", data.taxIdentificationNumber);
+      }
+      if (data.businessRegistrationDate) {
+        formData.append("businessRegistrationDate", data.businessRegistrationDate);
+      }
+      if (data.businessLicenseNumber) {
+        formData.append("businessLicenseNumber", data.businessLicenseNumber);
+      }
+      if (data.businessWebsite) {
+        formData.append("businessWebsite", data.businessWebsite);
+      }
+      if (data.numberOfEmployees !== undefined && data.numberOfEmployees !== null) {
+        formData.append("numberOfEmployees", data.numberOfEmployees.toString());
+      }
+      if (data.annualRevenue !== undefined && data.annualRevenue !== null) {
+        formData.append("annualRevenue", data.annualRevenue.toString());
+      }
+      if (data.businessDescription) {
+        formData.append("businessDescription", data.businessDescription);
+      }
     }
 
     // Add address fields
@@ -1945,6 +2023,336 @@ const ProfileContent = () => {
                 </p>
               ) : null}
             </div>
+
+            {/* Business Account Specific Fields */}
+            {isBusinessAccount && (
+              <>
+                {/* Company Registration Number */}
+                <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                  <label
+                    className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start"
+                    htmlFor={"companyRegistrationNumber"}
+                  >
+                    Company Registration Number
+                  </label>
+                  <div className="relative w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                    <input
+                      className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
+                      placeholder="e.g., RC-123456"
+                      type="text"
+                      {...register("companyRegistrationNumber")}
+                    />
+                    <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 grid place-items-center rounded-md bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30">
+                      <FiEdit2 className="text-xs" />
+                    </button>
+                  </div>
+                  {errors?.companyRegistrationNumber?.message ? (
+                    <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
+                      {errors?.companyRegistrationNumber?.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                {/* Tax Identification Number (TIN) */}
+                <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                  <label
+                    className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start"
+                    htmlFor={"taxIdentificationNumber"}
+                  >
+                    Tax Identification Number (TIN)
+                  </label>
+                  <div className="relative w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                    <input
+                      className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
+                      placeholder="Enter TIN"
+                      type="text"
+                      {...register("taxIdentificationNumber")}
+                    />
+                    <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 grid place-items-center rounded-md bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30">
+                      <FiEdit2 className="text-xs" />
+                    </button>
+                  </div>
+                  {errors?.taxIdentificationNumber?.message ? (
+                    <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
+                      {errors?.taxIdentificationNumber?.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                {/* Business Type */}
+                <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                  <label
+                    className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start"
+                    htmlFor={"businessType"}
+                  >
+                    Business Type
+                  </label>
+                  <div className="relative w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                    <input
+                      className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
+                      placeholder="e.g., Limited Liability Company, Partnership"
+                      type="text"
+                      {...register("businessType")}
+                    />
+                    <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 grid place-items-center rounded-md bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30">
+                      <FiEdit2 className="text-xs" />
+                    </button>
+                  </div>
+                  {errors?.businessType?.message ? (
+                    <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
+                      {errors?.businessType?.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                {/* Business Industry */}
+                <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                  <label
+                    className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start"
+                    htmlFor={"businessIndustry"}
+                  >
+                    Business Industry
+                  </label>
+                  <div className="relative w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                    <input
+                      className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
+                      placeholder="e.g., Technology, Finance, Retail"
+                      type="text"
+                      {...register("businessIndustry")}
+                    />
+                    <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 grid place-items-center rounded-md bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30">
+                      <FiEdit2 className="text-xs" />
+                    </button>
+                  </div>
+                  {errors?.businessIndustry?.message ? (
+                    <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
+                      {errors?.businessIndustry?.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                {/* Business Address */}
+                <div className="sm:col-span-2 flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                  <label
+                    className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start"
+                    htmlFor={"businessAddress"}
+                  >
+                    Business Address
+                  </label>
+                  <div className="relative w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                    <input
+                      className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
+                      placeholder="Enter business address"
+                      type="text"
+                      {...register("businessAddress")}
+                    />
+                    <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 grid place-items-center rounded-md bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30">
+                      <FiEdit2 className="text-xs" />
+                    </button>
+                  </div>
+                  {errors?.businessAddress?.message ? (
+                    <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
+                      {errors?.businessAddress?.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                {/* Business Registration Date */}
+                <div className="w-full relative">
+                  <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                    <label
+                      className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start"
+                      htmlFor={"businessRegistrationDate"}
+                    >
+                      Business Registration Date
+                    </label>
+                    <div
+                      onClick={() => setShowBusinessRegistrationDatePicker((v) => !v)}
+                      className="cursor-pointer w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3"
+                    >
+                      {watch("businessRegistrationDate") ? (
+                        <div className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white">
+                          {watch("businessRegistrationDate")}
+                        </div>
+                      ) : (
+                        <div className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white/50">
+                          Select registration date
+                        </div>
+                      )}
+                    </div>
+                    {errors?.businessRegistrationDate?.message ? (
+                      <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
+                        {errors?.businessRegistrationDate?.message}
+                      </p>
+                    ) : null}
+                  </div>
+                  {showBusinessRegistrationDatePicker && (
+                    <div ref={businessRegistrationDatePickerRef} className="absolute z-10 mt-1">
+                      <DatePicker
+                        selected={
+                          watch("businessRegistrationDate") ? new Date(watch("businessRegistrationDate")) : null
+                        }
+                        onChange={(date: Date | null) => {
+                          if (date) {
+                            const newDate = new Date(date);
+                            const day = newDate.getDate();
+                            const month = newDate.toLocaleString("en-US", { month: "short" });
+                            const year = newDate.getFullYear();
+                            setValue("businessRegistrationDate", `${day}-${month}-${year}`);
+                            setShowBusinessRegistrationDatePicker(false);
+                          }
+                        }}
+                        inline
+                        calendarClassName="custom-calendar"
+                        showYearDropdown
+                        scrollableYearDropdown
+                        yearDropdownItemNumber={100}
+                        dropdownMode="select"
+                        maxDate={new Date()}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Business License Number */}
+                <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                  <label
+                    className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start"
+                    htmlFor={"businessLicenseNumber"}
+                  >
+                    Business License Number
+                  </label>
+                  <div className="relative w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                    <input
+                      className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
+                      placeholder="Enter license number"
+                      type="text"
+                      {...register("businessLicenseNumber")}
+                    />
+                    <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 grid place-items-center rounded-md bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30">
+                      <FiEdit2 className="text-xs" />
+                    </button>
+                  </div>
+                  {errors?.businessLicenseNumber?.message ? (
+                    <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
+                      {errors?.businessLicenseNumber?.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                {/* Business Website */}
+                <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                  <label
+                    className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start"
+                    htmlFor={"businessWebsite"}
+                  >
+                    Business Website
+                  </label>
+                  <div className="relative w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                    <input
+                      className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
+                      placeholder="https://example.com"
+                      type="url"
+                      {...register("businessWebsite")}
+                    />
+                    <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 grid place-items-center rounded-md bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30">
+                      <FiEdit2 className="text-xs" />
+                    </button>
+                  </div>
+                  {errors?.businessWebsite?.message ? (
+                    <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
+                      {errors?.businessWebsite?.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                {/* Number of Employees */}
+                <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                  <label
+                    className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start"
+                    htmlFor={"numberOfEmployees"}
+                  >
+                    Number of Employees
+                  </label>
+                  <div className="relative w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                    <input
+                      className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
+                      placeholder="e.g., 50"
+                      type="number"
+                      min="0"
+                      step="1"
+                      {...register("numberOfEmployees")}
+                      onKeyDown={handleNumericKeyDown}
+                      onPaste={handleNumericPaste}
+                    />
+                    <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 grid place-items-center rounded-md bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30">
+                      <FiEdit2 className="text-xs" />
+                    </button>
+                  </div>
+                  {errors?.numberOfEmployees?.message ? (
+                    <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
+                      {errors?.numberOfEmployees?.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                {/* Annual Revenue */}
+                <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                  <label
+                    className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start"
+                    htmlFor={"annualRevenue"}
+                  >
+                    Annual Revenue (₦)
+                  </label>
+                  <div className="relative w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                    <input
+                      className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
+                      placeholder="Enter annual revenue"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      {...register("annualRevenue")}
+                      onKeyDown={handleNumericKeyDown}
+                      onPaste={handleNumericPaste}
+                    />
+                    <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 grid place-items-center rounded-md bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30">
+                      <FiEdit2 className="text-xs" />
+                    </button>
+                  </div>
+                  {errors?.annualRevenue?.message ? (
+                    <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
+                      {errors?.annualRevenue?.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                {/* Business Description */}
+                <div className="sm:col-span-2 flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                  <label
+                    className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start"
+                    htmlFor={"businessDescription"}
+                  >
+                    Business Description
+                  </label>
+                  <div className="relative w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                    <textarea
+                      className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm resize-none min-h-[100px]"
+                      placeholder="Describe your business activities and services"
+                      rows={4}
+                      {...register("businessDescription")}
+                    />
+                    <button type="button" className="absolute right-2 top-2 h-7 w-7 grid place-items-center rounded-md bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30">
+                      <FiEdit2 className="text-xs" />
+                    </button>
+                  </div>
+                  {errors?.businessDescription?.message ? (
+                    <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
+                      {errors?.businessDescription?.message}
+                    </p>
+                  ) : null}
+                </div>
+              </>
+            )}
 
             </div>
           </div>
