@@ -10,7 +10,7 @@ export const getInvestmentProductRequest = async () => {
 
 export const createInvestmentRequest = async (data: CreateInvestmentPayload) => {
   return request({
-    url: "/investments",
+    url: "/investment",
     method: "post",
     data,
   });
@@ -31,7 +31,7 @@ export const getInvestmentsRequest = async ({ page, limit, status, sort }: GetIn
 
 export const getInvestmentDetailsRequest = async ({ id }: { id: string }) => {
   return request({
-    url: `/investments/${id}`,
+    url: `/investment/${id}`,
     method: "get",
   });
 };
@@ -39,7 +39,7 @@ export const getInvestmentDetailsRequest = async ({ id }: { id: string }) => {
 export const payoutInvestmentRequest = async (payload: PayoutInvestmentPayload) => {
   const { investmentId, formdata, walletPin } = payload;
   return request({
-    url: `/investments/${investmentId}/payout`,
+    url: `/investment/${investmentId}/payout`,
     method: "post",
     data: formdata || { walletPin },
   });

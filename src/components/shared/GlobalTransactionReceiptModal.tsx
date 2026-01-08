@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CgClose } from "react-icons/cg";
 import { LuCopy } from "react-icons/lu";
+import { FiDownload } from "react-icons/fi";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
@@ -175,17 +176,17 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
 
             {/* Receipt Content */}
             <div className="flex-1 overflow-y-auto px-6 py-4">
-              <div id="global-transaction-receipt" className="text-white">
+              <div id="global-transaction-receipt" className="text-white bg-[#1C1C1E] rounded-xl p-6">
                 {/* Rows with dotted orange separators */}
                 <div className="space-y-0">
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/60">
+                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/30">
                     <span className="text-xs text-white/60">Transaction Date</span>
                     <span className="text-xs text-white font-medium">
                       {format(new Date(transaction.createdAt), "dd-MM-yyyy hh:mm a")}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/60">
+                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/30">
                     <span className="text-xs text-white/60">Transaction ID</span>
                     <div className="flex items-center gap-2 max-w-[210px]">
                       <span className="text-xs text-white font-medium truncate">
@@ -201,7 +202,7 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/60">
+                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/30">
                     <span className="text-xs text-white/60">Amount</span>
                     <span className="text-xs text-white font-medium">
                       {transaction.currency === "NGN" ? "₦" : transaction.currency}
@@ -209,13 +210,13 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/60">
+                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/30">
                     <span className="text-xs text-white/60">Currency</span>
                     <span className="text-xs text-white font-medium">{transaction.currency}</span>
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/60">
-                    <span className="text-xs text-white/60">Transaction Date</span>
+                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/30">
+                    <span className="text-xs text-white/60">Transaction Type</span>
                     <span className="text-xs text-white font-medium">{getTransactionTypeLabel()}</span>
                   </div>
 
@@ -223,13 +224,13 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
                   {transaction.type === "TRANSFER" && (
                     <>
                       {transaction.senderName && (
-                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#D4B139]/60">
+                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
                           <span className="text-xs text-white/60">Sender Name</span>
                           <span className="text-xs text-white font-medium">{transaction.senderName}</span>
                         </div>
                       )}
                       {transaction.recipientName && (
-                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#D4B139]/60">
+                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
                           <span className="text-xs text-white/60">Beneficiary Details</span>
                           <span className="text-xs text-white font-medium text-right">
                             {transaction.recipientName}
@@ -238,17 +239,47 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
                         </div>
                       )}
                       {transaction.recipientBank && (
-                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#D4B139]/60">
+                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
                           <span className="text-xs text-white/60">Beneficiary Bank</span>
                           <span className="text-xs text-white font-medium">{transaction.recipientBank}</span>
                         </div>
                       )}
                       {transaction.description && (
-                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#D4B139]/60">
+                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
                           <span className="text-xs text-white/60">Narration</span>
                           <span className="text-xs text-white font-medium text-right truncate max-w-[200px]">
                             {transaction.description}
                           </span>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Bill Payment specific */}
+                  {(transaction.type === "DATA" || transaction.type === "AIRTIME" || transaction.type === "CABLE" || transaction.type === "ELECTRICITY" || transaction.type === "INTERNET") && (
+                    <>
+                      {transaction.planName && (
+                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
+                          <span className="text-xs text-white/60">Plan</span>
+                          <span className="text-xs text-white font-medium">{transaction.planName}</span>
+                        </div>
+                      )}
+                      {transaction.validity && (
+                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
+                          <span className="text-xs text-white/60">Duration</span>
+                          <span className="text-xs text-white font-medium">{transaction.validity}</span>
+                        </div>
+                      )}
+                      {transaction.provider && (
+                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
+                          <span className="text-xs text-white/60">Provider</span>
+                          <span className="text-xs text-white font-medium">{transaction.provider}</span>
+                        </div>
+                      )}
+                      {transaction.billerNumber && (
+                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
+                          <span className="text-xs text-white/60">Phone Number</span>
+                          <span className="text-xs text-white font-medium">{transaction.billerNumber}</span>
                         </div>
                       )}
                     </>
@@ -271,14 +302,14 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
                 </div>
 
                 {/* Footer */}
-                <div className="mt-8 pt-6 border-t border-white/10">
+                <div className="mt-8 pt-6 border-t border-dashed border-[#f76301]/30">
                   <p className="text-xs text-white/60 text-center mb-4">
                     Thank you for banking with ValarPay.
                   </p>
                   <div className="text-xs text-white/50 text-center space-y-1">
-                    <p>For support, contact us at Support@valarpay.com,</p>
-                    <p>call +23481346906 or</p>
-                    <p>Head Office: C3&C4 Suite 2nd Floor Ejison Plaza 9a New Market Road Main Market Onitsha</p>
+                    <p>For support, contact us at Support@valarpay.com.</p>
+                    <p>call +2348134146006 or</p>
+                    <p>Head Office: C3 C4 Suite 2nd Floor Eison Plaza 9a New Market Road Main Market Oritsha</p>
                   </div>
                 </div>
               </div>
@@ -288,9 +319,10 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
                 <button
                   onClick={downloadReceiptAsPNG}
                   disabled={isDownloading}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#f76301] hover:bg-[#e55a00] text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#f76301] hover:bg-[#e55a00] text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
                 >
-                  <span className="text-sm font-medium">
+                  <FiDownload className="text-base" />
+                  <span className="text-sm">
                     {isDownloading ? "Downloading..." : "Download Receipt"}
                   </span>
                 </button>

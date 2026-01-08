@@ -9,6 +9,7 @@ import CableBillSteps from "@/components/modals/bills/CableBillSteps";
 import ElectricityBillSteps from "@/components/modals/bills/ElectricityBillSteps";
 import BettingBillSteps from "@/components/modals/betting/BettingBillSteps";
 import EducationBillSteps from "@/components/modals/bills/EducationBillSteps";
+import JambWaecBillSteps from "@/components/modals/bills/JambWaecBillSteps";
 import ConvertCurrencyBillSteps from "@/components/modals/bills/ConvertCurrencyBillSteps";
 import BuyGiftCardContent from "@/components/user/bill/gift-card/buy/BuyGiftCardContent";
 import RedeemGiftCardContent from "@/components/user/bill/gift-card/redeem/RedeemGiftCardContent";
@@ -24,6 +25,7 @@ export type BillModalKey =
   | "giftcard_redeem"
   | "betting"
   | "education"
+  | "jamb_waec"
   | "convert";
 
 type BillsHubModalProps = {
@@ -73,6 +75,8 @@ const BillsHubModal: React.FC<BillsHubModalProps> = ({ isOpen, onClose, initialB
         return <BettingBillSteps onClose={onClose} />;
       case "education":
         return <EducationBillSteps onClose={onClose} />;
+      case "jamb_waec":
+        return <JambWaecBillSteps onClose={onClose} />;
       case "convert":
         return <ConvertCurrencyBillSteps onClose={onClose} />;
       case "giftcard_buy":
@@ -88,8 +92,8 @@ const BillsHubModal: React.FC<BillsHubModalProps> = ({ isOpen, onClose, initialB
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
 
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-visible rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0A0A0A] shadow-2xl">
-        <div className="w-full max-h-[90vh] overflow-y-auto overflow-x-visible relative">{renderBody()}</div>
+      <div className="relative w-full max-w-md overflow-visible rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-bg-1100 shadow-2xl">
+        <div className="w-full overflow-visible relative min-h-0">{renderBody()}</div>
       </div>
     </div>
   );

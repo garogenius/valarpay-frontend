@@ -22,6 +22,7 @@ import SuccessToast from "@/components/toast/SuccessToast";
 import CustomButton from "@/components/shared/Button";
 import Tier2UpgradeModal from "@/components/modals/UpgradeTier2Modal";
 import Tier3UpgradeModal from "@/components/modals/UpgradeTier3Modal";
+import KYCRequirementsModal from "@/components/modals/KYCRequirementsModal";
 import { FiCreditCard } from "react-icons/fi";
 
 const AccountsContent: React.FC = () => {
@@ -63,6 +64,8 @@ const AccountsContent: React.FC = () => {
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(initialCurrency);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [accountLabel, setAccountLabel] = useState("");
+  const [showKYCModal, setShowKYCModal] = useState(false);
+  const [kycErrorMessage, setKycErrorMessage] = useState<string>("");
   
   // Filter for non-NGN currency accounts
   const currencyAccounts = useMemo(() => {
@@ -163,14 +166,39 @@ const AccountsContent: React.FC = () => {
 
   const onCreateAccountError = (error: any) => {
     const errorMessage = error?.response?.data?.message;
-    const descriptions = Array.isArray(errorMessage)
-      ? errorMessage
-      : [errorMessage || "Failed to create currency account"];
+    const errorText = Array.isArray(errorMessage)
+      ? errorMessage.join(" ")
+      : errorMessage || "Failed to create currency account";
+    
+    // Check if error is related to KYC requirements
+    const isKYCError = 
+      errorText.toLowerCase().includes("postal code") ||
+      errorText.toLowerCase().includes("passport number") ||
+      errorText.toLowerCase().includes("passport country") ||
+      errorText.toLowerCase().includes("passport issue date") ||
+      errorText.toLowerCase().includes("passport expiry date") ||
+      errorText.toLowerCase().includes("employment status") ||
+      errorText.toLowerCase().includes("occupation") ||
+      errorText.toLowerCase().includes("primary purpose") ||
+      errorText.toLowerCase().includes("source of funds") ||
+      errorText.toLowerCase().includes("expected monthly inflow") ||
+      errorText.toLowerCase().includes("kyc document") ||
+      errorText.toLowerCase().includes("kyc identity verification");
 
-    ErrorToast({
-      title: "Creation Failed",
-      descriptions,
-    });
+    if (isKYCError) {
+      // Show KYC requirements modal
+      setKycErrorMessage(errorText);
+      setShowKYCModal(true);
+    } else {
+      // Show regular error toast for other errors
+      const descriptions = Array.isArray(errorMessage)
+        ? errorMessage
+        : [errorMessage || "Failed to create currency account"];
+      ErrorToast({
+        title: "Creation Failed",
+        descriptions,
+      });
+    }
   };
 
   const onCreateAccountSuccess = () => {
@@ -283,7 +311,6 @@ const AccountsContent: React.FC = () => {
 
     createAccount({
       currency: selectedCurrency as "USD" | "EUR" | "GBP",
-      provider: "graph" as WALLET_PROVIDER,
     });
   };
 
@@ -864,6 +891,12 @@ const AccountsContent: React.FC = () => {
       <BlockCardModal isOpen={openBlock} onClose={() => setOpenBlock(false)} />
       <Tier2UpgradeModal isOpen={openTier2Modal} onClose={() => setOpenTier2Modal(false)} />
       <Tier3UpgradeModal isOpen={openTier3Modal} onClose={() => setOpenTier3Modal(false)} />
+      <KYCRequirementsModal
+        isOpen={showKYCModal}
+        onClose={() => setShowKYCModal(false)}
+        currency={selectedCurrency}
+        errorMessage={kycErrorMessage}
+      />
     </div>
   );
 };

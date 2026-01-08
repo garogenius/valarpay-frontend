@@ -140,6 +140,22 @@ type NetworkIconKey = "mtn" | "glo" | "airtel" | "9mobile";
 export const getNetworkIconByString = (
   network: string
 ): string | StaticImageData | null => {
+  // Normalize network name to handle variations
+  const normalized = network.toLowerCase().trim().replace(/\s+/g, "");
+  
+  // Map variations to standard keys
+  const networkMap: Record<string, NetworkIconKey> = {
+    mtn: "mtn",
+    glo: "glo",
+    airtel: "airtel",
+    "9mobile": "9mobile",
+    etisalat: "9mobile", // Etisalat is now 9mobile
+    "9-mobile": "9mobile",
+    "9 mobile": "9mobile",
+  };
+  
+  const key = networkMap[normalized] || normalized as NetworkIconKey;
+  
   const iconMap: Record<NetworkIconKey, string | StaticImageData> = {
     mtn: networkIcons.mtnIcon,
     glo: networkIcons.gloIcon,
@@ -147,7 +163,7 @@ export const getNetworkIconByString = (
     "9mobile": networkIcons["9mobile"],
   };
 
-  return iconMap[network as NetworkIconKey] || null;
+  return iconMap[key] || null;
 };
 
 type CableIconsKey = "dstv" | "gotv" | "startimes";

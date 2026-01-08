@@ -9,7 +9,7 @@ import { useVerifyWalletPin } from "@/api/user/user.queries";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
 import CustomButton from "@/components/shared/Button";
-import InsufficientBalanceModal from "@/components/shared/InsufficientBalanceModal";
+import useGlobalModalsStore from "@/store/globalModals.store";
 import type { FixedDepositPlan, FixedDepositPlanType } from "@/api/fixed-deposit/fixed-deposit.types";
 
 interface FixedSavingsModalProps {
@@ -32,7 +32,8 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
   const [walletPin, setWalletPin] = useState("");
   const [transactionResult, setTransactionResult] = useState<unknown>(null);
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(ngnWallet?.id || null);
-  const [showInsufficientBalanceModal, setShowInsufficientBalanceModal] = useState(false);
+  
+  const { handleError, showInsufficientFundsModal, showIncorrectPinModal } = useGlobalModalsStore();
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleaned = e.target.value.replace(/[^0-9.]/g, '');
@@ -85,15 +86,19 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
   };
 
   const onError = (error: unknown) => {
-    const errorMessage = (error as { response?: { data?: { message?: unknown } } })?.response?.data
-      ?.message as unknown;
-    const descriptions = Array.isArray(errorMessage)
-      ? (errorMessage as string[])
-      : [typeof errorMessage === "string" ? errorMessage : "Failed to create fixed deposit"];
-
-    ErrorToast({
-      title: "Creation Failed",
-      descriptions,
+    handleError(error, {
+      currency: "NGN",
+      onRetry: () => {
+        if (!selectedPlan) return;
+        createFixedDeposit({
+          planType: selectedPlan.planType,
+          principalAmount: amount,
+          currency: "NGN",
+          interestPaymentFrequency: "AT_MATURITY",
+          reinvestInterest: false,
+          autoRenewal: false,
+        });
+      },
     });
   };
 
@@ -114,10 +119,28 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
   const onVerifyPinError = (error: unknown) => {
     const errorMessage = (error as { response?: { data?: { message?: unknown } } })?.response?.data
       ?.message as unknown;
-    const descriptions = Array.isArray(errorMessage)
-      ? (errorMessage as string[])
-      : [typeof errorMessage === "string" ? errorMessage : "Invalid PIN"];
-    ErrorToast({ title: "Verification Failed", descriptions });
+    const message = Array.isArray(errorMessage)
+      ? errorMessage.join(" ").toLowerCase()
+      : String(errorMessage || "").toLowerCase();
+    
+    // Check if it's a PIN error
+    if (message.includes("pin") || message.includes("password") || message.includes("authentication")) {
+      showIncorrectPinModal({
+        attemptsRemaining: (error as any)?.response?.data?.attemptsRemaining,
+        onRetry: () => {
+          if (!selectedPlan) return;
+          verifyPin({ pin: walletPin });
+        },
+      });
+    } else {
+      handleError(error, {
+        currency: "NGN",
+        onRetry: () => {
+          if (!selectedPlan) return;
+          verifyPin({ pin: walletPin });
+        },
+      });
+    }
   };
 
   const onVerifyPinSuccess = () => {
@@ -173,7 +196,11 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
 
     const walletBalance = Number(selectedWallet.balance || 0);
     if (Number(amount) > walletBalance) {
-      setShowInsufficientBalanceModal(true);
+      showInsufficientFundsModal({
+        requiredAmount: Number(amount),
+        currentBalance: walletBalance,
+        currency: "NGN",
+      });
       return;
     }
 
@@ -563,13 +590,6 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
         )}
       </div>
 
-      {/* Insufficient Balance Modal */}
-      <InsufficientBalanceModal
-        isOpen={showInsufficientBalanceModal}
-        onClose={() => setShowInsufficientBalanceModal(false)}
-        requiredAmount={amount}
-        currentBalance={selectedWalletId ? wallets.find(w => w.id === selectedWalletId)?.balance : ngnWallet?.balance}
-      />
     </div>
   );
 };

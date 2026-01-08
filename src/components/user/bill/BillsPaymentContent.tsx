@@ -80,11 +80,10 @@ const SECTIONS: Section[] = [
   },
   {
     title: "Betting & Currency",
-    gridClass: "grid-cols-4",
+    gridClass: "grid-cols-3",
     tiles: [
       { label: "Betting", icon: SlTrophy, link: "/user/betting" },
       { label: "Convert Currency", icon: LiaRedoAltSolid, modal: "convert" },
-      { label: "Sell GiftCards", icon: MdCardGiftcard, modal: "giftcard_redeem" },
       { label: "Buy GiftCards", icon: MdCardGiftcard, modal: "giftcard_buy" },
     ],
   },
@@ -102,7 +101,7 @@ const SECTIONS: Section[] = [
     gridClass: "grid-cols-2",
     tiles: [
       { label: "Education", icon: IoSchoolOutline, modal: "education" },
-      { label: "Jamb & Waec", icon: IoSchoolOutline, modal: "education" },
+      { label: "Jamb & Waec", icon: IoSchoolOutline, modal: "jamb_waec" },
     ],
   },
 ];

@@ -7,6 +7,19 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import ErrorToast from "@/components/toast/ErrorToast";
 
+// Custom styles to ensure DatePicker inputs are full width
+const datePickerStyles = `
+  .react-datepicker-wrapper {
+    width: 100% !important;
+  }
+  .react-datepicker__input-container {
+    width: 100% !important;
+  }
+  .react-datepicker__input-container input {
+    width: 100% !important;
+  }
+`;
+
 interface DownloadStatementModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -18,9 +31,11 @@ const DownloadStatementModal: React.FC<DownloadStatementModalProps> = ({ isOpen,
   const [statementEmail, setStatementEmail] = useState<string>("");
 
   return (
-    <AnimatePresence>
-      {isOpen ? (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <>
+      <style>{datePickerStyles}</style>
+      <AnimatePresence>
+        {isOpen ? (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -48,31 +63,37 @@ const DownloadStatementModal: React.FC<DownloadStatementModalProps> = ({ isOpen,
             </div>
 
             <div className="px-5 py-5 space-y-4">
-              <div className="space-y-1">
+              <div className="space-y-1 w-full">
                 <p className="text-gray-400 text-[11px]">Start Date</p>
-                <DatePicker
-                  selected={statementStart}
-                  onChange={(d) => setStatementStart(d)}
-                  placeholderText="Enter Start Date"
-                  className="w-full bg-[#141416] border border-gray-800 rounded-lg px-4 py-3 text-sm text-white outline-none"
-                  calendarClassName="!bg-[#0A0A0A] !border !border-gray-800"
-                  popperClassName="z-[80]"
-                />
+                <div className="w-full">
+                  <DatePicker
+                    selected={statementStart}
+                    onChange={(d) => setStatementStart(d)}
+                    placeholderText="Enter Start Date"
+                    className="w-full bg-[#141416] border border-gray-800 rounded-lg px-4 py-3 text-sm text-white outline-none"
+                    calendarClassName="!bg-[#0A0A0A] !border !border-gray-800"
+                    popperClassName="z-[80]"
+                    wrapperClassName="w-full"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1 w-full">
                 <p className="text-gray-400 text-[11px]">End Date</p>
-                <DatePicker
-                  selected={statementEnd}
-                  onChange={(d) => setStatementEnd(d)}
-                  placeholderText="Enter Start Date"
-                  className="w-full bg-[#141416] border border-gray-800 rounded-lg px-4 py-3 text-sm text-white outline-none"
-                  calendarClassName="!bg-[#0A0A0A] !border !border-gray-800"
-                  popperClassName="z-[80]"
-                />
+                <div className="w-full">
+                  <DatePicker
+                    selected={statementEnd}
+                    onChange={(d) => setStatementEnd(d)}
+                    placeholderText="Enter End Date"
+                    className="w-full bg-[#141416] border border-gray-800 rounded-lg px-4 py-3 text-sm text-white outline-none"
+                    calendarClassName="!bg-[#0A0A0A] !border !border-gray-800"
+                    popperClassName="z-[80]"
+                    wrapperClassName="w-full"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1 w-full">
                 <p className="text-gray-400 text-[11px]">Email address</p>
                 <input
                   value={statementEmail}
@@ -100,6 +121,7 @@ const DownloadStatementModal: React.FC<DownloadStatementModalProps> = ({ isOpen,
         </div>
       ) : null}
     </AnimatePresence>
+    </>
   );
 };
 

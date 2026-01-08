@@ -98,7 +98,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
   return (
     <div
       aria-hidden="true"
-      className="z-[999999] overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 flex justify-center items-center w-full md:inset-0 h-[100dvh]"
+      className="z-[999999] fixed top-0 right-0 left-0 flex justify-center items-center w-full md:inset-0 h-[100dvh]"
       onClick={onClose}
     >
       <div className="fixed inset-0 transition-opacity" aria-hidden="true">
@@ -106,7 +106,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
       </div>
       <div
         onClick={(e)=>e.stopPropagation()}
-        className="relative mx-2.5 2xs:mx-4 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 px-0 py-4 w-full max-w-2xl max-h-[94vh] rounded-2xl overflow-visible"
+        className="relative mx-2.5 2xs:mx-4 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 px-0 py-4 w-full max-w-2xl rounded-2xl overflow-visible"
       >
         <button
           onClick={onClose}
@@ -177,10 +177,10 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
                 </div>
               </div>
               <div className="w-full grid grid-cols-2 gap-4">
-                <CustomButton type="button" className="w-full bg-transparent border border-[#D4B139] text-white py-3.5 rounded-xl hover:bg-transparent" onClick={() => setStep(0)}>
+                <CustomButton type="button" className="w-full bg-transparent border border-[#f76301] text-white py-3.5 rounded-xl hover:bg-transparent" onClick={() => setStep(0)}>
                   Back
                 </CustomButton>
-                <CustomButton type="button" className="w-full bg-[#D4B139] hover:bg-[#c7a42f] text-black py-3.5 rounded-xl" onClick={() => setStep(2)}>
+                <CustomButton type="button" className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black py-3.5 rounded-xl" onClick={() => setStep(2)}>
                   Add Card/Account
                 </CustomButton>
               </div>
@@ -231,7 +231,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
               </div>
 
               <div className="w-full mt-2">
-                <CustomButton type="button" className="w-full bg-[#D4B139] hover:bg-[#c7a42f] text-black py-3.5 rounded-xl" onClick={onClose}>
+                <CustomButton type="button" className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black py-3.5 rounded-xl" onClick={onClose}>
                   Done
                 </CustomButton>
               </div>
@@ -281,7 +281,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
                 </ol>
               </div>
               <div className="w-full mt-2">
-                <CustomButton type="button" className="w-full bg-[#D4B139] hover:bg-[#c7a42f] text-black py-3.5 rounded-xl" onClick={onClose}>
+                <CustomButton type="button" className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black py-3.5 rounded-xl" onClick={onClose}>
                   Done
                 </CustomButton>
               </div>
@@ -292,10 +292,10 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
             <div className="w-full flex flex-col gap-4">
               {/* Tabs */}
               <div className="w-full flex items-center gap-8 border-b border-white/10 pb-2">
-                <button type="button" className={`text-sm font-medium pb-1 border-b-2 ${tab==='card' ? 'text-[#F2C94C] border-[#F2C94C]' : 'text-white/70 border-transparent'}`} onClick={() => setTab('card')}>
+                <button type="button" className={`text-sm font-medium pb-1 border-b-2 ${tab==='card' ? 'text-[#f76301] border-[#f76301]' : 'text-white/70 border-transparent'}`} onClick={() => setTab('card')}>
                   Bank Card
                 </button>
-                <button type="button" className={`text-sm font-medium pb-1 border-b-2 ${tab==='account' ? 'text-[#F2C94C] border-[#F2C94C]' : 'text-white/70 border-transparent'}`} onClick={() => setTab('account')}>
+                <button type="button" className={`text-sm font-medium pb-1 border-b-2 ${tab==='account' ? 'text-[#f76301] border-[#f76301]' : 'text-white/70 border-transparent'}`} onClick={() => setTab('account')}>
                   Bank Account
                 </button>
               </div>
@@ -347,10 +347,10 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
                   </div>
 
                   <div className="w-full grid grid-cols-2 gap-4 mt-2 items-stretch">
-                    <CustomButton type="button" className="w-full bg-transparent border border-[#D4B139] text-white py-3.5 rounded-xl hover:bg-transparent" onClick={() => setStep(0)}>
+                    <CustomButton type="button" className="w-full bg-transparent border border-[#f76301] text-white py-3.5 rounded-xl hover:bg-transparent" onClick={() => setStep(0)}>
                       Back
                     </CustomButton>
-                    <CustomButton type="button" disabled={!canProceedCard} className="w-full bg-[#D4B139] hover:bg-[#c7a42f] text-black py-3.5 rounded-xl" onClick={()=> setStep(3)}>
+                    <CustomButton type="button" disabled={!canProceedCard} className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black py-3.5 rounded-xl" onClick={()=> setStep(3)}>
                       Next
                     </CustomButton>
                   </div>
@@ -374,7 +374,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
                       </div>
                     </div>
                     {bankOpen && (
-                      <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+                      <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-[999999] no-scrollbar">
                         <SearchableDropdown
                           items={banks}
                           searchKey="name"
@@ -419,10 +419,10 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
                   </div>
 
                   <div className="w-full grid grid-cols-2 gap-4 mt-2 items-stretch">
-                    <CustomButton type="button" className="w-full border border-[#F2C94C] text-white py-3.5 rounded-xl" onClick={() => setStep(0)}>
+                    <CustomButton type="button" className="w-full border border-[#f76301] text-white py-3.5 rounded-xl" onClick={() => setStep(0)}>
                       Back
                     </CustomButton>
-                    <CustomButton type="button" disabled={!canProceedAccount} className="w-full bg-[#D4B139] hover:bg-[#c7a42f] text-black py-3.5 rounded-xl" onClick={()=> setStep(3)}>
+                    <CustomButton type="button" disabled={!canProceedAccount} className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black py-3.5 rounded-xl" onClick={()=> setStep(3)}>
                       Next
                     </CustomButton>
                   </div>
@@ -466,7 +466,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
 
               <div className="flex items-center justify-between">
                 <p className="text-white/90 text-sm">Top-up Account Via</p>
-                <button type="button" className="text-[#D4B139] text-xs">Manage Card</button>
+                <button type="button" className="text-[#f76301] text-xs">Manage Card</button>
               </div>
               <div className="w-full rounded-xl bg-white/5 p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -500,13 +500,13 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
               </div>
 
               <div className="w-full grid grid-cols-2 gap-4 items-stretch mt-2">
-                <CustomButton type="button" className="w-full bg-transparent border border-[#D4B139] text-white py-3.5 rounded-xl hover:bg-transparent" onClick={()=> setStep(2)}>
+                <CustomButton type="button" className="w-full bg-transparent border border-[#f76301] text-white py-3.5 rounded-xl hover:bg-transparent" onClick={()=> setStep(2)}>
                   Back
                 </CustomButton>
                 <CustomButton
                   type="button"
                   disabled={!fundAmount || Number(fundAmount.replace(/,/g,''))<=0 || !walletPin}
-                  className="w-full bg-[#D4B139] hover:bg-[#c7a42f] text-black py-3.5 rounded-xl"
+                  className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black py-3.5 rounded-xl"
                   onClick={onClose}
                 >
                   Pay

@@ -138,7 +138,7 @@ const CableBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <>
-      <div className="w-full flex flex-col bg-white dark:bg-[#0A0A0A]">
+      <div className="w-full flex flex-col bg-white dark:bg-bg-1100 min-h-0">
         <div className="px-5 pt-4">
           <div className="flex items-start justify-between">
             <div>
@@ -157,9 +157,9 @@ const CableBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
         </div>
 
-        <div className="px-5 py-5 border-t border-gray-200 dark:border-gray-800">
+        <div className="px-5 py-5 border-t border-gray-200 dark:border-gray-800 min-h-0">
           {step === "details" ? (
-            <div className="w-full flex flex-col gap-4">
+            <div className="w-full flex flex-col gap-4 min-h-0">
               <div className="relative flex flex-col gap-1" ref={providerRef}>
                 <label className="text-[11px] text-gray-500 dark:text-gray-400">Provider</label>
                 <button
@@ -173,7 +173,7 @@ const CableBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <span className="text-gray-500 dark:text-gray-500">▾</span>
                 </button>
                 {providerOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-[9999]">
+                  <div className="relative left-0 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-2xl z-[9999] mt-2">
                     {plansLoading ? (
                       <div className="p-4 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
                         <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...
@@ -224,7 +224,7 @@ const CableBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <span className="text-gray-500 dark:text-gray-500">▾</span>
                 </button>
                 {planOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-[9999]">
+                  <div className="relative left-0 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-2xl z-[9999] mt-2">
                     {variationsLoading ? (
                       <div className="p-4 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
                         <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...

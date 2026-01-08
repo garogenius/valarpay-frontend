@@ -43,6 +43,45 @@ export type IPayEducation = {
   addBeneficiary?: boolean;
 };
 
+// JAMB & WAEC Types
+export type JambWaecPlan = {
+  id: number;
+  name: string;
+  amount: number;
+  itemCode?: string;
+};
+
+export type JambWaecPlanData = {
+  billerCode: string;
+  billerName: string;
+  plans: JambWaecPlan[];
+};
+
+export type IVerifyJambWaec = {
+  itemCode: string;
+  billerCode: string;
+  billerNumber: string;
+};
+
+export type VerifiedJambWaec = {
+  customerName?: string;
+  candidateNumber?: string;
+  registrationNumber?: string;
+  amount?: number;
+};
+
+export type IPayJambWaec = {
+  itemCode: string;
+  billerCode: string;
+  currency: string;
+  billerNumber: string;
+  amount: number;
+  walletPin: string;
+  addBeneficiary?: boolean;
+};
+
+
+
 
 
 

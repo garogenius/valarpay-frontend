@@ -27,6 +27,12 @@ interface GlobalModalsState {
     onRetry?: () => void;
   };
 
+  // Transaction History Modal
+  showTransactionHistory: boolean;
+  transactionHistoryData: {
+    transaction: any | null;
+  };
+
   // Actions
   handleError: (error: any, options?: {
     currency?: "NGN" | "USD" | "EUR" | "GBP";
@@ -49,6 +55,7 @@ interface GlobalModalsState {
     transactionId?: string;
     onRetry?: () => void;
   }) => void;
+  showTransactionHistoryModal: (transaction: any) => void;
   closeAllModals: () => void;
 }
 
@@ -60,6 +67,8 @@ const useGlobalModalsStore = create<GlobalModalsState>((set) => ({
   incorrectPinData: {},
   showPaymentFailed: false,
   paymentFailedData: {},
+  showTransactionHistory: false,
+  transactionHistoryData: { transaction: null },
 
   // Handle error automatically
   handleError: (error: any, options?: {
@@ -138,6 +147,13 @@ const useGlobalModalsStore = create<GlobalModalsState>((set) => ({
     });
   },
 
+  showTransactionHistoryModal: (transaction) => {
+    set({
+      showTransactionHistory: true,
+      transactionHistoryData: { transaction },
+    });
+  },
+
   closeAllModals: () => {
     set({
       showInsufficientFunds: false,
@@ -146,6 +162,8 @@ const useGlobalModalsStore = create<GlobalModalsState>((set) => ({
       incorrectPinData: {},
       showPaymentFailed: false,
       paymentFailedData: {},
+      showTransactionHistory: false,
+      transactionHistoryData: { transaction: null },
     });
   },
 }));

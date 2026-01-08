@@ -35,10 +35,13 @@ export const useGetAirtimePlan = (payload: IAirtimePlan) => {
 export const useGetInternationalAirtimePlan = (
   payload: IInternationalAirtimePlan
 ) => {
+  // Only enable query if phone number is valid (at least 7 characters)
+  const isValidPhone = payload.phone && payload.phone.length >= 7;
   return useQuery({
     queryKey: ["international-airtime-plan", payload],
     queryFn: () => internationalAirtimePlanRequest(payload),
-    enabled: !!payload.phone,
+    enabled: isValidPhone,
+    staleTime: 30000, // Cache for 30 seconds to prevent excessive calls
   });
 };
 

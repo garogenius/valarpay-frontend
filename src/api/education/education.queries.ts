@@ -6,6 +6,12 @@ import {
   getEducationBillersRequest,
   payEducationSchoolFeeRequest,
   verifyEducationCustomerRequest,
+  getWaecPlanRequest,
+  getJambPlanRequest,
+  verifyWaecBillerNumberRequest,
+  verifyJambBillerNumberRequest,
+  payWaecRequest,
+  payJambRequest,
 } from "./education.apis";
 import type {
   EducationBiller,
@@ -13,6 +19,10 @@ import type {
   IPayEducation,
   IVerifyEducationCustomer,
   VerifiedEducationCustomer,
+  JambWaecPlanData,
+  IVerifyJambWaec,
+  VerifiedJambWaec,
+  IPayJambWaec,
 } from "./education.types";
 
 export const useGetEducationBillers = () => {
@@ -61,6 +71,83 @@ export const usePayEducationSchoolFee = (
     },
   });
 };
+
+// JAMB & WAEC Hooks
+export const useGetWaecPlan = () => {
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["waec-plan"],
+    queryFn: getWaecPlanRequest,
+  });
+  const planData: JambWaecPlanData | null = data?.data?.data ?? null;
+  return { planData, isPending, isError };
+};
+
+export const useGetJambPlan = () => {
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["jamb-plan"],
+    queryFn: getJambPlanRequest,
+  });
+  const planData: JambWaecPlanData | null = data?.data?.data ?? null;
+  return { planData, isPending, isError };
+};
+
+export const useVerifyWaecBillerNumber = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  return useMutation({
+    mutationFn: (payload: IVerifyJambWaec) => verifyWaecBillerNumberRequest(payload),
+    onError,
+    onSuccess,
+  });
+};
+
+export const useVerifyJambBillerNumber = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  return useMutation({
+    mutationFn: (payload: IVerifyJambWaec) => verifyJambBillerNumberRequest(payload),
+    onError,
+    onSuccess,
+  });
+};
+
+export const usePayWaec = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: IPayJambWaec) => payWaecRequest(payload),
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["get-beneficiaries"] });
+      onSuccess(data);
+    },
+  });
+};
+
+export const usePayJamb = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: IPayJambWaec) => payJambRequest(payload),
+    onError,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["get-beneficiaries"] });
+      onSuccess(data);
+    },
+  });
+};
+
+
 
 
 

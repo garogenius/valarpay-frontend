@@ -5,6 +5,7 @@ import useGlobalModalsStore from "@/store/globalModals.store";
 import GlobalInsufficientFundsModal from "./GlobalInsufficientFundsModal";
 import GlobalIncorrectPinModal from "./GlobalIncorrectPinModal";
 import GlobalPaymentFailedModal from "./GlobalPaymentFailedModal";
+import GlobalTransactionHistoryModal from "./GlobalTransactionHistoryModal";
 
 /**
  * Global Modals Provider Component
@@ -35,9 +36,11 @@ const GlobalModalsProvider: React.FC = () => {
     showInsufficientFunds,
     showIncorrectPin,
     showPaymentFailed,
+    showTransactionHistory,
     insufficientFundsData,
     incorrectPinData,
     paymentFailedData,
+    transactionHistoryData,
     closeAllModals,
   } = useGlobalModalsStore();
 
@@ -72,6 +75,14 @@ const GlobalModalsProvider: React.FC = () => {
         errorMessage={paymentFailedData.errorMessage}
         errorCode={paymentFailedData.errorCode}
         transactionId={paymentFailedData.transactionId}
+      />
+
+      <GlobalTransactionHistoryModal
+        isOpen={showTransactionHistory}
+        onClose={() => {
+          closeAllModals();
+        }}
+        transaction={transactionHistoryData.transaction}
       />
     </>
   );

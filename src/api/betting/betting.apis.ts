@@ -63,14 +63,14 @@ export const getBettingWalletTransactionsRequest = async ({
   const query = new URLSearchParams();
   if (limit) query.set("limit", String(limit));
   return request({
-    url: `/betting/wallet/transactions${query.toString() ? `?${query.toString()}` : ""}`,
+    url: `/betting/transactions${query.toString() ? `?${query.toString()}` : ""}`,
     method: "get",
   });
 };
 
 export const withdrawBettingWalletRequest = async (formdata: IWithdrawBettingWallet) => {
   return request({
-    url: "/betting/withdraw",
+    url: "/betting/wallet/withdraw",
     method: "post",
     data: formdata,
   });

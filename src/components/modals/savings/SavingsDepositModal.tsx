@@ -9,7 +9,6 @@ import { useFundEasyLifePlan } from "@/api/easylife-savings/easylife-savings.que
 import { useVerifyWalletPin } from "@/api/user/user.queries";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
-import InsufficientBalanceModal from "@/components/shared/InsufficientBalanceModal";
 
 interface SavingsDepositModalProps {
   isOpen: boolean;
@@ -33,19 +32,20 @@ const SavingsDepositModal: React.FC<SavingsDepositModalProps> = ({
   const [walletPin, setWalletPin] = React.useState("");
   const [showPinStep, setShowPinStep] = React.useState(false);
   const [pendingFund, setPendingFund] = React.useState<null | { amount: number; currency: string }>(null);
-  const [showInsufficientBalanceModal, setShowInsufficientBalanceModal] = React.useState(false);
-  const [balanceInfo, setBalanceInfo] = React.useState<{ requiredAmount?: number; currentBalance?: number }>({});
+  
+  const { handleError, showInsufficientFundsModal, showIncorrectPinModal } = useGlobalModalsStore();
 
   const onError = (error: unknown) => {
-    const errorMessage = (error as { response?: { data?: { message?: unknown } } })?.response?.data
-      ?.message as unknown;
-    const descriptions = Array.isArray(errorMessage)
-      ? (errorMessage as string[])
-      : [typeof errorMessage === "string" ? errorMessage : "Failed to fund savings plan"];
-
-    ErrorToast({
-      title: "Funding Failed",
-      descriptions,
+    handleError(error, {
+      currency: pendingFund?.currency as "NGN" | "USD" | "EUR" | "GBP" || "NGN",
+      onRetry: () => {
+        if (!pendingFund || !planId) return;
+        if (planType === "easylife") {
+          fundEasyLifePlan({ planId, amount: pendingFund.amount, currency: pendingFund.currency });
+        } else {
+          fundSavingsPlan({ planId, amount: pendingFund.amount, currency: pendingFund.currency });
+        }
+      },
     });
     setShowPinStep(false);
     setWalletPin("");
@@ -69,10 +69,28 @@ const SavingsDepositModal: React.FC<SavingsDepositModalProps> = ({
   const onVerifyPinError = (error: unknown) => {
     const errorMessage = (error as { response?: { data?: { message?: unknown } } })?.response?.data
       ?.message as unknown;
-    const descriptions = Array.isArray(errorMessage)
-      ? (errorMessage as string[])
-      : [typeof errorMessage === "string" ? errorMessage : "Invalid PIN"];
-    ErrorToast({ title: "Verification Failed", descriptions });
+    const message = Array.isArray(errorMessage)
+      ? errorMessage.join(" ").toLowerCase()
+      : String(errorMessage || "").toLowerCase();
+    
+    // Check if it's a PIN error
+    if (message.includes("pin") || message.includes("password") || message.includes("authentication")) {
+      showIncorrectPinModal({
+        attemptsRemaining: (error as any)?.response?.data?.attemptsRemaining,
+        onRetry: () => {
+          if (!pendingFund) return;
+          verifyPin({ pin: walletPin });
+        },
+      });
+    } else {
+      handleError(error, {
+        currency: pendingFund?.currency as "NGN" | "USD" | "EUR" | "GBP" || "NGN",
+        onRetry: () => {
+          if (!pendingFund) return;
+          verifyPin({ pin: walletPin });
+        },
+      });
+    }
   };
 
   const onVerifyPinSuccess = () => {
@@ -120,12 +138,11 @@ const SavingsDepositModal: React.FC<SavingsDepositModalProps> = ({
     }
 
     if (Number(amount) > Number(selectedWallet.balance)) {
-      // Show insufficient balance modal instead of toast
-      setBalanceInfo({
+      showInsufficientFundsModal({
         requiredAmount: Number(amount),
         currentBalance: Number(selectedWallet.balance),
+        currency: (selectedWallet.currency?.toUpperCase() || "NGN") as "NGN" | "USD" | "EUR" | "GBP",
       });
-      setShowInsufficientBalanceModal(true);
       return;
     }
 
@@ -248,12 +265,6 @@ const SavingsDepositModal: React.FC<SavingsDepositModalProps> = ({
         )}
       </div>
 
-      <InsufficientBalanceModal
-        isOpen={showInsufficientBalanceModal}
-        onClose={() => setShowInsufficientBalanceModal(false)}
-        requiredAmount={balanceInfo.requiredAmount || 0}
-        currentBalance={balanceInfo.currentBalance || 0}
-      />
     </div>
   );
 };

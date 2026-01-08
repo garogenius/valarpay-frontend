@@ -14,6 +14,7 @@ import {
 import { handleCopy, shortenReference } from "@/utils/utilityFunctions";
 import useNavigate from "@/hooks/useNavigate";
 import useTransactionStore from "@/store/useTransaction.store";
+import useGlobalModalsStore from "@/store/globalModals.store";
 
 const statusPills: Record<string, string> = {
   success: "bg-green-500/15 text-green-400 border-green-700/40",
@@ -29,6 +30,7 @@ const typeAmountStyle: Record<string, string> = {
 export const GenerateColumns = () => {
   const navigate = useNavigate();
   const { setTransaction } = useTransactionStore();
+  const { showTransactionHistoryModal } = useGlobalModalsStore();
   return [
     {
       Header: "Transaction ID",
@@ -173,7 +175,20 @@ export const GenerateColumns = () => {
         );
       },
     },
-
-    // Receipt column intentionally hidden for Transaction History UI (row details live in receipt page)
+    {
+      Header: "Action",
+      id: "action",
+      accessor: "id",
+      Cell: ({ row }: { row: Row<Transaction> }) => {
+        return (
+          <button
+            onClick={() => showTransactionHistoryModal(row.original)}
+            className="text-[#f76301] hover:text-[#e55a00] font-medium text-sm transition-colors"
+          >
+            View
+          </button>
+        );
+      },
+    },
   ];
 };

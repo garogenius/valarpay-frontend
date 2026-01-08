@@ -31,7 +31,7 @@ const WithdrawMoneyModal: React.FC<WithdrawMoneyModalProps> = ({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative w-full max-w-md bg-[#0A0A0A] rounded-2xl border border-gray-800 shadow-2xl max-h-[90vh] overflow-hidden flex flex-col"
+            className="relative w-full max-w-md bg-[#0A0A0A] rounded-2xl border border-gray-800 shadow-2xl overflow-visible flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <WithdrawSteps onClose={onClose} />

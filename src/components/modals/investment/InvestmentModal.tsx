@@ -6,7 +6,7 @@ import { useCreateInvestment } from "@/api/investment/investment.queries";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
 import CustomButton from "@/components/shared/Button";
-import InsufficientBalanceModal from "@/components/shared/InsufficientBalanceModal";
+import useGlobalModalsStore from "@/store/globalModals.store";
 import useUserStore from "@/store/user.store";
 
 interface InvestmentModalProps {
@@ -27,8 +27,9 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
   const [legalDocumentFile, setLegalDocumentFile] = useState<File | null>(null);
   const [uploadingDocument, setUploadingDocument] = useState(false);
   const [transactionResult, setTransactionResult] = useState<any>(null);
-  const [showInsufficientBalanceModal, setShowInsufficientBalanceModal] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  
+  const { handleError, showInsufficientFundsModal } = useGlobalModalsStore();
   const wallets = user?.wallet || [];
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(wallets.length > 0 ? wallets[0].id : null);
 
@@ -45,7 +46,6 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
       setLegalDocumentUrl("");
       setLegalDocumentFile(null);
       setTransactionResult(null);
-      setShowInsufficientBalanceModal(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -53,25 +53,17 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
   }, [isOpen]);
 
   const onCreateError = (error: any) => {
-    const errorMessage = error?.response?.data?.message;
-    const errorString = Array.isArray(errorMessage)
-      ? errorMessage.join(" ")
-      : errorMessage || "Failed to create investment";
-    
-    // Check if error is about insufficient balance
-    if (errorString.toLowerCase().includes("insufficient wallet balance") || 
-        errorString.toLowerCase().includes("insufficient balance")) {
-      setShowInsufficientBalanceModal(true);
-    } else {
-      const descriptions = Array.isArray(errorMessage)
-        ? errorMessage
-        : [errorString];
-
-      ErrorToast({
-        title: "Investment Creation Failed",
-        descriptions,
-      });
-    }
+    handleError(error, {
+      currency: "NGN",
+      onRetry: () => {
+        createInvestment({
+          amount,
+          currency: "NGN",
+          ...(agreementReference && { agreementReference }),
+          ...(legalDocumentUrl && { legalDocumentUrl }),
+        });
+      },
+    });
   };
 
   const onCreateSuccess = (data: any) => {
@@ -198,12 +190,6 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
 
   return (
     <>
-      <InsufficientBalanceModal
-        isOpen={showInsufficientBalanceModal}
-        onClose={() => setShowInsufficientBalanceModal(false)}
-        requiredAmount={amount}
-        currentBalance={currentBalance}
-      />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
         <div className="absolute inset-0 bg-black/80" onClick={onClose} />
 

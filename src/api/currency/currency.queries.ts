@@ -58,6 +58,7 @@ export const useGetCurrencyAccountByCurrency = (currency: "USD" | "EUR" | "GBP" 
     queryKey: ["currency-account", currency],
     queryFn: () => getCurrencyAccountByCurrencyRequest(currency!),
     enabled: !!currency && (currency === "USD" || currency === "EUR" || currency === "GBP"),
+    staleTime: 60000, // Cache for 60 seconds to prevent excessive calls
   });
 
   const account: ICurrencyAccount | undefined = data?.data?.data || data?.data;

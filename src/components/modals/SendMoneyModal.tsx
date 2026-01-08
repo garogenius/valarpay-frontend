@@ -25,12 +25,12 @@ const SendMoneyModal: React.FC<SendMoneyModalProps> = ({ isOpen, onClose }) => {
   return (
     <div
       aria-hidden="true"
-      className="z-[999999] overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 flex justify-center items-center w-full md:inset-0 h-[100dvh]"
+      className="z-[999999] fixed top-0 right-0 left-0 flex justify-center items-center w-full md:inset-0 h-[100dvh]"
     >
       <div className="fixed inset-0 transition-opacity" aria-hidden="true">
         <div className="absolute inset-0 bg-black/80 dark:bg-black/60" onClick={handleClose}></div>
       </div>
-      <div className="relative mx-2.5 2xs:mx-4 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 px-0 py-4 w-full max-w-2xl max-h-[92vh] rounded-2xl overflow-hidden">
+      <div className="relative mx-2.5 2xs:mx-4 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 px-0 py-4 w-full max-w-2xl rounded-2xl overflow-visible">
         {canClose && (
           <button
             onClick={handleClose}

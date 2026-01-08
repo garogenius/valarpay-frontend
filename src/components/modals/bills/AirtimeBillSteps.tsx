@@ -5,6 +5,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { FaFingerprint } from "react-icons/fa";
+import NextImage from "next/image";
 import SpinnerLoader from "@/components/Loader/SpinnerLoader";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
@@ -12,7 +13,8 @@ import useUserStore from "@/store/user.store";
 import { CURRENCY } from "@/constants/types";
 import GlobalTransactionHistoryModal from "@/components/shared/GlobalTransactionHistoryModal";
 import { useFingerprintForPayments } from "@/store/paymentPreferences.store";
-import { useGetAirtimeNetWorkProvider, usePayForAirtime } from "@/api/airtime/airtime.queries";
+import { useGetAirtimeNetWorkProvider, usePayForAirtime, useGetAirtimePlan } from "@/api/airtime/airtime.queries";
+import { getNetworkIconByString } from "@/utils/utilityFunctions";
 
 type Step = "details" | "confirm";
 
@@ -53,6 +55,40 @@ const AirtimeBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       }))
       .filter((p: AirtimeProvider) => !!p.operatorId && !!p.name);
   }, [data]);
+
+  // Auto-detect network when phone number is 11 digits
+  const cleanPhone = phoneNumber.replace(/\D/g, "");
+  const { data: airtimePlanData, isPending: detectingNetwork } = useGetAirtimePlan({
+    phone: cleanPhone.length === 11 ? cleanPhone : "",
+    currency: "NGN",
+  });
+
+  // Auto-select provider when network is detected
+  React.useEffect(() => {
+    if (!airtimePlanData?.data?.data) return;
+    
+    const planData = airtimePlanData.data.data;
+    const detectedNetwork = planData?.network;
+    const operatorId = planData?.plan?.operatorId;
+    
+    if (detectedNetwork && operatorId && providers.length > 0) {
+      // Find provider that matches the detected network
+      const matchedProvider = providers.find((p) => {
+        const providerName = p.name.toLowerCase();
+        const networkName = String(detectedNetwork).toLowerCase();
+        return (
+          providerName === networkName ||
+          providerName.includes(networkName) ||
+          networkName.includes(providerName) ||
+          Number(p.operatorId) === Number(operatorId)
+        );
+      });
+      
+      if (matchedProvider && (!provider || provider.operatorId !== matchedProvider.operatorId)) {
+        setProvider(matchedProvider);
+      }
+    }
+  }, [airtimePlanData?.data?.data, providers, phoneNumber]);
 
   const formatNgn = (v: number) =>
     `₦${new Intl.NumberFormat("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
@@ -101,7 +137,7 @@ const AirtimeBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <>
-      <div className="w-full flex flex-col bg-white dark:bg-[#0A0A0A]">
+      <div className="w-full flex flex-col bg-white dark:bg-bg-1100">
         {/* Top bar */}
         <div className="px-5 pt-4">
           <div className="flex items-start justify-between">
@@ -130,34 +166,70 @@ const AirtimeBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <button
                   type="button"
                   onClick={() => setProviderOpen((v) => !v)}
-                  className="w-full flex items-center justify-between bg-[#F4F4F5] dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm text-black dark:text-white"
+                  disabled={detectingNetwork}
+                  className="w-full flex items-center justify-between bg-[#F4F4F5] dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm text-black dark:text-white disabled:opacity-60"
                 >
-                  <span className={provider ? "text-black dark:text-white" : "text-gray-500 dark:text-gray-600"}>
-                    {provider ? providerLabel : "Select Network"}
-                  </span>
-                  <span className="text-gray-500 dark:text-gray-500">▾</span>
+                  <div className="flex items-center gap-3">
+                    {detectingNetwork && cleanPhone.length === 11 ? (
+                      <>
+                        <SpinnerLoader width={16} height={16} color="#FF6B2C" />
+                        <span className="text-gray-500 dark:text-gray-600">Detecting network...</span>
+                      </>
+                    ) : (
+                      <>
+                        {provider && (() => {
+                          const networkIcon = getNetworkIconByString(provider.name.toLowerCase().replace(/\s+/g, ""));
+                          return networkIcon ? (
+                            <NextImage
+                              src={networkIcon}
+                              alt={provider.name}
+                              width={20}
+                              height={20}
+                              className="w-5 h-5 object-contain"
+                            />
+                          ) : null;
+                        })()}
+                        <span className={provider ? "text-black dark:text-white" : "text-gray-500 dark:text-gray-600"}>
+                          {provider ? providerLabel : "Select Network"}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  {!detectingNetwork && <span className="text-gray-500 dark:text-gray-500">▾</span>}
                 </button>
 
                 {providerOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-[9999]">
+                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-[999999]">
                     {providersLoading ? (
                       <div className="p-4 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
                         <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...
                       </div>
                     ) : (
-                      (providers || []).map((p) => (
-                        <button
-                          key={p.operatorId}
-                          type="button"
-                          onClick={() => {
-                            setProvider(p);
-                            setProviderOpen(false);
-                          }}
-                          className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
-                        >
-                          {p.name}
-                        </button>
-                      ))
+                      (providers || []).map((p) => {
+                        const networkIcon = getNetworkIconByString(p.name.toLowerCase().replace(/\s+/g, ""));
+                        return (
+                          <button
+                            key={p.operatorId}
+                            type="button"
+                            onClick={() => {
+                              setProvider(p);
+                              setProviderOpen(false);
+                            }}
+                            className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors flex items-center gap-3"
+                          >
+                            {networkIcon && (
+                              <NextImage
+                                src={networkIcon}
+                                alt={p.name}
+                                width={24}
+                                height={24}
+                                className="w-6 h-6 object-contain"
+                              />
+                            )}
+                            <span>{p.name}</span>
+                          </button>
+                        );
+                      })
                     )}
                   </div>
                 )}
@@ -170,16 +242,19 @@ const AirtimeBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <input
                     value={phoneNumber}
                     onChange={(e) => {
-                      const raw = e.target.value;
-                      const cleaned = raw.replace(/[^\d+]/g, "");
-                      const normalized = cleaned.startsWith("+") ? `+${cleaned.slice(1).replace(/\+/g, "")}` : cleaned.replace(/\+/g, "");
-                      setPhoneNumber(normalized.slice(0, 16));
+                      // Only allow digits, limit to 11 characters for local numbers
+                      const cleaned = e.target.value.replace(/\D/g, "");
+                      setPhoneNumber(cleaned.slice(0, 11));
                     }}
                     className="w-full bg-transparent border-none outline-none text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 text-sm"
-                    placeholder="+2340000000000"
-                    inputMode="text"
+                    placeholder="08012345678"
+                    inputMode="numeric"
+                    maxLength={11}
                   />
                 </div>
+                {cleanPhone.length === 11 && detectingNetwork && (
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400">Detecting network...</p>
+                )}
               </div>
 
               {/* Amount */}

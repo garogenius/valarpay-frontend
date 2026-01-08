@@ -28,8 +28,8 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
 
   const [step, setStep] = useState<Step>("details");
 
-  const [fromCur, setFromCur] = useState<Cur>("USD");
-  const [toCur, setToCur] = useState<Cur>("NGN");
+  const [fromCur, setFromCur] = useState<Cur | null>(null);
+  const [toCur, setToCur] = useState<Cur | null>(null);
   const [amountText, setAmountText] = useState("");
   const amount = useMemo(() => Number(amountText) || 0, [amountText]);
   const [walletPin, setWalletPin] = useState("");
@@ -43,10 +43,10 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
   const [transactionData, setTransactionData] = useState<any>(null);
 
   const { exchangeRate, isPending: ratePending, isError: rateError } = useGetExchangeRate({
-    fromCurrency: fromCur,
-    toCurrency: toCur,
+    fromCurrency: fromCur || ("USD" as Cur),
+    toCurrency: toCur || ("NGN" as Cur),
     provider: "graph",
-    enabled: fromCur !== toCur,
+    enabled: !!fromCur && !!toCur && fromCur !== toCur,
   });
 
   const rate = Number(exchangeRate?.rate || 0) || 0;
@@ -68,7 +68,7 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
       status: "SUCCESSFUL",
       direction: "debit",
       amount: Number(amount) || 0,
-      currency: fromCur,
+      currency: fromCur || ("USD" as Cur),
       reference: ref,
       createdAt: now,
       paymentMethod: "Available Balance",
@@ -77,7 +77,7 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
       recipientName: "Currency Conversion",
       recipientAccount: "",
       recipientBank: "ValarPay",
-      description: `Convert ${fromCur} to ${toCur}`,
+      description: fromCur && toCur ? `Convert ${fromCur} to ${toCur}` : "Currency conversion",
     });
     setShowSuccess(true);
   };
@@ -85,12 +85,12 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
   const { mutate: convert, isPending: convertPending, isError: convertErr } = useConvertCurrency(onConvertError, onConvertSuccess);
   const converting = convertPending && !convertErr;
 
-  const canNext = amount > 0 && fromCur !== toCur && !!rate && !rateError;
+  const canNext = amount > 0 && !!fromCur && !!toCur && fromCur !== toCur && !!rate && !rateError;
   const canPay = canNext && walletPin.length === 4;
 
   return (
     <>
-      <div className="w-full flex flex-col bg-white dark:bg-[#0A0A0A]">
+      <div className="w-full flex flex-col bg-white dark:bg-bg-1100">
         <div className="px-5 pt-4">
           <div className="flex items-start justify-between">
             <div>
@@ -120,7 +120,9 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
                     onClick={() => setFromOpen((v) => !v)}
                     className="w-full flex items-center justify-between bg-[#F4F4F5] dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm text-black dark:text-white"
                   >
-                    <span>{fromCur}</span>
+                    <span className={fromCur ? "text-black dark:text-white" : "text-gray-500 dark:text-gray-600"}>
+                      {fromCur || "Select currency"}
+                    </span>
                     <span className="text-gray-500 dark:text-gray-500">▾</span>
                   </button>
                   {fromOpen ? (
@@ -149,7 +151,9 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
                     onClick={() => setToOpen((v) => !v)}
                     className="w-full flex items-center justify-between bg-[#F4F4F5] dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm text-black dark:text-white"
                   >
-                    <span>{toCur}</span>
+                    <span className={toCur ? "text-black dark:text-white" : "text-gray-500 dark:text-gray-600"}>
+                      {toCur || "Select currency"}
+                    </span>
                     <span className="text-gray-500 dark:text-gray-500">▾</span>
                   </button>
                   {toOpen ? (
@@ -197,7 +201,7 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
                   <p className="text-xs text-gray-600 dark:text-gray-300">Rate not available</p>
                 ) : (
                   <p className="text-xs text-green-700 dark:text-green-300 font-medium">
-                    Rate: 1 {fromCur} = {rate} {toCur}
+                    {fromCur && toCur ? `Rate: 1 ${fromCur} = ${rate} ${toCur}` : "Select currencies to see rate"}
                   </p>
                 )}
                 <p className="text-xs text-green-700 dark:text-green-300 font-medium">
@@ -211,16 +215,16 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
                 <div className="flex items-center justify-between py-2">
                   <p className="text-xs text-gray-600 dark:text-gray-400">Rate</p>
                   <p className="text-xs font-medium text-black dark:text-white">
-                    {rate ? `1 ${fromCur} = ${rate} ${toCur}` : "-"}
+                    {rate && fromCur && toCur ? `1 ${fromCur} = ${rate} ${toCur}` : "-"}
                   </p>
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <p className="text-xs text-gray-600 dark:text-gray-400">Swap From</p>
-                  <p className="text-xs font-medium text-black dark:text-white">{amount} {fromCur}</p>
+                  <p className="text-xs font-medium text-black dark:text-white">{amount} {fromCur || "-"}</p>
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <p className="text-xs text-gray-600 dark:text-gray-400">Swap To</p>
-                  <p className="text-xs font-medium text-black dark:text-white">{converted.toFixed(2)} {toCur}</p>
+                  <p className="text-xs font-medium text-black dark:text-white">{converted.toFixed(2)} {toCur || "-"}</p>
                 </div>
               </div>
 
@@ -276,6 +280,7 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
               </button>
               <button
                 onClick={() => {
+                  if (!fromCur || !toCur) return;
                   convert({ amount, fromCurrency: fromCur, toCurrency: toCur, walletPin });
                 }}
                 disabled={!canPay || converting}
@@ -297,6 +302,8 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
             setStep("details");
             setWalletPin("");
             setAmountText("");
+            setFromCur(null);
+            setToCur(null);
             onClose();
           }}
           transaction={transactionData}

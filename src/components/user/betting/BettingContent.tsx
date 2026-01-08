@@ -110,7 +110,7 @@ const BettingContent = () => {
     <div className="flex flex-col gap-6 pb-10">
       {/* Back Button */}
       <div
-        onClick={() => navigate("/user/payments")}
+        onClick={() => navigate("/user/payment")}
         className="flex items-center gap-2 cursor-pointer text-text-200 dark:text-text-400"
       >
         <IoChevronBack className="text-2xl" />

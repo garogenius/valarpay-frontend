@@ -49,8 +49,9 @@ const InternationalAirtimeBillSteps: React.FC<{ onClose: () => void }> = ({ onCl
   const [showSuccess, setShowSuccess] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
 
+  // Only fetch plan if phone number is valid (at least 7 characters)
   const { data, isPending: planPending, isError: planError } = useGetInternationalAirtimePlan({
-    phone: phoneNumber,
+    phone: phoneNumber.length >= 7 ? phoneNumber : "",
   });
   const loadingPlan = planPending && !planError;
 
@@ -136,7 +137,7 @@ const InternationalAirtimeBillSteps: React.FC<{ onClose: () => void }> = ({ onCl
 
   return (
     <>
-      <div className="w-full flex flex-col bg-white dark:bg-[#0A0A0A]">
+      <div className="w-full flex flex-col bg-white dark:bg-bg-1100">
         <div className="px-5 pt-4">
           <div className="flex items-start justify-between">
             <div>

@@ -132,7 +132,7 @@ const ElectricityBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) =>
 
   return (
     <>
-      <div className="w-full flex flex-col bg-white dark:bg-[#0A0A0A]">
+      <div className="w-full flex flex-col bg-white dark:bg-bg-1100">
         <div className="px-5 pt-4">
           <div className="flex items-start justify-between">
             <div>

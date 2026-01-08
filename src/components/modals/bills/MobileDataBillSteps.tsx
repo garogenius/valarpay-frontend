@@ -5,6 +5,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { FaFingerprint } from "react-icons/fa";
+import NextImage from "next/image";
 import SpinnerLoader from "@/components/Loader/SpinnerLoader";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
@@ -13,6 +14,7 @@ import { CURRENCY } from "@/constants/types";
 import GlobalTransactionHistoryModal from "@/components/shared/GlobalTransactionHistoryModal";
 import { useFingerprintForPayments } from "@/store/paymentPreferences.store";
 import { useGetDataPlan, useGetDataVariation, usePayForData } from "@/api/data/data.queries";
+import { getNetworkIconByString } from "@/utils/utilityFunctions";
 
 type Step = "details" | "confirm";
 
@@ -37,11 +39,20 @@ const MobileDataBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => 
   const [showSuccess, setShowSuccess] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
 
+  const cleanPhone = phoneNumber.replace(/\D/g, "").slice(-11);
   const { network, networkPlans, isLoading: plansPending, isError: plansError } = useGetDataPlan({
-    phone: phoneNumber.replace(/\D/g, "").slice(-11),
+    phone: cleanPhone,
     currency: "NGN",
   });
   const plansLoading = plansPending && !plansError;
+
+  // Auto-select first plan when network is detected and plans are available
+  React.useEffect(() => {
+    if (network && networkPlans && networkPlans.length > 0 && !selectedPlan) {
+      // Auto-select the first plan when network is detected
+      setSelectedPlan(networkPlans[0]);
+    }
+  }, [network, networkPlans, selectedPlan]);
 
   const operatorId = useMemo(() => Number(selectedPlan?.operatorId || 0) || 0, [selectedPlan]);
 
@@ -114,7 +125,7 @@ const MobileDataBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 
   return (
     <>
-      <div className="w-full flex flex-col bg-white dark:bg-[#0A0A0A]">
+      <div className="w-full flex flex-col bg-white dark:bg-bg-1100">
         <div className="px-5 pt-4">
           <div className="flex items-start justify-between">
             <div>
@@ -157,7 +168,21 @@ const MobileDataBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                 ) : network ? (
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-gray-600 dark:text-gray-400">Network</p>
-                    <p className="text-xs font-medium text-black dark:text-white">{String(network).toUpperCase()}</p>
+                    <div className="flex items-center gap-2">
+                      {(() => {
+                        const networkIcon = getNetworkIconByString(String(network).toLowerCase());
+                        return networkIcon ? (
+                          <NextImage
+                            src={networkIcon}
+                            alt={String(network)}
+                            width={20}
+                            height={20}
+                            className="w-5 h-5 object-contain"
+                          />
+                        ) : null;
+                      })()}
+                      <p className="text-xs font-medium text-black dark:text-white">{String(network).toUpperCase()}</p>
+                    </div>
                   </div>
                 ) : (
                   <p className="text-xs text-gray-600 dark:text-gray-400">Enter phone number to detect network</p>
@@ -180,7 +205,7 @@ const MobileDataBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                 </button>
 
                 {planOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-[9999]">
+                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-[999999]">
                     {(networkPlans || []).map((p: any) => (
                       <button
                         key={p.id}
@@ -215,7 +240,7 @@ const MobileDataBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                 </button>
 
                 {amountOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-[9999]">
+                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-[999999]">
                     {varsLoading ? (
                       <div className="p-4 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
                         <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...

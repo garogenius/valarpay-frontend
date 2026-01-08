@@ -2,13 +2,16 @@
 
 import { Transaction, TRANSACTION_CATEGORY } from "@/constants/types";
 import { format } from "date-fns";
-import { FiSmartphone, FiWifi, FiArrowUp, FiArrowDown } from "react-icons/fi";
+import { FiSmartphone, FiWifi, FiArrowUp, FiArrowDown, FiEye } from "react-icons/fi";
+import useGlobalModalsStore from "@/store/globalModals.store";
 
 interface TransactionItemProps {
   transaction: Transaction;
 }
 
 const TransactionItem = ({ transaction }: TransactionItemProps) => {
+  const { showTransactionHistoryModal } = useGlobalModalsStore();
+
   const getIcon = () => {
     if (transaction.category === TRANSACTION_CATEGORY.TRANSFER) {
       return transaction.type === "DEBIT" ? (
@@ -78,9 +81,18 @@ const TransactionItem = ({ transaction }: TransactionItemProps) => {
           </p>
         </div>
       </div>
-      <p className={`text-xs sm:text-sm font-semibold whitespace-nowrap ${isCredit ? "text-green-500" : "text-red-500"}`}>
-        {getAmount()}
-      </p>
+      <div className="flex items-center gap-3">
+        <p className={`text-xs sm:text-sm font-semibold whitespace-nowrap ${isCredit ? "text-green-500" : "text-red-500"}`}>
+          {getAmount()}
+        </p>
+        <button
+          onClick={() => showTransactionHistoryModal(transaction)}
+          className="text-[#f76301] hover:text-[#e55a00] transition-colors"
+          aria-label="View transaction"
+        >
+          <FiEye className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 };

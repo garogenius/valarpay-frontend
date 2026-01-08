@@ -142,13 +142,13 @@ const PaymentSettingsModal: React.FC<PaymentSettingsModalProps> = ({ isOpen, onC
   return (
     <div
       aria-hidden="true"
-      className="z-[999999] overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 flex justify-center items-center w-full md:inset-0 h-[100dvh]"
+      className="z-[999999] fixed top-0 right-0 left-0 flex justify-center items-center w-full md:inset-0 h-[100dvh]"
     >
       <div className="fixed inset-0 transition-opacity" aria-hidden="true">
         <div className="absolute inset-0 bg-black/80 dark:bg-black/60" onClick={onClose} />
       </div>
 
-      <div className="relative mx-2.5 2xs:mx-4 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 px-0 py-4 w-full max-w-xl max-h-[92vh] rounded-2xl overflow-hidden">
+      <div className="relative mx-2.5 2xs:mx-4 bg-bg-600 dark:bg-bg-1100 border border-border-800 dark:border-border-700 px-0 py-4 w-full max-w-xl rounded-2xl overflow-visible">
         <button
           onClick={onClose}
           className="absolute top-3 right-3 p-2 cursor-pointer bg-bg-1400 rounded-full hover:bg-bg-1200 transition-colors"
@@ -165,7 +165,7 @@ const PaymentSettingsModal: React.FC<PaymentSettingsModalProps> = ({ isOpen, onC
           {/* Show loading only when fetching currency accounts for the first time */}
           {accountsLoading && currencyAccounts.length === 0 ? (
             <div className="flex items-center justify-center py-8">
-              <SpinnerLoader width={32} height={32} color="#D4B139" />
+              <SpinnerLoader width={32} height={32} color="#f76301" />
             </div>
           ) : (
             <>
@@ -174,7 +174,7 @@ const PaymentSettingsModal: React.FC<PaymentSettingsModalProps> = ({ isOpen, onC
                   <p className="text-white/80">
                     Available Balance ({getCurrencySymbol(selectedCurrency)}{Number(currentBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
                   </p>
-                  <span className="w-4 h-4 rounded-full border-2 border-[#D4B139] inline-block"/>
+                  <span className="w-4 h-4 rounded-full border-2 border-[#f76301] inline-block"/>
                 </div>
                 {allAccounts.map((acc) => (
                   <label key={`${acc.currency}-${acc.accountNumber}`} className="flex items-center justify-between py-3 cursor-pointer">
@@ -194,7 +194,7 @@ const PaymentSettingsModal: React.FC<PaymentSettingsModalProps> = ({ isOpen, onC
                       type="radio"
                       checked={selectedCurrency === acc.currency}
                       onChange={() => handleCurrencySelect(acc.currency)}
-                      className="w-4 h-4 accent-[#D4B139]"
+                      className="w-4 h-4 accent-[#f76301]"
                     />
                   </label>
                 ))}
@@ -208,7 +208,7 @@ const PaymentSettingsModal: React.FC<PaymentSettingsModalProps> = ({ isOpen, onC
               <div className="mt-4">
                 <CustomButton 
                   type="button" 
-                  className="w-full bg-[#D4B139] hover:bg-[#c7a42f] text-black py-3.5 rounded-xl" 
+                  className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black py-3.5 rounded-xl" 
                   onClick={() => {
                     // Invalidate queries to refresh data when closing modal
                     queryClient.invalidateQueries({ queryKey: ["currency-account-transactions", selectedCurrency] });

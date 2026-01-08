@@ -49,7 +49,6 @@ const BuyGiftCardContent: React.FC<{ onSelectPath?: (path: string) => void }> = 
 
   return (
     <div className="flex flex-col gap-8">
-      {stage === "one" && <GiftCardNav onSelectPath={onSelectPath} />}
       {stage === "two" && (
         <div
           onClick={() => {
@@ -61,7 +60,7 @@ const BuyGiftCardContent: React.FC<{ onSelectPath?: (path: string) => void }> = 
           <p className="text-lg font-medium ">Back</p>
         </div>
       )}
-      <div className="w-full flex flex-col bg-white  dark:bg-bg-1100 px-0 2xs:px-4 xs:px-6 2xs:py-4 xs:py-6 2xl:py-8  rounded-lg sm:rounded-xl">
+      <div className="w-full flex flex-col px-0 2xs:px-4 xs:px-6 2xs:py-4 xs:py-6 2xl:py-8">
         {stage === "one" && (
           <BuyGiftCardStageOne
             stage={stage}
