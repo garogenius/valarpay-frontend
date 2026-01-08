@@ -151,8 +151,15 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
                transaction.billDetails?.type === "electricity" ? "ELECTRICITY" :
                transaction.billDetails?.type === "internet" ? "INTERNET" : "BILL_PAYMENT") :
             "DEPOSIT",
-      status: transaction.status === "SUCCESSFUL" || transaction.status === "SUCCESS" ? "SUCCESSFUL" :
-              transaction.status === "FAILED" || transaction.status === "FAILURE" ? "FAILED" : "PENDING",
+      status: (() => {
+        const status = String(transaction.status || "").toLowerCase();
+        if (status === "successful" || status === "success" || status === TRANSACTION_STATUS.success) {
+          return "SUCCESSFUL";
+        } else if (status === "failed" || status === "failure" || status === TRANSACTION_STATUS.failed) {
+          return "FAILED";
+        }
+        return "PENDING";
+      })(),
       amount: getAmount(),
       currency: transaction.currency,
       reference: transaction.transactionRef || transaction.reference || transaction.id,
@@ -214,11 +221,15 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
                   <div className="flex items-center gap-3 mb-2">
                     {getStatusIcon()}
                     <span className={`text-lg font-semibold ${
-                      transaction.status === "SUCCESSFUL" || transaction.status === "SUCCESS" 
-                        ? "text-green-500" 
-                        : transaction.status === "FAILED" || transaction.status === "FAILURE"
-                        ? "text-red-500"
-                        : "text-yellow-500"
+                      (() => {
+                        const status = String(transaction.status || "").toLowerCase();
+                        if (status === "successful" || status === "success" || status === TRANSACTION_STATUS.success) {
+                          return "text-green-500";
+                        } else if (status === "failed" || status === "failure" || status === TRANSACTION_STATUS.failed) {
+                          return "text-red-500";
+                        }
+                        return "text-yellow-500";
+                      })()
                     }`}>
                       {getStatusText()}
                     </span>
