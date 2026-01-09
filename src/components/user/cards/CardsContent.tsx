@@ -58,9 +58,10 @@ const CardsContent: React.FC = () => {
   const [openTransactions, setOpenTransactions] = React.useState(false);
   const [openCreateCard, setOpenCreateCard] = React.useState(false);
   const [selectedCard, setSelectedCard] = React.useState<IVirtualCard | null>(null);
-  const [cardLabel, setCardLabel] = React.useState("");
+  const [cardholderNameInput, setCardholderNameInput] = React.useState("");
   const [initialBalance, setInitialBalance] = React.useState<string>("");
-  const [selectedCurrency, setSelectedCurrency] = React.useState<"USD" | "NGN">("USD");
+  const [selectedCurrency, setSelectedCurrency] =
+    React.useState<CardCurrency>("USD");
   const [currencyDropdownOpen, setCurrencyDropdownOpen] = React.useState(false);
   const [errorModal, setErrorModal] = React.useState<{
     isOpen: boolean;
@@ -75,83 +76,98 @@ const CardsContent: React.FC = () => {
   
   useOnClickOutside(currencyDropdownRef, () => setCurrencyDropdownOpen(false));
 
-  // Fetch all virtual cards (currently USD and NGN only; EUR and GBP coming soon)
+  // Memoize NGN wallet reference for quick lookups
+  const ngWallet = React.useMemo(
+    () =>
+      user?.wallet?.find(
+        (w) => String(w?.currency || "").toUpperCase().trim() === "NGN"
+      ) ?? null,
+    [user]
+  );
+
+  // Fetch all virtual cards (USD, EUR, GBP, and NGN)
   const { cards, isPending: cardsLoading, refetch: refetchCards } = useGetCards();
   const safeCards = Array.isArray(cards) ? cards : [];
-  // All cards from useGetCards() are virtual cards, so we just filter by currency
-  const virtualCards = safeCards.filter((card: IVirtualCard) => 
-    card.currency === "USD" || card.currency === "NGN"
+
+  const supportedCardCurrencies: CardCurrency[] = [
+    "USD",
+    "EUR",
+    "GBP",
+    "NGN",
+  ];
+
+  const virtualCards = safeCards.filter((card: IVirtualCard) =>
+    supportedCardCurrencies.includes(
+      (card.currency || "").toUpperCase() as CardCurrency
+    )
   );
 
   // Fetch currency accounts to check for account availability
   const { accounts: currencyAccounts } = useGetCurrencyAccounts();
-  
-  // Also fetch the specific account for the selected currency to ensure we have the latest data
-  const { account: fetchedCurrencyAccount, isError: accountFetchError } = useGetCurrencyAccountByCurrency(
-    selectedCurrency === "NGN" ? undefined : selectedCurrency === "USD" ? "USD" : undefined
-  );
-  
-  // Only USD and NGN cards are available
-  const supportedCardCurrencies: Array<"USD" | "NGN"> = ["USD", "NGN"];
-  
+
+  const currencyAccountQuery =
+    selectedCurrency === "NGN" ? undefined : selectedCurrency;
+
+  const { account: fetchedCurrencyAccount, isError: accountFetchError } =
+    useGetCurrencyAccountByCurrency(currencyAccountQuery);
+
   // Check if account exists and is active - check both the list and the fetched account
-  const hasCurrencyAccount = (currency: "USD" | "NGN") => {
-    // For NGN, check wallet
+  const hasCurrencyAccount = (currency: CardCurrency) => {
+    const normalize = (value?: string) =>
+      String(value || "").toUpperCase().trim();
+
     if (currency === "NGN") {
-      const hasNGNWallet = user?.wallet?.some(w => {
-        const walletCurrency = String(w?.currency || "").toUpperCase().trim();
-        return walletCurrency === "NGN";
-      });
-      return !!hasNGNWallet;
+      return ngWallet != null;
     }
-    
-    // For USD, check currency accounts
-    const accountInList = Array.isArray(currencyAccounts) 
+
+    const accountInList = Array.isArray(currencyAccounts)
       ? currencyAccounts.find((acc: any) => {
           if (!acc || !acc.currency) return false;
-          const accCurrency = String(acc.currency).toUpperCase().trim();
-          const targetCurrency = currency.toUpperCase().trim();
-          return accCurrency === targetCurrency;
+          return normalize(acc.currency) === normalize(currency);
         })
       : null;
-    
-    const hasInList = !!accountInList;
-    
-    // Also check if we have a fetched account for the selected currency
-    const hasFetched = currency === selectedCurrency && 
-      fetchedCurrencyAccount && 
+
+    const hasFetched =
+      currency === selectedCurrency &&
+      fetchedCurrencyAccount &&
       !accountFetchError &&
-      fetchedCurrencyAccount.currency &&
-      String(fetchedCurrencyAccount.currency).toUpperCase().trim() === currency.toUpperCase().trim();
-    
-    return hasInList || hasFetched;
+      normalize(fetchedCurrencyAccount.currency) === normalize(currency);
+
+    return !!accountInList || hasFetched;
   };
-  
+
   // Get the actual account for the selected currency to check its status
-  const getCurrencyAccount = (currency: "USD" | "NGN") => {
-    // For NGN, return null (uses wallet, not currency account)
+  const getCurrencyAccount = (currency: CardCurrency) => {
+    const normalize = (value?: string) =>
+      String(value || "").toUpperCase().trim();
+
     if (currency === "NGN") {
-      return null;
+      if (!ngWallet) return null;
+      return {
+        id: ngWallet.id,
+        currency: "NGN",
+        status: "ACTIVE",
+        accountNumber: ngWallet.accountNumber,
+      };
     }
-    
-    // For USD, check fetched account first
-    if (currency === selectedCurrency && fetchedCurrencyAccount && 
-        !accountFetchError &&
-        String(fetchedCurrencyAccount.currency).toUpperCase().trim() === currency.toUpperCase().trim()) {
+
+    if (
+      currency === selectedCurrency &&
+      fetchedCurrencyAccount &&
+      !accountFetchError &&
+      normalize(fetchedCurrencyAccount.currency) === normalize(currency)
+    ) {
       return fetchedCurrencyAccount;
     }
-    
-    // Then check list
+
     if (Array.isArray(currencyAccounts)) {
       const account = currencyAccounts.find((acc: any) => {
         if (!acc || !acc.currency) return false;
-        const accCurrency = String(acc.currency).toUpperCase().trim();
-        const targetCurrency = currency.toUpperCase().trim();
-        return accCurrency === targetCurrency;
+        return normalize(acc.currency) === normalize(currency);
       });
       if (account) return account;
     }
-    
+
     return null;
   };
 
@@ -231,7 +247,7 @@ const CardsContent: React.FC = () => {
       description: `Your virtual ${selectedCurrency} card has been created.`,
     });
     setOpenCreateCard(false);
-    setCardLabel("");
+    setCardholderNameInput("");
     setInitialBalance("");
     setSelectedCurrency("USD"); // Reset to USD after creation
     refetchCards();
@@ -267,52 +283,46 @@ const CardsContent: React.FC = () => {
 
   const handleCreateCard = () => {
     if (!hasCurrencyAccount(selectedCurrency)) {
-      if (selectedCurrency === "NGN") {
-        ErrorToast({
-          title: "NGN Wallet Required",
-          descriptions: ["You must have a NGN wallet before creating a virtual card. Please contact support if you don't have a NGN wallet."],
-        });
-      } else {
-        ErrorToast({
-          title: `${selectedCurrency} Account Required`,
-          descriptions: [`You must have a ${selectedCurrency} account before creating a virtual card. Please create a ${selectedCurrency} account first.`],
-        });
-      }
+      ErrorToast({
+        title: `${selectedCurrency} Account Required`,
+        descriptions: [
+          `You must have a ${selectedCurrency} account before creating a virtual card. Please create a ${selectedCurrency} account first.`,
+        ],
+      });
       return;
     }
 
-    // Check account status (only for USD, NGN uses wallet)
-    let account = null;
-    if (selectedCurrency !== "NGN") {
-      account = getCurrencyAccount(selectedCurrency);
-      if (account && account.status && account.status !== "ACTIVE") {
-        ErrorToast({
-          title: "Account Not Active",
-          descriptions: [
-            `Your ${selectedCurrency} account is ${account.status.toLowerCase()}.`,
-            "Please ensure your account is active before creating a virtual card.",
-            "If you just created the account, please wait a moment for it to be activated."
-          ],
-        });
-        return;
-      }
+    const account = getCurrencyAccount(selectedCurrency);
+    if (account && account.status && account.status !== "ACTIVE") {
+      ErrorToast({
+        title: "Account Not Active",
+        descriptions: [
+          `Your ${selectedCurrency} account is ${account.status.toLowerCase()}.`,
+          "Please ensure your account is active before creating a virtual card.",
+          "If you just created the account, please wait a moment for it to be activated.",
+        ],
+      });
+      return;
     }
 
-    if (!cardLabel.trim()) {
+    if (!cardholderNameInput.trim()) {
       ErrorToast({
         title: "Validation Error",
-        descriptions: ["Card label is required"],
+        descriptions: ["Cardholder name is required"],
       });
       return;
     }
 
     // Parse initial balance if provided
-    const parsedInitialBalance = initialBalance.trim() 
-      ? parseFloat(initialBalance.trim()) 
+    const parsedInitialBalance = initialBalance.trim()
+      ? parseFloat(initialBalance.trim())
       : undefined;
-    
+
     // Validate initial balance if provided
-    if (initialBalance.trim() && (isNaN(parsedInitialBalance!) || parsedInitialBalance! < 0)) {
+    if (
+      initialBalance.trim() &&
+      (isNaN(parsedInitialBalance!) || parsedInitialBalance! < 0)
+    ) {
       ErrorToast({
         title: "Validation Error",
         descriptions: ["Initial balance must be a valid positive number."],
@@ -320,28 +330,40 @@ const CardsContent: React.FC = () => {
       return;
     }
 
+    if (!account) {
+      ErrorToast({
+        title: "Account Error",
+        descriptions: ["Unable to resolve the selected currency account."],
+      });
+      return;
+    }
+
     // Build payload with optional initialBalance
     const payload: any = {
-      label: cardLabel.trim(),
-      currency: selectedCurrency === "NGN" ? "NGN" : selectedCurrency,
+      walletId: account.id,
+      currency: selectedCurrency,
+      cardholderName: cardholderNameInput.trim(),
+      label: cardholderNameInput.trim(),
     };
-    
+
     if (parsedInitialBalance !== undefined && parsedInitialBalance > 0) {
       payload.initialBalance = parsedInitialBalance;
     }
 
     // Log account details before creating card
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Creating card with account:', {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Creating card with account:", {
         currency: selectedCurrency,
-        label: cardLabel.trim(),
+        cardholderName: cardholderNameInput.trim(),
         initialBalance: parsedInitialBalance,
-        account: account ? {
-          id: account.id,
-          currency: account.currency,
-          status: account.status,
-          accountNumber: account.accountNumber,
-        } : null,
+        account: account
+          ? {
+              id: account.id,
+              currency: account.currency,
+              status: account.status,
+              accountNumber: account.accountNumber,
+            }
+          : null,
         payload,
       });
     }
@@ -380,7 +402,7 @@ const CardsContent: React.FC = () => {
     return `•••• •••• •••• ${last4}`;
   };
 
-  const cardholderName = (user?.fullname || "CARD HOLDER").toUpperCase();
+  const defaultCardholderName = (user?.fullname || "CARD HOLDER").toUpperCase();
 
   const isCardDisabled = (card: IVirtualCard) => {
     return card.status === "BLOCKED" || card.status === "CLOSED";
@@ -391,30 +413,52 @@ const CardsContent: React.FC = () => {
     (card.currency || "").toUpperCase() === selectedCurrency
   );
 
+  const accountRequirementLabel =
+    selectedCurrency === "NGN"
+      ? "NGN Wallet Required"
+      : `${selectedCurrency} Account Required`;
+
+  const accountRequirementDescription =
+    selectedCurrency === "NGN"
+      ? "You must have a NGN wallet before creating a virtual card. Please contact support if you don't have a NGN wallet."
+      : `You must have a ${selectedCurrency} account before creating a virtual card. Please create a ${selectedCurrency} account in the Accounts page first.`;
+
   const renderEmptyVirtual = () => (
     <div className="flex flex-col items-center justify-center py-16 sm:py-20 gap-6">
       <div className="w-32 h-24 sm:w-40 sm:h-28 rounded-xl bg-white/5 flex items-center justify-center border-4 border-white/10">
         <FiCreditCard className="text-4xl text-white/40" />
       </div>
       <div className="text-center max-w-md space-y-3">
-        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-2">
-          <p className="text-yellow-400 text-xs sm:text-sm font-medium mb-1">Important Notice</p>
-          <p className="text-white/80 text-xs sm:text-sm">• Virtual cards are currently available for USD and NGN only</p>
-          <p className="text-white/80 text-xs sm:text-sm">• EUR and GBP virtual cards coming soon</p>
-          <p className="text-white/80 text-xs sm:text-sm">• You must have a corresponding currency account before creating a virtual card</p>
-        </div>
-        {!hasCurrencyAccount("USD") && !hasCurrencyAccount("NGN") ? (
+          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-2">
+            <p className="text-yellow-400 text-xs sm:text-sm font-medium mb-1">
+              Important Notice
+            </p>
+            <p className="text-white/80 text-xs sm:text-sm">
+              • Virtual cards are currently available for USD, EUR, GBP, and NGN
+            </p>
+            <p className="text-white/80 text-xs sm:text-sm">
+              • You must have the matching wallet/account before creating a virtual card
+            </p>
+          </div>
+        {!hasCurrencyAccount(selectedCurrency) ? (
           <div className="space-y-2">
-            <p className="text-white/60 text-sm">You need a USD or NGN account to create a virtual card.</p>
-            <p className="text-white/40 text-xs">Please create a currency account in the Accounts page first.</p>
+            <p className="text-white/60 text-sm">
+              You need a {selectedCurrency} account to create a virtual card.
+            </p>
+            <p className="text-white/40 text-xs">
+              Please create a currency account in the Accounts page first.
+            </p>
           </div>
         ) : (
-        <p className="text-white text-sm sm:text-base mb-2">You currently do not have any virtual cards (USD or NGN) linked to this account.</p>
+          <p className="text-white text-sm sm:text-base mb-2">
+            You currently do not have any virtual {selectedCurrency} cards linked to
+            this account.
+          </p>
         )}
       </div>
       <CustomButton
         onClick={() => setOpenCreateCard(true)}
-        disabled={!hasCurrencyAccount("USD") && !hasCurrencyAccount("NGN")}
+        disabled={!hasCurrencyAccount(selectedCurrency)}
         className="bg-[#f76301] hover:bg-[#e55a00] text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Create Virtual Card
@@ -501,7 +545,7 @@ const CardsContent: React.FC = () => {
               <div className="flex flex-col gap-4 items-center md:items-start">
                 <div className="flex justify-center w-full">
                   <CardPreview
-                    cardholder={cardholderName}
+                    cardholder={defaultCardholderName}
                     maskedNumber={maskedNumber(card.cardNumber)}
                     expiry={formatExpiry(card)}
                     brand="visa"
@@ -719,7 +763,7 @@ const CardsContent: React.FC = () => {
                       <span className="text-sm flex-1 text-white">{currency} Cards</span>
                       {!hasAccount && (
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
-                          {currency === "NGN" ? "No Wallet" : "No Account"}
+                          No Account
                         </span>
                       )}
                     </button>
@@ -803,34 +847,44 @@ const CardsContent: React.FC = () => {
       {/* Create Card Modal */}
       {openCreateCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/80" onClick={() => { setOpenCreateCard(false); setCardLabel(""); setInitialBalance(""); setSelectedCurrency("USD"); }} />
+          <div
+            className="absolute inset-0 bg-black/80"
+            onClick={() => {
+              setOpenCreateCard(false);
+              setCardholderNameInput("");
+              setInitialBalance("");
+              setSelectedCurrency("USD");
+            }}
+          />
           <div className="relative w-full max-w-md bg-bg-600 dark:bg-bg-1100 border border-white/10 rounded-2xl p-5 z-10">
             <h2 className="text-white text-base font-semibold mb-4">Create Virtual Card</h2>
             <div className="flex flex-col gap-3">
               {!hasCurrencyAccount(selectedCurrency) && (
                 <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
                   <p className="text-yellow-400 text-xs font-medium mb-1">
-                    {selectedCurrency === "NGN" ? "NGN Wallet Required" : `${selectedCurrency} Account Required`}
+                    {accountRequirementLabel}
                   </p>
                   <p className="text-white/80 text-xs">
-                    {selectedCurrency === "NGN" 
-                      ? "You must have a NGN wallet before creating a virtual card. Please contact support if you don't have a NGN wallet."
-                      : `You must have a ${selectedCurrency} account before creating a virtual card. Please create a ${selectedCurrency} account in the Accounts page first.`}
+                    {accountRequirementDescription}
                   </p>
                 </div>
               )}
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
                 <p className="text-blue-400 text-xs font-medium mb-1">Note</p>
-                <p className="text-white/80 text-xs">• Only USD and NGN virtual cards are available</p>
-                <p className="text-white/80 text-xs">• You must have a USD or NGN account before creating a virtual card</p>
+                <p className="text-white/80 text-xs">
+                  • Virtual cards are currently available for USD, EUR, GBP, and NGN
+                </p>
+                <p className="text-white/80 text-xs">
+                  • You must have the matching wallet or account before creating a virtual card
+                </p>
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-white/70 text-xs">Card Label</label>
+                <label className="text-white/70 text-xs">Cardholder Name</label>
                 <input
                   className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3 px-3 text-white text-sm placeholder:text-white/50 outline-none focus:border-[#f76301]"
-                  placeholder={`e.g., Personal ${selectedCurrency} Card`}
-                  value={cardLabel}
-                  onChange={(e) => setCardLabel(e.target.value)}
+                  placeholder="e.g., John Doe"
+                  value={cardholderNameInput}
+                  onChange={(e) => setCardholderNameInput(e.target.value)}
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -858,24 +912,28 @@ const CardsContent: React.FC = () => {
               </div>
               <div className="flex gap-3 mt-2">
                 <CustomButton
-                  onClick={() => { 
-                    setOpenCreateCard(false); 
-                    setCardLabel(""); 
+                  onClick={() => {
+                    setOpenCreateCard(false);
+                    setCardholderNameInput("");
                     setInitialBalance("");
-                    setSelectedCurrency("USD"); 
+                    setSelectedCurrency("USD");
                   }}
                   className="flex-1 bg-transparent border border-white/15 text-white rounded-lg py-2.5"
                 >
                   Cancel
                 </CustomButton>
-                                  <CustomButton
-                                    onClick={handleCreateCard}
-                                    disabled={creatingCard || !cardLabel.trim() || !hasCurrencyAccount(selectedCurrency)}
-                                    isLoading={creatingCard}
-                                    className="flex-1 bg-[#f76301] hover:bg-[#e55a00] text-black rounded-lg py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                                  >
-                                    Create Card
-                                  </CustomButton>
+                <CustomButton
+                  onClick={handleCreateCard}
+                  disabled={
+                    creatingCard ||
+                    !cardholderNameInput.trim() ||
+                    !hasCurrencyAccount(selectedCurrency)
+                  }
+                  isLoading={creatingCard}
+                  className="flex-1 bg-[#f76301] hover:bg-[#e55a00] text-black rounded-lg py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Create Card
+                </CustomButton>
               </div>
             </div>
           </div>

@@ -13,7 +13,7 @@ import type {
 // Create virtual card
 export const createCardRequest = async (data: ICreateCardPayload) => {
   return request({
-    url: "/currency/cards",
+    url: "/api/v1/wallet/virtual-card/create",
     method: "post",
     data,
   });
@@ -107,6 +107,9 @@ export const getCardTransactionsRequest = async (cardId: string, query: IGetCard
     method: "get",
   });
 };
+
+
+
 
 
 

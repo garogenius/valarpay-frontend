@@ -169,7 +169,8 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const paying = (examType === "WAEC" && payWaecPending) || (examType === "JAMB" && payJambPending);
 
-  const canNext = !!examType && !!selectedPlan && billerNumber.length >= 6 && amount > 0;
+  const canNext =
+    !!examType && !!selectedPlan && !!billerCode && billerNumber.length >= 6 && amount > 0;
   const canPay = canNext && walletPin.length === 4 && !!verifiedCustomerName;
 
   return (
@@ -255,6 +256,11 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   </span>
                   <span className="text-gray-500 dark:text-gray-500">▾</span>
                 </button>
+                {plansError && examType ? (
+                  <p className="text-[11px] text-red-500 mt-1">
+                    Unable to load {examType} plans. Please try again later.
+                  </p>
+                ) : null}
                 {planOpen && examType && (
                   <div className="relative left-0 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-2xl z-[9999] mt-2">
                     {plansLoading ? (
@@ -263,7 +269,7 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       </div>
                     ) : plans.length === 0 ? (
                       <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">
-                        No plans available
+                        {plansError ? "Unable to load plans" : "No plans available"}
                       </div>
                     ) : (
                       plans.map((plan: any) => (
@@ -380,7 +386,7 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           {step === "details" ? (
             <button
               onClick={() => {
-                if (!examType || !selectedPlan || !billerNumber) return;
+                if (!examType || !selectedPlan || !billerNumber || !billerCode) return;
                 // Construct itemCode: use plan.itemCode if available, otherwise construct from exam type
                 const itemCode = selectedPlan.itemCode || `${examType}-REG`;
                 if (examType === "WAEC") {

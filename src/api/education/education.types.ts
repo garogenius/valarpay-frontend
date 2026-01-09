@@ -1,8 +1,10 @@
 export type EducationBiller = {
   id?: string | number;
+  billerId?: string;
   billerCode: string;
   billerName?: string;
   name?: string;
+  category?: string;
 };
 
 export type EducationBillerItem = {

@@ -122,47 +122,25 @@ export const usePaySchoolFee = (
 
 // JAMB & WAEC Hooks
 export const useGetWaecPlan = (enabled: boolean = true) => {
-  // First ensure education billers are fetched
-  const { billers: educationBillers, isPending: billersLoading } = useGetEducationBillers();
-  
-  // Check if WAEC biller exists
-  const waecBillerExists = educationBillers?.some(
-    (biller: EducationBiller) => 
-      biller.billerName?.toUpperCase() === "WAEC" || 
-      biller.name?.toUpperCase() === "WAEC" ||
-      biller.billerCode?.toUpperCase().includes("WAEC")
-  ) ?? false;
-
   const { data, isPending, isError } = useQuery({
     queryKey: ["waec-plan"],
     queryFn: getWaecPlanRequest,
-    enabled: enabled && !billersLoading && waecBillerExists,
+    enabled,
     retry: 2,
   });
   const planData: JambWaecPlanData | null = data?.data?.data ?? null;
-  return { planData, isPending: isPending || billersLoading, isError };
+  return { planData, isPending, isError };
 };
 
 export const useGetJambPlan = (enabled: boolean = true) => {
-  // First ensure education billers are fetched
-  const { billers: educationBillers, isPending: billersLoading } = useGetEducationBillers();
-  
-  // Check if JAMB biller exists
-  const jambBillerExists = educationBillers?.some(
-    (biller: EducationBiller) => 
-      biller.billerName?.toUpperCase() === "JAMB" || 
-      biller.name?.toUpperCase() === "JAMB" ||
-      biller.billerCode?.toUpperCase().includes("JAMB")
-  ) ?? false;
-
   const { data, isPending, isError } = useQuery({
     queryKey: ["jamb-plan"],
     queryFn: getJambPlanRequest,
-    enabled: enabled && !billersLoading && jambBillerExists,
+    enabled,
     retry: 2,
   });
   const planData: JambWaecPlanData | null = data?.data?.data ?? null;
-  return { planData, isPending: isPending || billersLoading, isError };
+  return { planData, isPending, isError };
 };
 
 export const useVerifyWaecBillerNumber = (

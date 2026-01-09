@@ -64,7 +64,7 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
       : list;
   }, [billers, billerNameFilter]);
 
-  const billerCode = String(biller?.billerCode || "");
+  const billerCode = String(biller?.billerCode || biller?.billerId || "");
   // Use school bill info endpoint to get plans/services
   const { plans, isPending: itemsPending, isError: itemsError } = useGetSchoolBillInfo(billerCode);
   const itemsLoading = itemsPending && !itemsError;
@@ -184,7 +184,7 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
                     ) : (
                       (filteredBillers || []).map((b: any) => (
                         <button
-                          key={String(b.billerCode)}
+                          key={String(b.billerCode || b.billerId || b.id || b.billerName || b.name)}
                           type="button"
                           onClick={() => {
                             setBiller(b);
@@ -193,7 +193,7 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
                           }}
                           className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
                         >
-                          {String(b.billerName || b.name || b.billerCode)}
+                          {String(b.billerName || b.name || b.billerCode || b.billerId)}
                         </button>
                       ))
                     )}

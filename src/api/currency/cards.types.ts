@@ -1,8 +1,9 @@
-export type CardCurrency = "NGN" | "USD";
+export type CardCurrency = "USD" | "EUR" | "GBP" | "NGN";
 export type CardStatus = "ACTIVE" | "FROZEN" | "BLOCKED" | "CLOSED";
 
 export interface IVirtualCard {
   id: string;
+  cardId?: string;
   walletId: string;
   cardNumber: string;
   cvv: string;
@@ -21,7 +22,9 @@ export interface IVirtualCard {
 }
 
 export interface ICreateCardPayload {
+  walletId: string;
   currency: CardCurrency;
+  cardholderName: string;
   label?: string;
   initialBalance?: number;
 }

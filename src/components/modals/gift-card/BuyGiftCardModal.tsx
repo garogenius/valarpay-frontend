@@ -202,11 +202,11 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
     )}`;
 
   const renderTopBar = () => (
-    <div className="px-5 pt-4">
+    <div className="px-5 pt-4 pb-3">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[#0A0A0A] dark:text-white text-sm font-semibold">Buy Giftcards</p>
-          <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">
+          <p className="text-white text-sm font-semibold">Buy Giftcards</p>
+          <p className="text-[#9a9a9a] text-xs mt-0.5">
             {step === "form" ? "Enter payment details to continue" : 
              step === "confirm" ? "Confirm Transactions" : 
              step === "redeem" ? "Your gift card codes" :
@@ -215,7 +215,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
         </div>
         <button
           onClick={handleClose}
-          className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+          className="text-[#bcbcbc] hover:text-white transition-colors"
           aria-label="Close"
         >
           <IoClose className="w-5 h-5" />
@@ -242,34 +242,33 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative w-full max-w-md bg-white dark:bg-[#0A0A0A] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xl overflow-visible flex flex-col"
+            className="relative w-full max-w-md rounded-2xl border border-[#2a2a2a] bg-[#0c0c0c] shadow-2xl overflow-visible flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-full flex flex-col bg-white dark:bg-[#0A0A0A]">
+            <div className="w-full flex flex-col bg-[#0c0c0c]">
               {renderTopBar()}
 
-              <div className="px-5 py-5 border-t border-gray-200 dark:border-gray-800">
+              <div className="px-5 py-5">
                 {step === "form" && (
                   <div className="w-full flex flex-col gap-4">
                     {/* Select Country - Currency/Country selection */}
-                    <div className="relative flex flex-col gap-1" ref={currencyRef}>
-                      <label className="text-[11px] text-gray-500 dark:text-gray-400">Select Country</label>
+                    <div className="relative flex flex-col gap-2" ref={currencyRef}>
+                      <label className="text-[11px] uppercase tracking-[0.25em] text-[#8a8a8a]">
+                        Select Country
+                      </label>
                       <button
                         type="button"
                         onClick={() => setCurrencyOpen(!currencyOpen)}
-                        className="w-full flex items-center justify-between bg-[#F4F4F5] dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm text-black dark:text-white"
+                        className="w-full flex items-center justify-between rounded-md bg-[#1c1c1e] border border-[#2a2a2a] px-4 py-3 text-sm text-white"
                       >
-                        <span className={selectedCountry ? "text-black dark:text-white" : "text-gray-500 dark:text-gray-600"}>
+                        <span className={selectedCountry ? "text-white" : "text-[#7c7c7c]"}>
                           {selectedCountry || "Select country"}
                         </span>
-                        <span className="text-gray-500 dark:text-gray-500">▾</span>
+                        <IoChevronDown className="text-[#7c7c7c]" />
                       </button>
 
                       {currencyOpen && (
-                        <div
-                          className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-20"
-                          style={{ scrollbarWidth: "thin", scrollbarColor: "#2C2C2E transparent" }}
-                        >
+                        <div className="absolute left-0 top-full mt-2 w-full bg-[#141416] border border-[#2a2a2a] rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-20">
                           {allCurrencies.map((c: any, index: number) => (
                             <button
                               key={`${c.countryName}-${c.currency}-${index}`}
@@ -283,7 +282,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                                 setSelectedPrice(null);
                                 setCurrencyOpen(false);
                               }}
-                              className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
+                              className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors"
                             >
                               {c.countryName} - {c.currency}
                             </button>
@@ -294,27 +293,26 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
 
                     {/* Gift Card Category - Only enabled when currency is selected */}
                     {selectedCurrency && (
-                      <div className="relative flex flex-col gap-1" ref={categoryRef}>
-                        <label className="text-[11px] text-gray-500 dark:text-gray-400">Gift Card Category</label>
+                      <div className="relative flex flex-col gap-2" ref={categoryRef}>
+                        <label className="text-[11px] uppercase tracking-[0.25em] text-[#8a8a8a]">
+                          Gift Card Category
+                        </label>
                         <button
                           type="button"
                           onClick={() => setCategoryOpen(!categoryOpen)}
-                          className="w-full flex items-center justify-between bg-[#F4F4F5] dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm text-black dark:text-white"
+                          className="w-full flex items-center justify-between rounded-md bg-[#1c1c1e] border border-[#2a2a2a] px-4 py-3 text-sm text-white"
                         >
-                          <span className={selectedCategory ? "text-black dark:text-white" : "text-gray-500 dark:text-gray-600"}>
+                          <span className={selectedCategory ? "text-white" : "text-[#7c7c7c]"}>
                             {selectedCategory || "Select category"}
                           </span>
-                          <span className="text-gray-500 dark:text-gray-500">▾</span>
+                          <IoChevronDown className="text-[#7c7c7c]" />
                         </button>
 
                         {categoryOpen && (
-                          <div
-                            className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-20"
-                            style={{ scrollbarWidth: "thin", scrollbarColor: "#2C2C2E transparent" }}
-                          >
+                          <div className="absolute left-0 top-full mt-2 w-full bg-[#141416] border border-[#2a2a2a] rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-20">
                             {categoriesLoading ? (
-                              <div className="p-4 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
-                                <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...
+                              <div className="p-4 flex items-center gap-2 text-[#9a9a9a] text-sm">
+                                <SpinnerLoader width={18} height={18} color="#f76301" /> Loading...
                               </div>
                             ) : (categories || []).map((c: any) => (
                               <button
@@ -327,7 +325,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                                   setSelectedPrice(null);
                                   setCategoryOpen(false);
                                 }}
-                                className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
+                                className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors"
                               >
                                 {c.name}
                               </button>
@@ -339,18 +337,20 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
 
                     {/* Select Card - Product selection */}
                     {selectedCurrency && selectedCategory && (
-                      <div className="relative flex flex-col gap-1" ref={productRef}>
-                        <label className="text-[11px] text-gray-500 dark:text-gray-400">Select Card</label>
+                      <div className="relative flex flex-col gap-2" ref={productRef}>
+                        <label className="text-[11px] uppercase tracking-[0.25em] text-[#8a8a8a]">
+                          Select Card
+                        </label>
                         <button
                           type="button"
                           disabled={!selectedCurrency || !selectedCategory}
                           onClick={() => selectedCurrency && selectedCategory && setProductOpen(!productOpen)}
-                          className={`w-full flex items-center justify-between bg-[#F4F4F5] dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm ${
-                            selectedCurrency && selectedCategory ? "text-black dark:text-white" : "text-gray-500 dark:text-gray-600 opacity-60 cursor-not-allowed"
+                          className={`w-full flex items-center justify-between rounded-md bg-[#1c1c1e] border border-[#2a2a2a] px-4 py-3 text-sm ${
+                            selectedCurrency && selectedCategory ? "text-white" : "text-[#7c7c7c] opacity-60 cursor-not-allowed"
                           }`}
                         >
                           {!product ? (
-                            <span className="text-gray-500 dark:text-gray-600">Select card</span>
+                            <span className="text-[#7c7c7c]">Select card</span>
                           ) : (
                             <div className="flex items-center gap-2">
                               {product.logoUrls?.[0] && (
@@ -363,20 +363,17 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                                   unoptimized
                                 />
                               )}
-                              <span className="text-black dark:text-white">{product.productName}</span>
+                              <span className="text-white">{product.productName}</span>
                             </div>
                           )}
-                          <span className="text-gray-500 dark:text-gray-500">▾</span>
+                          <IoChevronDown className="text-[#7c7c7c]" />
                         </button>
 
                         {productOpen && (
-                          <div
-                            className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-20"
-                            style={{ scrollbarWidth: "thin", scrollbarColor: "#2C2C2E transparent" }}
-                          >
+                          <div className="absolute left-0 top-full mt-2 w-full bg-[#141416] border border-[#2a2a2a] rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-20">
                             {productsLoading ? (
-                              <div className="p-4 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
-                                <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...
+                              <div className="p-4 flex items-center gap-2 text-[#9a9a9a] text-sm">
+                                <SpinnerLoader width={18} height={18} color="#f76301" /> Loading...
                               </div>
                             ) : filteredProducts.length > 0 ? (
                               filteredProducts.map((p: any) => (
@@ -389,7 +386,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                                     setSelectedPrice(null);
                                     setProductOpen(false);
                                   }}
-                                  className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors flex items-center gap-2"
+                                  className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors flex items-center gap-2"
                                 >
                                   {p.logoUrls?.[0] && (
                                     <Image
@@ -405,7 +402,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                                 </button>
                               ))
                             ) : (
-                              <div className="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm">No products available</div>
+                              <div className="px-4 py-3 text-[#9a9a9a] text-sm">No products available</div>
                             )}
                           </div>
                         )}
@@ -414,28 +411,27 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
 
                     {/* Card Amount - Price selection */}
                     {product && Number(quantity) > 0 && prices.length > 0 && (
-                      <div className="relative flex flex-col gap-1" ref={priceRef}>
-                        <label className="text-[11px] text-gray-500 dark:text-gray-400">Card Amount</label>
+                      <div className="relative flex flex-col gap-2" ref={priceRef}>
+                        <label className="text-[11px] uppercase tracking-[0.25em] text-[#8a8a8a]">
+                          Card Amount
+                        </label>
                         <button
                           type="button"
                           onClick={() => setPriceOpen(!priceOpen)}
-                          className="w-full flex items-center justify-between bg-[#F4F4F5] dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm text-black dark:text-white"
+                          className="w-full flex items-center justify-between rounded-md bg-[#1c1c1e] border border-[#2a2a2a] px-4 py-3 text-sm text-white"
                         >
                           {!selectedPrice ? (
-                            <span className="text-gray-500 dark:text-gray-600">Select amount</span>
+                            <span className="text-[#7c7c7c]">Select amount</span>
                           ) : (
-                            <span className="text-black dark:text-white">
+                            <span className="text-white">
                               {Number(selectedPrice.price).toLocaleString()} {product.recipientCurrencyCode || ""}
                             </span>
                           )}
-                          <span className="text-gray-500 dark:text-gray-500">▾</span>
+                          <IoChevronDown className="text-[#7c7c7c]" />
                         </button>
 
                         {priceOpen && (
-                          <div
-                            className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-20"
-                            style={{ scrollbarWidth: "thin", scrollbarColor: "#2C2C2E transparent" }}
-                          >
+                          <div className="absolute left-0 top-full mt-2 w-full bg-[#141416] border border-[#2a2a2a] rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-20">
                             {prices.map((price, index) => (
                               <button
                                 key={index}
@@ -444,7 +440,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                                   setSelectedPrice(price);
                                   setPriceOpen(false);
                                 }}
-                                className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
+                                className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors"
                               >
                                 {price.price} {product.recipientCurrencyCode || ""}
                               </button>
@@ -456,9 +452,11 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
 
                     {/* Number of Cards - Quantity */}
                     {product && (
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[11px] text-gray-500 dark:text-gray-400">Number of Cards</label>
-                        <div className="w-full flex items-center bg-[#F4F4F5] dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5">
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[11px] uppercase tracking-[0.25em] text-[#8a8a8a]">
+                          Number of Cards
+                        </label>
+                        <div className="w-full flex items-center rounded-md bg-[#1c1c1e] border border-[#2a2a2a] px-4 py-2.5">
                           <button
                             type="button"
                             onClick={() => {
@@ -468,12 +466,12 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                                 setSelectedPrice(null);
                               }
                             }}
-                            className="w-8 h-8 rounded-full bg-white/10 dark:bg-white/10 hover:bg-white/20 flex items-center justify-center text-black dark:text-white text-lg font-medium transition-colors"
+                            className="w-8 h-8 rounded-md bg-[#2c2c2e] hover:bg-[#3a3a3c] flex items-center justify-center text-white text-lg font-medium transition-colors"
                           >
                             −
                           </button>
                           <input
-                            className="flex-1 bg-transparent border-none outline-none text-black dark:text-white text-sm text-center"
+                            className="flex-1 bg-transparent border-none outline-none text-white text-sm text-center"
                             type="text"
                             value={quantity}
                             onChange={(e) => {
@@ -498,7 +496,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                               setQuantity(String(newQty));
                               setSelectedPrice(null);
                             }}
-                            className="w-8 h-8 rounded-full bg-white/10 dark:bg-white/10 hover:bg-white/20 flex items-center justify-center text-black dark:text-white text-lg font-medium transition-colors"
+                            className="w-8 h-8 rounded-md bg-[#2c2c2e] hover:bg-[#3a3a3c] flex items-center justify-center text-white text-lg font-medium transition-colors"
                           >
                             +
                           </button>
@@ -518,45 +516,45 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
 
                 {step === "confirm" && (
                   <div className="w-full flex flex-col gap-4">
-                    <div className="bg-[#1C1C1E] rounded-lg p-4 space-y-3">
+                    <div className="space-y-3">
                       {product && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-400 text-sm">Card Type</span>
+                        <div className="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
+                          <span className="text-[#9a9a9a] text-sm">Card Type</span>
                           <span className="text-white text-sm font-medium">{product.productName}</span>
                         </div>
                       )}
-                      <div className="flex justify-between">
-                        <span className="text-gray-400 text-sm">Country</span>
+                      <div className="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
+                        <span className="text-[#9a9a9a] text-sm">Country</span>
                         <span className="text-white text-sm font-medium">{selectedCountry || "-"}</span>
                       </div>
                       {selectedPrice && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-400 text-sm">Card Amount</span>
+                        <div className="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
+                          <span className="text-[#9a9a9a] text-sm">Card Amount</span>
                           <span className="text-white text-sm font-medium">{selectedPrice.price} {product?.recipientCurrencyCode || ""}</span>
                         </div>
                       )}
-                      <div className="flex justify-between">
-                        <span className="text-gray-400 text-sm">Number of Cards</span>
+                      <div className="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
+                        <span className="text-[#9a9a9a] text-sm">Number of Cards</span>
                         <span className="text-white text-sm font-medium">{quantity}</span>
                       </div>
                       {selectedPrice && (
                         <>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400 text-sm">Rate</span>
+                          <div className="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
+                            <span className="text-[#9a9a9a] text-sm">Rate</span>
                             <span className="text-white text-sm font-medium">₦{selectedPrice.amount.toLocaleString()}/{product?.recipientCurrencyCode || "$"}</span>
                           </div>
                           {selectedPrice.fee > 0 && (
-                            <div className="flex justify-between">
-                              <span className="text-gray-400 text-sm">Charges</span>
+                            <div className="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
+                              <span className="text-[#9a9a9a] text-sm">Charges</span>
                               <span className="text-white text-sm font-medium">{formatNgn(selectedPrice.fee)}</span>
                             </div>
                           )}
-                          <div className="flex justify-between">
-                            <span className="text-gray-400 text-sm">Amount</span>
+                          <div className="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
+                            <span className="text-[#9a9a9a] text-sm">Amount</span>
                             <span className="text-white text-sm font-medium">{formatNgn(totalAmount)}</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400 text-sm">Amount Debited</span>
+                          <div className="flex justify-between items-center">
+                            <span className="text-[#9a9a9a] text-sm">Amount Debited</span>
                             <span className="text-white text-sm font-medium">{formatNgn(totalAmount)}</span>
                           </div>
                         </>
@@ -564,11 +562,11 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                     </div>
 
                     <div className="flex flex-col gap-1">
-                      <label className="text-sm text-gray-400">Enter Transaction PIN</label>
-                      <div className="w-full flex items-center gap-3">
-                        <div className="flex-1 flex items-center bg-[#141416] border border-gray-800 rounded-lg py-3 px-4">
+                      <label className="text-sm text-[#bcbcbc]">Enter Transaction PIN</label>
+                      <div className="relative w-full">
+                        <div className="flex items-center rounded-md bg-[#1c1c1e] border border-[#2a2a2a] py-3 px-4">
                           <input
-                            className="w-full bg-transparent border-none outline-none text-white placeholder:text-gray-600 text-sm tracking-widest"
+                            className="w-full bg-transparent border-none outline-none text-white placeholder:text-[#7c7c7c] text-sm tracking-widest pr-12"
                             placeholder="••••"
                             type="password"
                             inputMode="numeric"
@@ -580,7 +578,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                         {fingerprintEnabled ? (
                           <button
                             type="button"
-                            className="w-11 h-11 rounded-lg bg-white border border-white flex items-center justify-center hover:bg-gray-100 transition-colors"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#f76301] hover:opacity-90 transition-opacity"
                             aria-label="Use fingerprint"
                             onClick={() =>
                               ErrorToast({
@@ -589,7 +587,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                               })
                             }
                           >
-                            <FaFingerprint className="text-black text-lg" />
+                            <FaFingerprint className="text-xl" />
                           </button>
                         ) : null}
                       </div>
@@ -654,7 +652,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                   <button
                     onClick={() => setStep("confirm")}
                     disabled={!canProceed}
-                    className="w-full px-4 py-3 rounded-full bg-[#FF6B2C] text-black font-semibold hover:bg-[#FF7A3D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-3 rounded-md bg-[#f76301] text-black font-semibold hover:bg-[#e55a00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Next
                   </button>
@@ -662,14 +660,14 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setStep("form")}
-                      className="flex-1 px-4 py-3 rounded-full bg-[#2C2C2E] text-white hover:bg-[#353539] transition-colors font-medium"
+                      className="flex-1 px-4 py-3 rounded-md bg-[#2c2c2e] text-white hover:bg-[#3a3a3c] transition-colors font-medium"
                     >
                       Back
                     </button>
                     <button
                       onClick={handleConfirm}
                       disabled={walletPin.length !== 4 || paying}
-                      className="flex-1 px-4 py-3 rounded-full bg-[#FF6B2C] text-black font-semibold hover:bg-[#FF7A3D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 px-4 py-3 rounded-md bg-[#f76301] text-black font-semibold hover:bg-[#e55a00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {paying ? "Processing..." : "Pay"}
                     </button>
@@ -680,14 +678,14 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                       <button
                         onClick={handleFetchRedeemCodes}
                         disabled={redeemLoading}
-                        className="flex-1 px-4 py-3 rounded-full bg-[#FF6B2C] text-black font-semibold hover:bg-[#FF7A3D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 px-4 py-3 rounded-md bg-[#f76301] text-black font-semibold hover:bg-[#e55a00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {redeemLoading ? "Loading..." : "Get Codes"}
                       </button>
                     )}
                     <button
                       onClick={handleClose}
-                      className="flex-1 px-4 py-3 rounded-full bg-[#2C2C2E] text-white hover:bg-[#353539] transition-colors font-medium"
+                      className="flex-1 px-4 py-3 rounded-md bg-[#2c2c2e] text-white hover:bg-[#3a3a3c] transition-colors font-medium"
                     >
                       Close
                     </button>
@@ -695,7 +693,7 @@ const BuyGiftCardModal: React.FC<BuyGiftCardModalProps> = ({ isOpen, onClose }) 
                 ) : step === "redeem" ? (
                   <button
                     onClick={handleClose}
-                    className="w-full px-4 py-3 rounded-full bg-[#FF6B2C] text-black font-semibold hover:bg-[#FF7A3D] transition-colors"
+                    className="w-full px-4 py-3 rounded-md bg-[#f76301] text-black font-semibold hover:bg-[#e55a00] transition-colors"
                   >
                     Done
                   </button>
