@@ -63,11 +63,16 @@ export interface IGetExchangeRate {
 }
 
 export interface ExchangeRateData {
-  rate: number;
-  amount: number;
-  convertedAmount: number;
-  fromCurrency: string;
-  toCurrency: string;
+  senderCurrency: string;
+  senderAmount: number;
+  recipientCurrency: string;
+  recipientAmount: number;
+  // Computed fields (for backward compatibility)
+  rate?: number;
+  amount?: number;
+  convertedAmount?: number;
+  fromCurrency?: string;
+  toCurrency?: string;
 }
 
 export interface IConvertCurrency {

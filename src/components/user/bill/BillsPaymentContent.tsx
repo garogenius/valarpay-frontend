@@ -74,7 +74,7 @@ const SECTIONS: Section[] = [
     tiles: [
       { label: "Movie Tickets", icon: BiCameraMovie, comingSoonTitle: "Movie Tickets" },
       { label: "Flight", icon: SlPlane, comingSoonTitle: "Flight" },
-      { label: "Bus Tickets", icon: IoBusOutline, comingSoonTitle: "Bus Tickets" },
+      { label: "Bus Tickets", icon: IoBusOutline, modal: "transport" },
       { label: "Hotel", icon: LuShieldPlus, comingSoonTitle: "Hotel" },
     ],
   },

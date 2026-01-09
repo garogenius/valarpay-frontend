@@ -83,45 +83,41 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
   const rate = useMemo(() => {
     if (!exchangeRate || !fromCur || !toCur) return 0;
     
+    // Use the computed rate from the API response
     const apiRate = Number(exchangeRate.rate || 0);
     if (apiRate <= 0) return 0;
     
-    // If converting FROM foreign TO NGN: use rate directly (e.g., 1 USD = 1500 NGN)
-    if (fromCur !== "NGN" && toCur === "NGN") {
+    // The API returns rate as recipientAmount / senderAmount
+    // We need to adjust based on conversion direction
+    if (fromCur === exchangeRate.senderCurrency && toCur === exchangeRate.recipientCurrency) {
+      // Direct match: use rate as is
       return apiRate;
-    }
-    
-    // If converting FROM NGN TO foreign: calculate inverse rate (e.g., 1 NGN = 1/1500 USD)
-    if (fromCur === "NGN" && toCur !== "NGN") {
+    } else if (fromCur === exchangeRate.recipientCurrency && toCur === exchangeRate.senderCurrency) {
+      // Reverse direction: use inverse rate
       return 1 / apiRate;
     }
     
-    // If both are foreign currencies, we'd need to convert through NGN
-    // For now, return 0 as this case might need special handling
-    return 0;
+    // Fallback: use computed rate
+    return apiRate;
   }, [exchangeRate, fromCur, toCur]);
 
   const converted = useMemo(() => {
-    if (amount <= 0 || rate <= 0 || !fromCur || !toCur) return 0;
+    if (amount <= 0 || !exchangeRate || !fromCur || !toCur) return 0;
     
-    // If converting FROM foreign TO NGN: use convertedAmount from API if available, otherwise calculate
-    if (fromCur !== "NGN" && toCur === "NGN") {
-      if (exchangeRate && Number(exchangeRate.convertedAmount) > 0) {
-        // Scale the convertedAmount based on the actual amount vs API amount
-        const scaleFactor = amount / apiAmount;
-        return Number(exchangeRate.convertedAmount) * scaleFactor;
-      }
+    // Calculate based on the actual API response structure
+    // Scale the recipientAmount based on the ratio of actual amount to senderAmount
+    if (exchangeRate.senderAmount > 0) {
+      const scaleFactor = amount / exchangeRate.senderAmount;
+      return exchangeRate.recipientAmount * scaleFactor;
+    }
+    
+    // Fallback: use rate calculation
+    if (rate > 0) {
       return amount * rate;
     }
     
-    // If converting FROM NGN TO foreign: calculate using inverse rate
-    if (fromCur === "NGN" && toCur !== "NGN") {
-      return amount * rate;
-    }
-    
-    // If both are foreign currencies, calculate using rate (though this might not work correctly)
-    return amount * rate;
-  }, [amount, rate, fromCur, toCur, exchangeRate, apiAmount]);
+    return 0;
+  }, [amount, rate, fromCur, toCur, exchangeRate]);
 
   const onConvertError = (error: any) => {
     const errorMessage = error?.response?.data?.message;

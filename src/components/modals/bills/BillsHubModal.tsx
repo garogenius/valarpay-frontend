@@ -11,6 +11,7 @@ import BettingBillSteps from "@/components/modals/betting/BettingBillSteps";
 import EducationBillSteps from "@/components/modals/bills/EducationBillSteps";
 import JambWaecBillSteps from "@/components/modals/bills/JambWaecBillSteps";
 import ConvertCurrencyBillSteps from "@/components/modals/bills/ConvertCurrencyBillSteps";
+import TransportBillSteps from "@/components/modals/bills/TransportBillSteps";
 import BuyGiftCardContent from "@/components/user/bill/gift-card/buy/BuyGiftCardContent";
 import RedeemGiftCardContent from "@/components/user/bill/gift-card/redeem/RedeemGiftCardContent";
 
@@ -26,7 +27,8 @@ export type BillModalKey =
   | "betting"
   | "education"
   | "jamb_waec"
-  | "convert";
+  | "convert"
+  | "transport";
 
 type BillsHubModalProps = {
   isOpen: boolean;
@@ -79,6 +81,8 @@ const BillsHubModal: React.FC<BillsHubModalProps> = ({ isOpen, onClose, initialB
         return <JambWaecBillSteps onClose={onClose} />;
       case "convert":
         return <ConvertCurrencyBillSteps onClose={onClose} />;
+      case "transport":
+        return <TransportBillSteps onClose={onClose} />;
       case "giftcard_buy":
         return <BuyGiftCardContent onSelectPath={onSelectPath} />;
       case "giftcard_redeem":

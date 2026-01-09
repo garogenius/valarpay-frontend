@@ -156,7 +156,19 @@ export const useGetExchangeRate = (payload: IGetExchangeRate & { enabled?: boole
     enabled: payload.enabled !== false && !!payload.currency && payload.amount > 0,
   });
 
-  const exchangeRate: ExchangeRateData | undefined = data?.data?.data;
+  const rawData = data?.data?.data;
+  
+  // Transform API response to include computed fields for backward compatibility
+  const exchangeRate: ExchangeRateData | undefined = rawData ? {
+    ...rawData,
+    // Compute rate: recipientAmount / senderAmount
+    rate: rawData.senderAmount > 0 ? rawData.recipientAmount / rawData.senderAmount : 0,
+    amount: rawData.senderAmount,
+    convertedAmount: rawData.recipientAmount,
+    fromCurrency: rawData.senderCurrency,
+    toCurrency: rawData.recipientCurrency,
+  } : undefined;
+  
   return { exchangeRate, isPending, isError };
 };
 
