@@ -209,3 +209,10 @@ input:-webkit-autofill:active {
     margin: 0.125rem !important;
   }
 }
+
+/* Hide small floating loaders in top-right/bottom-right corners */
+div[class*="fixed"][class*="right"]:has(svg[class*="animate-spin"]),
+div[class*="fixed"][class*="right"]:has([class*="loader"]),
+button[class*="fixed"][class*="right"]:has(svg[class*="animate-spin"]) {
+  display: none !important;
+}
