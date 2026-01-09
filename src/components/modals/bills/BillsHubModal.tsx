@@ -84,7 +84,7 @@ const BillsHubModal: React.FC<BillsHubModalProps> = ({ isOpen, onClose, initialB
       case "transport":
         return <TransportBillSteps onClose={onClose} />;
       case "giftcard_buy":
-        return <BuyGiftCardContent onSelectPath={onSelectPath} />;
+        return <BuyGiftCardContent onSelectPath={onSelectPath} onClose={onClose} />;
       case "giftcard_redeem":
         return <RedeemGiftCardContent onSelectPath={onSelectPath} />;
       default:

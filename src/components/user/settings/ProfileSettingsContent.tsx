@@ -404,13 +404,18 @@ const ProfileSettingsContent = () => {
       title: "Document Uploaded!",
       description: responseData?.data?.message || "Your document has been uploaded successfully",
     });
-    
-    // Reset form after successful upload
-    setSelectedDocumentType("");
-    setDocumentNumber("");
-    setDocumentCountry("");
-    setIssueDate("");
-    setExpiryDate("");
+
+    // Keep the saved document information visible after upload
+    const documentData = responseData?.data?.data;
+    if (documentData?.documentType) {
+      setSelectedDocumentType(documentData.documentType);
+      setDocumentNumber(documentData.documentNumber || "");
+      setDocumentCountry(documentData.documentCountry || "");
+      setIssueDate(normalizeDate(documentData.issueDate || ""));
+      setExpiryDate(normalizeDate(documentData.expiryDate || ""));
+    }
+
+    // Clear only the file input after successful upload
     setSelectedDocumentFile(null);
     if (documentFileInputRef.current) documentFileInputRef.current.value = "";
   };
@@ -435,6 +440,77 @@ const ProfileSettingsContent = () => {
       return "";
     }
   };
+
+  type SavedKycDocument = {
+    documentType:
+      | "passport"
+      | "bank_statement"
+      | "utility_bill"
+      | "drivers_license"
+      | "national_id";
+    documentNumber?: string;
+    documentCountry?: string;
+    issueDate?: string;
+    expiryDate?: string;
+  };
+
+  const savedKycDocument: SavedKycDocument | null = useMemo(() => {
+    const u: any = user;
+    if (!u) return null;
+
+    if (u.passportDocumentUrl) {
+      return {
+        documentType: "passport",
+        documentNumber: u.passportNumber,
+        documentCountry: u.passportCountry,
+        issueDate: u.passportIssueDate,
+        expiryDate: u.passportExpiryDate,
+      };
+    }
+    if (u.driversLicenseUrl) {
+      return {
+        documentType: "drivers_license",
+        documentNumber: u.driversLicenseNumber,
+        documentCountry: u.driversLicenseCountry,
+      };
+    }
+    if (u.nationalIdUrl) {
+      return {
+        documentType: "national_id",
+        documentNumber: u.nationalIdNumber,
+        documentCountry: u.nationalIdCountry,
+      };
+    }
+    if (u.bankStatementUrl) {
+      return {
+        documentType: "bank_statement",
+        issueDate: u.bankStatementIssueDate,
+        expiryDate: u.bankStatementExpiryDate,
+      };
+    }
+    if (u.utilityBillUrl) {
+      return {
+        documentType: "utility_bill",
+        issueDate: u.utilityBillIssueDate,
+        expiryDate: u.utilityBillExpiryDate,
+      };
+    }
+    return null;
+  }, [user]);
+
+  // Hydrate KYC upload form from already saved document (so "Select Document Type" shows what user uploaded)
+  useEffect(() => {
+    if (tab !== "kyc") return;
+    if (!savedKycDocument) return;
+    if (selectedDocumentType) return; // user is actively selecting/editing
+    if (selectedDocumentFile) return; // don't override mid-upload
+
+    setSelectedDocumentType(savedKycDocument.documentType);
+    setDocumentNumber(savedKycDocument.documentNumber || "");
+    setDocumentCountry(savedKycDocument.documentCountry || "");
+    setIssueDate(normalizeDate(savedKycDocument.issueDate || ""));
+    setExpiryDate(normalizeDate(savedKycDocument.expiryDate || ""));
+  }, [tab, savedKycDocument, selectedDocumentType, selectedDocumentFile]);
 
   // Handle document upload
   const handleDocumentUpload = () => {

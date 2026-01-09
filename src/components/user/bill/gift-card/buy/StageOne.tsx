@@ -26,6 +26,7 @@ import {
   handleNumericKeyDown,
 } from "@/utils/utilityFunctions";
 import RedeemInstructionModal from "@/components/modals/RedeemInstructionModal";
+import { IoClose } from "react-icons/io5";
 
 function processGiftCardPrices(
   product: GiftCardProduct
@@ -72,12 +73,14 @@ type StageOneProps = {
   setStage: (stage: "one" | "two" | "three") => void;
   setGiftCardDetails: (giftCardDetails: GiftCardDetails) => void;
   setAmount: (amount: string) => void;
+  onClose?: () => void;
 };
 
 const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
   setStage,
   setGiftCardDetails,
   setAmount,
+  onClose,
 }) => {
   const allCurrencies = getAllISOCodes();
   const [product, setProduct] = useState<GiftCardProduct>();
@@ -206,15 +209,30 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
 
   return (
     <>
-      <div className="w-full py-5 xs:py-10 flex flex-col items-center justify-center">
-        <div className="w-full sm:w-[85%] lg:w-[75%] xl:w-[65%] 2xl:w-[55%] dark:bg-[#000000] bg-transparent md:bg-[#F2F1EE] rounded-lg sm:rounded-xl p-0 2xs:p-4 md:p-8">
+      <div className="w-full flex items-center justify-center py-2">
+        <div className="w-full max-w-[420px] rounded-2xl border border-[#2a2a2a] bg-[#0c0c0c] px-5 py-5 shadow-2xl">
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="w-full flex flex-col gap-4 md:gap-6"
+            className="w-full flex flex-col gap-4"
           >
-            <h2 className="2xs:hidden text-2xl font-semibold text-text-800">
-              Buy Gift Card
-            </h2>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-white text-sm font-semibold">Buy Giftcards</p>
+                <p className="text-[#9a9a9a] text-xs mt-0.5">
+                  Enter payment details to continue
+                </p>
+              </div>
+              {onClose ? (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-[#bcbcbc] hover:text-white transition-colors"
+                  aria-label="Close"
+                >
+                  <IoClose className="w-5 h-5" />
+                </button>
+              ) : null}
+            </div>
 
             <div
               ref={currencyDropdownRef}
@@ -222,7 +240,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
             >
               <label
                 htmlFor="network"
-                className="text-base text-text-200 dark:text-text-400 mb-1 flex items-start w-full"
+                className="text-[11px] uppercase tracking-[0.25em] text-[#8a8a8a] mb-1 flex items-start w-full"
               >
                 Select Currency{" "}
               </label>
@@ -230,15 +248,15 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
                 onClick={() => {
                   setCurrencyState(!currencyState);
                 }}
-                className="w-full flex gap-2 justify-center items-center bg-bg-2000 border border-border-600 rounded-lg py-4 px-3"
+                className="w-full flex gap-2 justify-center items-center rounded-md bg-[#1c1c1e] border border-[#2a2a2a] py-3 px-4"
               >
-                <div className="w-full flex items-center justify-between text-text-700 dark:text-text-1000">
+                <div className="w-full flex items-center justify-between text-[#7c7c7c]">
                   {" "}
                   {!watchedCurrency ? (
-                    <p className="text-sm ">Select currency </p>
+                    <p className="text-sm">Select currency</p>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <p className=" text-sm font-medium">{watchedCurrency}</p>
+                      <p className="text-sm font-medium text-white">{watchedCurrency}</p>
                     </div>
                   )}
                   <motion.svg
@@ -246,7 +264,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
                       rotate: currencyState ? 180 : 0,
                     }}
                     transition={{ duration: 0.3 }}
-                    className="w-4 h-4 text-text-700 dark:text-text-1000 cursor-pointer"
+                    className="w-4 h-4 text-[#7c7c7c] cursor-pointer"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -263,13 +281,13 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
               </div>
 
               {currencyState && (
-                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-[#141416] border border-[#2a2a2a] rounded-xl shadow-2xl z-10 no-scrollbar">
                   <SearchableDropdown
                     items={allCurrencies}
                     searchKey="countryName"
                     displayFormat={(currency) => (
                       <div className="flex items-center gap-2">
-                        <p className=" 2xs:text-base text-sm font-medium text-text-200 dark:text-text-400">
+                        <p className="2xs:text-base text-sm font-medium text-white">
                           {currency.countryName} - {currency.currency}
                         </p>
                       </div>
@@ -307,7 +325,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
             >
               <label
                 htmlFor="network"
-                className="text-base text-text-200 dark:text-text-400 mb-1 flex items-start w-full"
+                className="text-[11px] uppercase tracking-[0.25em] text-[#8a8a8a] mb-1 flex items-start w-full"
               >
                 Gift Card Category
               </label>
@@ -315,15 +333,15 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
                 onClick={() => {
                   setCategoryState(!categoryState);
                 }}
-                className="w-full flex gap-2 justify-center items-center bg-bg-2000 border border-border-600 rounded-lg py-4 px-3"
+                className="w-full flex gap-2 justify-center items-center rounded-md bg-[#1c1c1e] border border-[#2a2a2a] py-3 px-4"
               >
-                <div className="w-full flex items-center justify-between text-text-700 dark:text-text-1000">
+                <div className="w-full flex items-center justify-between text-[#7c7c7c]">
                   {" "}
                   {!watchedCategory ? (
-                    <p className="text-sm ">Select category </p>
+                    <p className="text-sm">Select category</p>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <p className=" text-sm font-medium">{watchedCategory}</p>
+                      <p className="text-sm font-medium text-white">{watchedCategory}</p>
                     </div>
                   )}
                   <motion.svg
@@ -331,7 +349,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
                       rotate: categoryState ? 180 : 0,
                     }}
                     transition={{ duration: 0.3 }}
-                    className="w-4 h-4 text-text-700 dark:text-text-1000 cursor-pointer"
+                    className="w-4 h-4 text-[#7c7c7c] cursor-pointer"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -348,13 +366,13 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
               </div>
 
               {categoryState && (
-                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-[#141416] border border-[#2a2a2a] rounded-xl shadow-2xl z-10 no-scrollbar">
                   <SearchableDropdown
                     items={categories}
                     searchKey="name"
                     displayFormat={(category) => (
                       <div className="flex items-center gap-2">
-                        <p className="2xs:text-base text-sm font-medium text-text-200 dark:text-text-400">
+                        <p className="2xs:text-base text-sm font-medium text-white">
                           {category.name}
                         </p>
                       </div>
@@ -391,7 +409,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
             >
               <label
                 htmlFor="product"
-                className="text-base text-text-200 dark:text-text-400 mb-1 flex items-start w-full"
+                className="text-[11px] uppercase tracking-[0.25em] text-[#8a8a8a] mb-1 flex items-start w-full"
               >
                 Gift Card Product
               </label>
@@ -401,16 +419,16 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
                     setProductState(!productState);
                   }
                 }}
-                className="w-full flex gap-2 justify-center items-center bg-bg-2000 border border-border-600 rounded-lg py-4 px-3"
+                className="w-full flex gap-2 justify-center items-center rounded-md bg-[#1c1c1e] border border-[#2a2a2a] py-3 px-4"
               >
-                <div className="w-full flex items-center justify-between text-text-700 dark:text-text-1000">
+                <div className="w-full flex items-center justify-between text-[#7c7c7c]">
                   {" "}
                   {!watchedCurrency ? (
-                    <p className="text-sm ">Select currency </p>
+                    <p className="text-sm">Select currency</p>
                   ) : !watchedCategory ? (
-                    <p className="text-sm ">Select category </p>
+                    <p className="text-sm">Select category</p>
                   ) : !watchedProduct || !product ? (
-                    <p className="text-sm ">Select product </p>
+                    <p className="text-sm">Select product</p>
                   ) : (
                     <div className="flex items-center gap-2">
                       {product?.logoUrls[0] ? (
@@ -433,7 +451,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
                       rotate: productState ? 180 : 0,
                     }}
                     transition={{ duration: 0.3 }}
-                    className="w-4 h-4 text-text-700 dark:text-text-1000 cursor-pointer"
+                    className="w-4 h-4 text-[#7c7c7c] cursor-pointer"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -450,7 +468,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
               </div>
 
               {productState && (
-                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-[#141416] border border-[#2a2a2a] rounded-xl shadow-2xl z-10 no-scrollbar">
                   <SearchableDropdown
                     items={products?.filter(
                       (product) => product.category.name === watchedCategory
@@ -468,7 +486,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
                             unoptimized
                           />
                         ) : null}
-                        <p className="2xs:text-base text-sm font-medium text-text-200 dark:text-text-400">
+                        <p className="2xs:text-base text-sm font-medium text-white">
                           {product.productName}
                         </p>
                       </div>
@@ -493,7 +511,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
               )}
               {product?.redeemInstruction && (
                 <p
-                  className="text-sm text-primary cursor-pointer"
+                  className="text-sm text-[#f76301] cursor-pointer"
                   onClick={() => setOpenRedeemInstruction(true)}
                 >
                   View redeem instructions
@@ -507,16 +525,16 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
               ) : null}
             </div>
 
-            <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+            <div className="flex flex-col justify-center items-center gap-1 w-full text-white">
               <label
-                className="w-full text-sm sm:text-base font-medium  text-text-200 dark:text-text-800 mb-1 flex items-start "
+                className="w-full text-[11px] uppercase tracking-[0.25em] text-[#8a8a8a] mb-1 flex items-start "
                 htmlFor={"quantity"}
               >
                 Quantity
               </label>
-              <div className="w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+              <div className="w-full flex gap-2 justify-center items-center rounded-md bg-[#1c1c1e] border border-[#2a2a2a] py-3 px-4">
                 <input
-                  className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
+                  className="w-full bg-transparent p-0 border-none outline-none text-sm text-white placeholder:text-[#7c7c7c]"
                   placeholder={`Enter quantity`}
                   required={true}
                   type="number"
@@ -552,7 +570,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
             >
               <label
                 htmlFor="price"
-                className="text-base text-text-200 dark:text-text-400 mb-1 flex items-start w-full"
+                className="text-[11px] uppercase tracking-[0.25em] text-[#8a8a8a] mb-1 flex items-start w-full"
               >
                 Price{" "}
                 {product && product?.recipientCurrencyCode
@@ -565,17 +583,17 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
                     setPriceState(!priceState);
                   }
                 }}
-                className="w-full flex gap-2 justify-center items-center bg-bg-2000 border border-border-600 rounded-lg py-4 px-3"
+                className="w-full flex gap-2 justify-center items-center rounded-md bg-[#1c1c1e] border border-[#2a2a2a] py-3 px-4"
               >
-                <div className="w-full flex items-center justify-between text-text-700 dark:text-text-1000">
+                <div className="w-full flex items-center justify-between text-[#7c7c7c]">
                   {!watchedCurrency ? (
-                    <p className="text-sm ">Select currency </p>
+                    <p className="text-sm">Select currency</p>
                   ) : !watchedCategory ? (
-                    <p className="text-sm ">Select category </p>
+                    <p className="text-sm">Select category</p>
                   ) : !watchedProduct && !product ? (
-                    <p className="text-sm ">Select product </p>
+                    <p className="text-sm">Select product</p>
                   ) : !watchedQuantity || watchedQuantity < 1 ? (
-                    <p className="text-sm ">Enter a valid quantity</p>
+                    <p className="text-sm">Enter a valid quantity</p>
                   ) : !watchedUnitPrice || prices.length < 1 ? (
                     <p className="text-sm ">
                       Select gift card price{" "}
@@ -585,7 +603,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
                     </p>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <p className=" text-sm font-medium">
+                      <p className="text-sm font-medium text-white">
                         {Number(watchedUnitPrice).toLocaleString()}{" "}
                         {product?.recipientCurrencyCode}
                       </p>
@@ -596,7 +614,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
                       rotate: priceState ? 180 : 0,
                     }}
                     transition={{ duration: 0.3 }}
-                    className="w-4 h-4 text-text-700 dark:text-text-1000 cursor-pointer"
+                    className="w-4 h-4 text-[#7c7c7c] cursor-pointer"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -613,13 +631,13 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
               </div>
 
               {priceState && (
-                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
+                <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-[#141416] border border-[#2a2a2a] rounded-xl shadow-2xl z-10 no-scrollbar">
                   <SearchableDropdown
                     items={prices}
                     searchKey="price"
                     displayFormat={(price) => (
                       <div className="flex items-center gap-2">
-                        <p className="2xs:text-base text-sm font-medium text-text-200 dark:text-text-400">
+                        <p className="2xs:text-base text-sm font-medium text-white">
                           {price.price} {product?.recipientCurrencyCode}
                         </p>
                       </div>
@@ -641,7 +659,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
                 </div>
               )}
 
-              <div className="flex flex-col gap-1 self-start text-sm text-primary">
+              <div className="flex flex-col gap-1 self-start text-sm text-[#f76301]">
                 {watchedFee ? (
                   <p>Fee: {`₦${watchedFee.toLocaleString()}`}</p>
                 ) : null}
@@ -664,7 +682,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
 
             <CustomButton
               type="submit"
-              className="w-full border-2 dark:text-black dark:font-bold border-primary text-white text-base 2xs:text-lg max-2xs:px-6 py-3.5"
+              className="w-full rounded-md bg-[#f76301] hover:bg-[#e55a00] text-black font-semibold py-3"
             >
               Next{" "}
             </CustomButton>

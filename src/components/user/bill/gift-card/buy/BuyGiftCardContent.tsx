@@ -13,7 +13,10 @@ import { BILL_TYPE, GiftCardDetails } from "@/constants/types";
 import GiftCardNav from "../GiftCardNav";
 import { usePayForGiftCard } from "@/api/gift-card/gift-card.queries";
 
-const BuyGiftCardContent: React.FC<{ onSelectPath?: (path: string) => void }> = ({ onSelectPath }) => {
+const BuyGiftCardContent: React.FC<{
+  onSelectPath?: (path: string) => void;
+  onClose?: () => void;
+}> = ({ onSelectPath, onClose }) => {
   const [stage, setStage] = useState<"one" | "two" | "three">("one");
   const [phone, _setPhone] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
@@ -48,7 +51,7 @@ const BuyGiftCardContent: React.FC<{ onSelectPath?: (path: string) => void }> = 
   const giftCardLoading = giftCardPending && !giftCardError;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       {stage === "two" && (
         <div
           onClick={() => {
@@ -67,6 +70,7 @@ const BuyGiftCardContent: React.FC<{ onSelectPath?: (path: string) => void }> = 
             setStage={setStage}
             setGiftCardDetails={setGiftCardDetails}
             setAmount={setAmount}
+            onClose={onClose}
           />
         )}
         {stage === "two" && (
@@ -93,6 +97,8 @@ const BuyGiftCardContent: React.FC<{ onSelectPath?: (path: string) => void }> = 
             isLoading={giftCardLoading}
             isBeneficiaryChecked={isBeneficiaryChecked}
             checkoutMessage={`Gift Card Purchase`}
+            compact
+            onClose={onClose}
           />
         )}
         {stage === "three" && (

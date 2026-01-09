@@ -3,7 +3,7 @@ import type { IPayEducation, IVerifyEducationCustomer, IPayJambWaec, IVerifyJamb
 
 export const getEducationBillersRequest = async () => {
   return request({
-    url: "/api/v1/bill/education/billers",
+    url: "/bill/education/billers",
     method: "get",
   });
 };
@@ -14,7 +14,7 @@ export const getEducationBillerItemsRequest = async ({
   billerCode: string;
 }) => {
   return request({
-    url: `/api/v1/bill/education/biller-items?billerCode=${billerCode}`,
+    url: `/bill/education/biller-items?billerCode=${billerCode}`,
     method: "get",
   });
 };
@@ -22,7 +22,7 @@ export const getEducationBillerItemsRequest = async ({
 // School fee bill info (returns plans/services)
 export const getSchoolBillInfoRequest = async (billerCode: string) => {
   return request({
-    url: `/api/v1/bill/school/get-bill-info?billerCode=${billerCode}`,
+    url: `/bill/school/get-bill-info?billerCode=${billerCode}`,
     method: "get",
   });
 };
@@ -31,7 +31,7 @@ export const verifyEducationCustomerRequest = async (
   formdata: IVerifyEducationCustomer
 ) => {
   return request({
-    url: "/api/v1/bill/education/verify-customer",
+    url: "/bill/education/verify-customer",
     method: "post",
     data: formdata,
   });
@@ -44,7 +44,7 @@ export const verifySchoolBillerNumberRequest = async (formdata: {
   billerNumber: string;
 }) => {
   return request({
-    url: "/api/v1/bill/school/verify-biller-number",
+    url: "/bill/school/verify-biller-number",
     method: "post",
     data: formdata,
   });
@@ -52,7 +52,7 @@ export const verifySchoolBillerNumberRequest = async (formdata: {
 
 export const payEducationSchoolFeeRequest = async (formdata: IPayEducation) => {
   return request({
-    url: "/api/v1/bill/education/school-fee/pay",
+    url: "/bill/education/school-fee/pay",
     method: "post",
     data: formdata,
   });
@@ -69,7 +69,7 @@ export const paySchoolFeeRequest = async (formdata: {
   addBeneficiary?: boolean;
 }) => {
   return request({
-    url: "/api/v1/bill/school/pay",
+    url: "/bill/school/pay",
     method: "post",
     data: formdata,
   });
@@ -78,21 +78,21 @@ export const paySchoolFeeRequest = async (formdata: {
 // JAMB & WAEC APIs
 export const getWaecPlanRequest = async () => {
   return request({
-    url: "/api/v1/bill/waec/get-plan",
+    url: "/bill/waec/get-plan",
     method: "get",
   });
 };
 
 export const getJambPlanRequest = async () => {
   return request({
-    url: "/api/v1/bill/jamb/get-plan",
+    url: "/bill/jamb/get-plan",
     method: "get",
   });
 };
 
 export const verifyWaecBillerNumberRequest = async (formdata: IVerifyJambWaec) => {
   return request({
-    url: "/api/v1/bill/waec/verify-biller-number",
+    url: "/bill/waec/verify-biller-number",
     method: "post",
     data: formdata,
   });
@@ -100,7 +100,7 @@ export const verifyWaecBillerNumberRequest = async (formdata: IVerifyJambWaec) =
 
 export const verifyJambBillerNumberRequest = async (formdata: IVerifyJambWaec) => {
   return request({
-    url: "/api/v1/bill/jamb/verify-biller-number",
+    url: "/bill/jamb/verify-biller-number",
     method: "post",
     data: formdata,
   });
@@ -108,7 +108,7 @@ export const verifyJambBillerNumberRequest = async (formdata: IVerifyJambWaec) =
 
 export const payWaecRequest = async (formdata: IPayJambWaec) => {
   return request({
-    url: "/api/v1/bill/waec/pay",
+    url: "/bill/waec/pay",
     method: "post",
     data: formdata,
   });
@@ -116,7 +116,7 @@ export const payWaecRequest = async (formdata: IPayJambWaec) => {
 
 export const payJambRequest = async (formdata: IPayJambWaec) => {
   return request({
-    url: "/api/v1/bill/jamb/pay",
+    url: "/bill/jamb/pay",
     method: "post",
     data: formdata,
   });
