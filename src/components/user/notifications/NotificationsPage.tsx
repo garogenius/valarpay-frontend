@@ -12,9 +12,9 @@ import {
 const tabs = [
   { key: "ALL", label: "All", labelShort: "All" },
   { key: "TRANSACTIONS", label: "Transactions", labelShort: "Transactions" },
-  { key: "UPDATES", label: "Updates", labelShort: "Updates" },
-  { key: "SERVICES", label: "Services", labelShort: "Services" },
-  { key: "MESSAGES", label: "Messages", labelShort: "Messages" },
+  { key: "UPDATES", label: "Updates from the bank", labelShort: "Updates" },
+  { key: "SERVICES", label: "Services of the bank", labelShort: "Services" },
+  { key: "MESSAGES", label: "Messages from the bank", labelShort: "Messages" },
 ] as const;
 
 type TabKey = typeof tabs[number]["key"];
