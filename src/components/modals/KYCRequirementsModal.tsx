@@ -139,3 +139,4 @@ const KYCRequirementsModal: React.FC<KYCRequirementsModalProps> = ({
 export default KYCRequirementsModal;
 
 
+

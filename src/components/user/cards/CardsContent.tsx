@@ -75,7 +75,7 @@ const CardsContent: React.FC = () => {
   
   useOnClickOutside(currencyDropdownRef, () => setCurrencyDropdownOpen(false));
 
-  // Fetch all virtual cards (USD, NGN)
+  // Fetch all virtual cards (currently USD and NGN only; EUR and GBP coming soon)
   const { cards, isPending: cardsLoading, refetch: refetchCards } = useGetCards();
   const safeCards = Array.isArray(cards) ? cards : [];
   // All cards from useGetCards() are virtual cards, so we just filter by currency
@@ -399,7 +399,8 @@ const CardsContent: React.FC = () => {
       <div className="text-center max-w-md space-y-3">
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-2">
           <p className="text-yellow-400 text-xs sm:text-sm font-medium mb-1">Important Notice</p>
-          <p className="text-white/80 text-xs sm:text-sm">• Only USD and NGN virtual cards are available</p>
+          <p className="text-white/80 text-xs sm:text-sm">• Virtual cards are currently available for USD and NGN only</p>
+          <p className="text-white/80 text-xs sm:text-sm">• EUR and GBP virtual cards coming soon</p>
           <p className="text-white/80 text-xs sm:text-sm">• You must have a corresponding currency account before creating a virtual card</p>
         </div>
         {!hasCurrencyAccount("USD") && !hasCurrencyAccount("NGN") ? (

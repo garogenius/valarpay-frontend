@@ -265,46 +265,23 @@ export const createVirtualCardRequest = async (formdata: ICreateVirtualCard) => 
   });
 };
 
-export const getVirtualCardDetailsRequest = ({
-  cardId,
-  provider,
-}: {
-  cardId: string;
-  provider?: string;
-}) => {
-  const queryParams = new URLSearchParams();
-  if (provider) queryParams.set("provider", provider);
+export const getVirtualCardDetailsRequest = (cardId: string) => {
   return request({
-    url: `/wallet/virtual-card/${cardId}${queryParams.toString() ? `?${queryParams.toString()}` : ""}`,
+    url: `/wallet/virtual-card/${cardId}`,
+    method: "get",
   });
 };
 
-export const freezeVirtualCardRequest = ({
-  cardId,
-  provider,
-}: {
-  cardId: string;
-  provider?: string;
-}) => {
-  const queryParams = new URLSearchParams();
-  if (provider) queryParams.set("provider", provider);
+export const freezeVirtualCardRequest = (cardId: string) => {
   return request({
-    url: `/wallet/virtual-card/${cardId}/freeze${queryParams.toString() ? `?${queryParams.toString()}` : ""}`,
+    url: `/wallet/virtual-card/${cardId}/freeze`,
     method: "post",
   });
 };
 
-export const unfreezeVirtualCardRequest = ({
-  cardId,
-  provider,
-}: {
-  cardId: string;
-  provider?: string;
-}) => {
-  const queryParams = new URLSearchParams();
-  if (provider) queryParams.set("provider", provider);
+export const unfreezeVirtualCardRequest = (cardId: string) => {
   return request({
-    url: `/wallet/virtual-card/${cardId}/unfreeze${queryParams.toString() ? `?${queryParams.toString()}` : ""}`,
+    url: `/wallet/virtual-card/${cardId}/unfreeze`,
     method: "post",
   });
 };

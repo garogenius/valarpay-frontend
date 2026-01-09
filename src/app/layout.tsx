@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/ThemeProvider";
-import NextTopLoader from "nextjs-toploader";
+import CustomTopLoader from "@/components/shared/CustomTopLoader";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Toaster } from "react-hot-toast";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
@@ -60,7 +60,7 @@ export default function RootLayout({
                   duration: 15000,
                 }}
               />
-              <NextTopLoader color="#D4B139" showSpinner={false} />
+              <CustomTopLoader />
               <main className="w-full overflow-hidden">{children}</main>
             </UserProvider>
           </ReactQueryProvider>

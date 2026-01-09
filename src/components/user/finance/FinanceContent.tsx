@@ -126,6 +126,27 @@ const FinanceContent = () => {
     (activeTab === "fixed-deposit" && fixedDepositsError) ||
     (activeTab === "easylife-savings" && easyLifePlansError);
 
+  const handleCreatePlan = () => {
+    if (activeTab === "target-savings") {
+      setCreateTargetOpen(true);
+    } else if (activeTab === "fixed-deposit") {
+      setCreateDepositOpen(true);
+    } else if (activeTab === "easylife-savings") {
+      setCreateEasyOpen(true);
+    }
+  };
+
+  const getCreateButtonLabel = () => {
+    if (activeTab === "target-savings") {
+      return "Start Target Savings";
+    } else if (activeTab === "fixed-deposit") {
+      return "Start Fixed Deposit";
+    } else if (activeTab === "easylife-savings") {
+      return "Start EasyLife Savings";
+    }
+    return "Start New Plan";
+  };
+
   const renderEmptyState = () => (
     <div className="flex flex-col items-center justify-center py-16 px-4">
       <div className="w-24 h-24 rounded-full bg-[#2C2C2E] flex items-center justify-center mb-6 border-4 border-gray-600">
@@ -136,10 +157,10 @@ const FinanceContent = () => {
       </p>
       <div className="mt-8">
         <CustomButton
-          onClick={() => setStartNewPlanOpen(true)}
+          onClick={handleCreatePlan}
           className="px-8 py-3 rounded-full"
         >
-          Start New Plan
+          {getCreateButtonLabel()}
         </CustomButton>
       </div>
     </div>
@@ -156,10 +177,10 @@ const FinanceContent = () => {
           </p>
         </div>
       <CustomButton
-        onClick={() => setStartNewPlanOpen(true)}
+        onClick={handleCreatePlan}
         className="flex-shrink-0 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-sm font-semibold whitespace-nowrap"
       >
-        Start New Plan
+        {getCreateButtonLabel()}
       </CustomButton>
       </div>
 

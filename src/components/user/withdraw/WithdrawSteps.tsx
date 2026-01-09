@@ -290,7 +290,7 @@ const WithdrawSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (!canProceedConfirm) return;
     
     // Show processing loader
-    useGlobalModalsStore.getState().showProcessingLoaderModal("Processing your withdrawal...");
+    useGlobalModalsStore.getState().showProcessingLoaderModal();
     
     initiateTransfer({
       accountName: bankData.accountName,

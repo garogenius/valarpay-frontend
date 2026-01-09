@@ -14,11 +14,10 @@ const DashboardContent = () => {
   const hasNgnWallet = !!user?.wallet?.find((w: any) => w.currency === "NGN");
   const isBvnVerified =
     hasNgnWallet || (user?.tierLevel !== TIER_LEVEL.notSet && user?.isBvnVerified);
-  const isNinVerified = user?.isNinVerified || false;
   const isPinCreated = user?.isWalletPinSet;
 
-  // User must verify either BVN or NIN
-  const isIdentityVerified = isBvnVerified || isNinVerified;
+  // User must verify BVN
+  const isIdentityVerified = isBvnVerified;
   const isVerified = isIdentityVerified && isPinCreated;
 
   const [verificationStatus, setVerificationStatus] = useState(isVerified);
@@ -26,7 +25,7 @@ const DashboardContent = () => {
 
   useEffect(() => {
     setVerificationStatus(isVerified);
-    // Show modal if user hasn't verified BVN or NIN
+    // Show modal if user hasn't verified BVN
     // Only show if not verified, don't hide if already showing (to prevent flicker)
     if (!isIdentityVerified && !showVerificationModal) {
       setShowVerificationModal(true);

@@ -315,16 +315,14 @@ export const useCreateVirtualCard = (
 
 export const useGetVirtualCardDetails = ({
   cardId,
-  provider,
   enabled,
 }: {
   cardId?: string;
-  provider?: string;
   enabled: boolean;
 }) => {
   const { data, isPending, isError } = useQuery({
-    queryKey: ["virtualCard", { cardId, provider }],
-    queryFn: () => getVirtualCardDetailsRequest({ cardId: cardId as string, provider }),
+    queryKey: ["virtualCard", cardId],
+    queryFn: () => getVirtualCardDetailsRequest(cardId as string),
     enabled: enabled && !!cardId,
   });
 
@@ -339,7 +337,7 @@ export const useFreezeVirtualCard = (
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: freezeVirtualCardRequest,
+    mutationFn: (cardId: string) => freezeVirtualCardRequest(cardId),
     onError,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["virtualCard"] });
@@ -354,7 +352,7 @@ export const useUnfreezeVirtualCard = (
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: unfreezeVirtualCardRequest,
+    mutationFn: (cardId: string) => unfreezeVirtualCardRequest(cardId),
     onError,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["virtualCard"] });

@@ -340,7 +340,7 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (!provider?.billerCode || !plan || !canPay) return;
     
     // Show processing loader
-    useGlobalModalsStore.getState().showProcessingLoaderModal("Processing your internet payment...");
+    useGlobalModalsStore.getState().showProcessingLoaderModal();
     
     payInternet({
       billerCode: provider.billerCode,

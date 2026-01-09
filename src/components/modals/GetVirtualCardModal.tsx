@@ -79,7 +79,6 @@ const GetVirtualCardModal: React.FC<GetVirtualCardModalProps> = ({
         walletId,
         currency: "USD",
         cardholderName,
-        provider: "graph",
       });
       return;
     }

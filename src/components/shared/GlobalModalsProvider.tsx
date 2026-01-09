@@ -89,7 +89,6 @@ const GlobalModalsProvider: React.FC = () => {
 
       <TransactionProcessingLoader
         isOpen={showProcessingLoader}
-        message={processingLoaderMessage}
       />
     </>
   );

@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import useUserStore from "@/store/user.store";
 import { TIER_LEVEL } from "@/constants/types";
 import BvnForm from "@/components/user/dashboard/BvnForm";
-import NinForm from "@/components/user/dashboard/NinForm";
 import VerifyBvnForm from "@/components/user/dashboard/VerifyBvnForm";
 import CreatePinForm from "@/components/user/dashboard/CreatePinForm";
 import BvnFaceCaptureModal from "@/components/modals/BvnFaceCaptureModal";
@@ -33,11 +32,8 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
   const hasNgnWallet = !!user?.wallet?.find((w: any) => w.currency === "NGN");
   const isBvnVerified =
     hasNgnWallet || (user?.tierLevel !== TIER_LEVEL.notSet && user?.isBvnVerified);
-  const isNinVerified = user?.isNinVerified || false;
-  const isIdentityVerified = isBvnVerified || isNinVerified;
+  const isIdentityVerified = isBvnVerified;
   const isPinCreated = user?.isWalletPinSet;
-
-  const [identityType, setIdentityType] = useState<"nin" | "bvn">("nin");
   const [currentStep, setCurrentStep] = useState(
     (isIdentityVerified && !isPinCreated) ? 2 : (isIdentityVerified && isPinCreated) ? 2 : 1
   );
@@ -133,7 +129,7 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
         onSuccess?.();
       }, 1500);
     }
-  }, [isBvnVerified, isNinVerified, isIdentityVerified, isPinCreated, isRequired, onSuccess]);
+  }, [isBvnVerified, isIdentityVerified, isPinCreated, isRequired, onSuccess]);
 
   // OTP Validation handlers
   const onOtpValidationError = (error: any) => {
@@ -159,13 +155,13 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
 
   const handleComplete = (step: number) => {
     if (step === 1) {
-      // Identity verified (BVN or NIN) - check if BVN OTP method was used
-      if (identityType === "bvn" && bvnDetails.verificationMethod === "otp" && bvnDetails.verificationId) {
+      // Identity verified (BVN) - check if BVN OTP method was used
+      if (bvnDetails.verificationMethod === "otp" && bvnDetails.verificationId) {
         // Show OTP step for BVN
         setShowOtpStep(true);
         setCurrentStep(1.5); // Intermediate step for OTP
       } else {
-        // NIN verified or BVN Face ID - move to PIN step
+        // BVN Face ID - move to PIN step
         setCurrentStep(2);
       }
       return;
@@ -243,87 +239,29 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
                         Verify Your Identity
                       </h2>
                       <p className="w-full max-w-md text-center text-white/60 text-xs sm:text-sm">
-                        If you want to open account with
+                        Verify your identity using your BVN to complete your account setup
                       </p>
                     </div>
 
-                    {/* NIN/BVN Selection */}
+                    {/* BVN Form */}
                     <div className="w-full max-w-md mx-auto flex flex-col gap-4">
-                      <div className="flex gap-3">
-                        <label className="flex-1 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="identityType"
-                            value="nin"
-                            checked={identityType === "nin"}
-                            onChange={() => setIdentityType("nin")}
-                            className="hidden"
-                          />
-                          <div className={`w-full p-4 rounded-xl border-2 transition-all ${
-                            identityType === "nin"
-                              ? "border-[#FF6B2C] bg-[#FF6B2C]/10"
-                              : "border-gray-700 bg-[#1C1C1E] hover:bg-[#2C2C2E]"
-                          }`}>
-                            <div className="flex items-center justify-center">
-                              <span className={`text-sm font-semibold ${
-                                identityType === "nin"
-                                  ? "text-[#FF6B2C]"
-                                  : "text-gray-300"
-                              }`}>
-                                NIN
-                              </span>
-                            </div>
-                          </div>
-                        </label>
-                        <label className="flex-1 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="identityType"
-                            value="bvn"
-                            checked={identityType === "bvn"}
-                            onChange={() => setIdentityType("bvn")}
-                            className="hidden"
-                          />
-                          <div className={`w-full p-4 rounded-xl border-2 transition-all ${
-                            identityType === "bvn"
-                              ? "border-[#FF6B2C] bg-[#FF6B2C]/10"
-                              : "border-gray-700 bg-[#1C1C1E] hover:bg-[#2C2C2E]"
-                          }`}>
-                            <div className="flex items-center justify-center">
-                              <span className={`text-sm font-semibold ${
-                                identityType === "bvn"
-                                  ? "text-[#FF6B2C]"
-                                  : "text-gray-300"
-                              }`}>
-                                BVN
-                              </span>
-                            </div>
-                          </div>
-                        </label>
-                      </div>
-
-                      {/* Show appropriate form based on selection */}
-                      {identityType === "nin" ? (
-                        <NinForm handleComplete={handleComplete} />
-                      ) : (
-                        <BvnForm
-                          handleComplete={handleComplete}
-                          setBvnDetails={(bvnDetails) => {
-                            setBvnDetails({
-                              ...bvnDetails,
-                              verificationMethod: bvnDetails.verificationMethod || "otp",
-                            });
-                          }}
-                          verificationMethod={bvnDetails.verificationMethod}
-                          setVerificationMethod={(method) => {
-                            setBvnDetails({ ...bvnDetails, verificationMethod: method });
-                          }}
-                          onFaceIdSelected={(bvn) => {
-                            setBvnDetails({ ...bvnDetails, bvn });
-                            setShowFaceCapture(true);
-                          }}
-                        />
-                      )}
+                      <BvnForm
+                        handleComplete={handleComplete}
+                        setBvnDetails={(bvnDetails) => {
+                          setBvnDetails({
+                            ...bvnDetails,
+                            verificationMethod: bvnDetails.verificationMethod || "otp",
+                          });
+                        }}
+                        verificationMethod={bvnDetails.verificationMethod}
+                        setVerificationMethod={(method) => {
+                          setBvnDetails({ ...bvnDetails, verificationMethod: method });
+                        }}
+                        onFaceIdSelected={(bvn) => {
+                          setBvnDetails({ ...bvnDetails, bvn });
+                          setShowFaceCapture(true);
+                        }}
+                      />
                     </div>
                   </>
                 )}

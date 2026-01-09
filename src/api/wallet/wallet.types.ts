@@ -37,12 +37,11 @@ export interface WalletAccount {
   bankName?: string;
 }
 
-// Virtual USD cards
+// Virtual multi-currency cards (USD, GBP, EUR, NGN)
 export interface ICreateVirtualCard {
   walletId: string;
-  currency: "USD";
+  currency: "USD" | "GBP" | "EUR" | "NGN";
   cardholderName: string;
-  provider: WALLET_PROVIDER;
 }
 
 export interface VirtualCard {
@@ -51,9 +50,9 @@ export interface VirtualCard {
   cvv: string;
   expiryMonth: string;
   expiryYear: string;
-  cardType: string;
-  currency: "USD";
-  status: string;
+  cardType: "virtual";
+  currency: "USD" | "GBP" | "EUR" | "NGN";
+  status: "active" | "frozen" | "blocked" | "closed";
 }
 
 // FX / currency conversion

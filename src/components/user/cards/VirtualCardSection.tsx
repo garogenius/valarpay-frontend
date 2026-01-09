@@ -221,9 +221,9 @@ const VirtualCardSection = () => {
             onClick={() => {
               if (!storedCardId) return;
               if (isFrozen) {
-                unfreezeCard({ cardId: storedCardId, provider: "graph" });
+                unfreezeCard(storedCardId);
               } else {
-                freezeCard({ cardId: storedCardId, provider: "graph" });
+                freezeCard(storedCardId);
               }
             }}
             className={cn(

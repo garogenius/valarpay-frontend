@@ -307,7 +307,7 @@ const TransferProcess = ({
   const handleConfirmTransaction = (walletPin: string) => {
     if (bankData) {
       // Show processing loader
-      useGlobalModalsStore.getState().showProcessingLoaderModal("Processing your transfer...");
+      useGlobalModalsStore.getState().showProcessingLoaderModal();
       
       setShowConfirmModal(false);
       
