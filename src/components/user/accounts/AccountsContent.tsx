@@ -602,9 +602,9 @@ const AccountsContent: React.FC = () => {
                 </div>
                               </div>
                             )}
-              </div>
-            </div>
-                      ) : (
+                      </div>
+                    </div>
+                  ) : (
                         <div className="flex flex-col gap-3">
                           {currencyCards.map((card: any) => (
                             <div key={card.id} className="border border-white/10 rounded-xl p-4 bg-white/5">
@@ -648,12 +648,10 @@ const AccountsContent: React.FC = () => {
                               </div>
                             </div>
                           ))}
-              </div>
+                        </div>
                       )}
-                    </>
+                    </div>
                   )}
-                </div>
-              )}
 
               {/* Virtual Cards - For EUR and GBP (Not Available Yet) */}
               {(selectedCurrency === "EUR" || selectedCurrency === "GBP") && (

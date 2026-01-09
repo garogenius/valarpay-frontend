@@ -29,7 +29,6 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
   const { user } = useUserStore();
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
 
   if (!isOpen || !transaction) return null;
 
