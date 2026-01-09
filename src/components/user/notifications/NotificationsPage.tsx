@@ -10,11 +10,11 @@ import {
 } from "@/api/notification/notification.queries";
 
 const tabs = [
-  { key: "ALL", label: "All transactions" },
-  { key: "TRANSACTIONS", label: "All transactions" },
-  { key: "UPDATES", label: "Updates from the bank" },
-  { key: "SERVICES", label: "Services of the bank" },
-  { key: "MESSAGES", label: "Messages from the bank" },
+  { key: "ALL", label: "All", labelShort: "All" },
+  { key: "TRANSACTIONS", label: "Transactions", labelShort: "Transactions" },
+  { key: "UPDATES", label: "Updates", labelShort: "Updates" },
+  { key: "SERVICES", label: "Services", labelShort: "Services" },
+  { key: "MESSAGES", label: "Messages", labelShort: "Messages" },
 ] as const;
 
 type TabKey = typeof tabs[number]["key"];
@@ -89,11 +89,12 @@ const NotificationsPage = () => {
             <button
               key={t.key}
               onClick={() => setActive(t.key)}
-              className={`flex items-center text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-full border ${
+              className={`flex items-center text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-full border whitespace-nowrap ${
                 isActive ? "bg-[#2C2C2E] border-gray-700 text-white" : "bg-transparent border-gray-800 text-gray-300 hover:bg-[#1C1C1E]"
               }`}
             >
-              {t.label}
+              <span className="hidden sm:inline">{t.label}</span>
+              <span className="sm:hidden">{t.labelShort}</span>
               <Pill>{countFor}</Pill>
             </button>
           );
