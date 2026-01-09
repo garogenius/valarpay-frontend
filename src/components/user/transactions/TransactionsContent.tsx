@@ -284,7 +284,7 @@ const TransactionsContent = () => {
   );
 
   return (
-    <div className="w-full max-w-6xl">
+    <div className="w-full">
       {/* Header */}
       <div className="flex flex-row items-center gap-2 sm:gap-3 justify-between">
         <div className="flex-1 min-w-0">

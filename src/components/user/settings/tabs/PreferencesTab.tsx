@@ -56,8 +56,8 @@ const PreferencesTab: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Theme Section */}
-      <div className="w-full bg-bg-600 dark:bg-bg-1100 border border-white/10 rounded-2xl p-4 sm:p-5">
+      {/* Theme Section - Commented out for now */}
+      {/* <div className="w-full bg-bg-600 dark:bg-bg-1100 border border-white/10 rounded-2xl p-4 sm:p-5">
         <p className="text-white dark:text-white font-semibold mb-3">Appearance</p>
         <div className="w-full flex items-center justify-between gap-3 py-3">
           <div>
@@ -66,7 +66,7 @@ const PreferencesTab: React.FC = () => {
           </div>
           <ThemeToggle />
         </div>
-      </div>
+      </div> */}
 
       {/* Notifications Section */}
       <div className="w-full bg-bg-600 dark:bg-bg-1100 border border-white/10 rounded-2xl p-4 sm:p-5">

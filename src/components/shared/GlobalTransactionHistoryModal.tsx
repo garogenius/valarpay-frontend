@@ -204,121 +204,125 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
       const tempDiv = document.createElement("div");
       tempDiv.style.position = "absolute";
       tempDiv.style.left = "-9999px";
-      tempDiv.style.width = "500px";
+      tempDiv.style.top = "0";
+      tempDiv.style.width = "600px";
+      tempDiv.style.minHeight = "auto";
       tempDiv.style.backgroundColor = "#1A1A1A";
-      tempDiv.style.padding = "30px";
+      tempDiv.style.padding = "40px";
       tempDiv.style.color = "#FFFFFF";
-      tempDiv.style.fontFamily = "system-ui, -apple-system, sans-serif";
+      tempDiv.style.fontFamily = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      tempDiv.style.boxSizing = "border-box";
+      tempDiv.style.overflow = "visible";
       document.body.appendChild(tempDiv);
 
       // Build receipt HTML matching exact design
       const isTransfer = receiptTransaction.type === "TRANSFER";
       
       const receiptHTML = `
-        <div style="background: #1A1A1A; color: #FFFFFF; padding: 30px; font-family: system-ui, -apple-system, sans-serif; width: 500px;">
+        <div style="background: #1A1A1A; color: #FFFFFF; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; width: 600px; box-sizing: border-box; overflow: visible;">
           <!-- Header with Logo and Tagline -->
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="background: #f76301; width: 40px; height: 40px; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
-                <span style="color: #FFFFFF; font-size: 24px; font-weight: bold;">V</span>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding: 0;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="background: #2D7FF9; width: 40px; height: 40px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <span style="color: #FFFFFF; font-size: 24px; font-weight: bold; line-height: 1;">V</span>
               </div>
-              <span style="color: #FFFFFF; font-size: 20px; font-weight: bold;">VALARPAY</span>
+              <span style="color: #FFFFFF; font-size: 20px; font-weight: bold; letter-spacing: 0.5px;">VALARPAY</span>
             </div>
-            <span style="color: #FFFFFF; font-size: 14px; opacity: 0.8;">Beyond Banking</span>
+            <span style="color: #FFFFFF; font-size: 14px; opacity: 0.8; font-weight: 400;">Beyond Banking</span>
           </div>
 
           <!-- Transaction Receipt Banner -->
-          <div style="background: #f76301; padding: 12px; text-align: center; margin-bottom: 30px; border-radius: 4px;">
-            <span style="color: #FFFFFF; font-size: 16px; font-weight: bold;">Transaction Receipt</span>
+          <div style="background: #f76301; padding: 14px 16px; text-align: center; margin-bottom: 30px; border-radius: 6px;">
+            <span style="color: #FFFFFF; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">Transaction Receipt</span>
           </div>
 
           <!-- Transaction Details with Dotted Lines -->
-          <div style="margin-bottom: 20px;">
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px;">Transaction Date:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${formatReceiptDate(receiptTransaction.createdAt)}</span>
+          <div style="margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Transaction Date:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${formatReceiptDate(receiptTransaction.createdAt)}</span>
             </div>
             
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px;">Transaction ID:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${receiptTransaction.reference}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Transaction ID:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${receiptTransaction.reference}</span>
             </div>
             
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px;">Amount:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${formatAmount(receiptTransaction.amount, receiptTransaction.currency)}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Amount:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${formatAmount(receiptTransaction.amount, receiptTransaction.currency)}</span>
             </div>
             
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px;">Currency:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${receiptTransaction.currency}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Currency:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${receiptTransaction.currency}</span>
             </div>
             
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px;">Transaction Type:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${getTransactionTypeLabel()}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Transaction Type:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${getTransactionTypeLabel()}</span>
             </div>
             
             ${isTransfer ? `
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px;">Sender Name:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${senderName}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Sender Name:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${senderName}</span>
             </div>
             
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px;">Beneficiary Details:</span>
-              <div style="text-align: right;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Beneficiary Details:</span>
+              <div style="text-align: right; flex-shrink: 0;">
                 <div style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${beneficiaryName}</div>
                 ${beneficiaryAccount ? `<div style="color: #FFFFFF; font-size: 14px; font-weight: 500; margin-top: 2px;">(${beneficiaryAccount})</div>` : ''}
               </div>
             </div>
             
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px;">Beneficiary Bank:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${beneficiaryBank}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Beneficiary Bank:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${beneficiaryBank}</span>
             </div>
             
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px;">Narration:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${narration}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Narration:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${narration}</span>
             </div>
             ` : `
             ${planName ? `
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px;">Plan:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${planName}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Plan:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${planName}</span>
             </div>
             ` : ''}
             ${validity ? `
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px;">Duration:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${validity}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Duration:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${validity}</span>
             </div>
             ` : ''}
             ${provider ? `
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px;">Provider:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${provider}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Provider:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${provider}</span>
             </div>
             ` : ''}
             ${phoneNumber ? `
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px;">Phone Number:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${phoneNumber}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Phone Number:</span>
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${phoneNumber}</span>
             </div>
             ` : ''}
             `}
             
-            <div style="display: flex; justify-content: space-between; padding: 12px 0;">
-              <span style="color: #FFFFFF; font-size: 14px;">Status:</span>
-              <span style="color: ${statusColor}; font-size: 14px; font-weight: bold;">${statusText}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0;">
+              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Status:</span>
+              <span style="color: ${statusColor}; font-size: 14px; font-weight: bold; text-align: right;">${statusText}</span>
             </div>
           </div>
 
           <!-- Footer -->
-          <div style="text-align: center; color: #FFFFFF; font-size: 12px; margin-top: 30px; line-height: 1.6;">
-            <p style="margin: 0 0 8px 0;">Thank you for banking with ValarPay. For support, contact us at Support@valarpay.com,</p>
-            <p style="margin: 0 0 8px 0;">call +2348134146906 or Head Office: C3&C4 Suite 2nd Floor Ejison Plaza 9a New Market Road Main Market Onitsha</p>
+          <div style="text-align: center; color: #FFFFFF; font-size: 12px; margin-top: 40px; line-height: 1.8; padding-top: 20px;">
+            <p style="margin: 0 0 6px 0; font-weight: 400;">Thank you for banking with ValarPay. For support, contact us at Support@valarpay.com,</p>
+            <p style="margin: 0 0 6px 0; font-weight: 400;">call +2348134146906 or Head Office: C3&C4 Suite 2nd Floor Ejison Plaza 9a New Market Road Main Market Onitsha</p>
           </div>
         </div>
       `;
@@ -326,17 +330,23 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
       tempDiv.innerHTML = receiptHTML;
 
       // Wait for content to render
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
-      // Convert to canvas
+      // Get the actual rendered height
+      const actualHeight = tempDiv.scrollHeight;
+      const actualWidth = tempDiv.scrollWidth;
+
+      // Convert to canvas with proper dimensions
       const canvas = await html2canvas(tempDiv, {
         scale: 2,
         useCORS: true,
         logging: false,
         backgroundColor: "#1A1A1A",
-        width: 500,
-        height: tempDiv.scrollHeight,
+        width: actualWidth,
+        height: actualHeight,
         allowTaint: true,
+        windowWidth: actualWidth,
+        windowHeight: actualHeight,
       });
 
       // Convert canvas to PNG and download
