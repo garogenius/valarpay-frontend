@@ -29,7 +29,7 @@ export const verifyEmailRequest = async (formdata: IVerifyEmail) => {
 
 export const verifyResetEmailRequest = async (formdata: IVerifyEmail) => {
   return request({
-    url: "/user/verify-email",
+    url: "/user/verify-forgot-password",
     method: "post",
     data: formdata,
   });

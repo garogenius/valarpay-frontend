@@ -24,7 +24,7 @@ const StartNewPlanModal: React.FC<StartNewPlanModalProps> = ({
     },
     {
       type: "fixed" as const,
-      title: "Fixed Savings",
+      title: "Fixed Deposit",
       description: "Earn consistent interest on your savings while keeping your funds secure",
     },
     {

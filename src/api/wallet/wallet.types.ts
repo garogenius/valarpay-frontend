@@ -58,16 +58,16 @@ export interface VirtualCard {
 
 // FX / currency conversion
 export interface IGetExchangeRate {
-  fromCurrency: "NGN" | "USD" | "EUR" | "GBP";
-  toCurrency: "NGN" | "USD" | "EUR" | "GBP";
-  provider?: "graph" | "fincra";
+  amount: number;
+  currency: "USD" | "EUR" | "GBP";
 }
 
 export interface ExchangeRateData {
   rate: number;
+  amount: number;
+  convertedAmount: number;
   fromCurrency: string;
   toCurrency: string;
-  timestamp: string;
 }
 
 export interface IConvertCurrency {

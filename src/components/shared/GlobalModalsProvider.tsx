@@ -6,6 +6,7 @@ import GlobalInsufficientFundsModal from "./GlobalInsufficientFundsModal";
 import GlobalIncorrectPinModal from "./GlobalIncorrectPinModal";
 import GlobalPaymentFailedModal from "./GlobalPaymentFailedModal";
 import GlobalTransactionHistoryModal from "./GlobalTransactionHistoryModal";
+import TransactionProcessingLoader from "./TransactionProcessingLoader";
 
 /**
  * Global Modals Provider Component
@@ -37,6 +38,7 @@ const GlobalModalsProvider: React.FC = () => {
     showIncorrectPin,
     showPaymentFailed,
     showTransactionHistory,
+    showProcessingLoader,
     insufficientFundsData,
     incorrectPinData,
     paymentFailedData,
@@ -83,6 +85,11 @@ const GlobalModalsProvider: React.FC = () => {
           closeAllModals();
         }}
         transaction={transactionHistoryData.transaction}
+      />
+
+      <TransactionProcessingLoader
+        isOpen={showProcessingLoader}
+        message={processingLoaderMessage}
       />
     </>
   );

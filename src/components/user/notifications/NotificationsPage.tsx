@@ -10,11 +10,11 @@ import {
 } from "@/api/notification/notification.queries";
 
 const tabs = [
-  { key: "ALL", label: "All" },
-  { key: "TRANSACTIONS", label: "Transaction" },
-  { key: "SERVICES", label: "Services" },
-  { key: "UPDATES", label: "Updates" },
-  { key: "MESSAGES", label: "Messages" },
+  { key: "ALL", label: "All transactions" },
+  { key: "TRANSACTIONS", label: "All transactions" },
+  { key: "UPDATES", label: "Updates from the bank" },
+  { key: "SERVICES", label: "Services of the bank" },
+  { key: "MESSAGES", label: "Messages from the bank" },
 ] as const;
 
 type TabKey = typeof tabs[number]["key"];
@@ -36,7 +36,7 @@ const NotificationsPage = () => {
     const byCat: Record<string, number> = {};
     (notifications || []).forEach((n: any) => {
       if (!n.readAt) {
-        const key = n.category || "OTHER";
+        const key = (n.category || "OTHER").toUpperCase();
         byCat[key] = (byCat[key] || 0) + 1;
       }
     });
@@ -45,7 +45,11 @@ const NotificationsPage = () => {
 
   const filtered = useMemo(() => {
     if (active === "ALL") return notifications || [];
-    return (notifications || []).filter((n: any) => n.category === active);
+    // Filter by category, ensuring case-insensitive matching
+    return (notifications || []).filter((n: any) => {
+      const category = (n.category || "").toUpperCase();
+      return category === active.toUpperCase();
+    });
   }, [active, notifications]);
 
   return (

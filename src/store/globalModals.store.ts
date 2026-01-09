@@ -33,6 +33,9 @@ interface GlobalModalsState {
     transaction: any | null;
   };
 
+  // Transaction Processing Loader
+  showProcessingLoader: boolean;
+
   // Actions
   handleError: (error: any, options?: {
     currency?: "NGN" | "USD" | "EUR" | "GBP";
@@ -56,6 +59,8 @@ interface GlobalModalsState {
     onRetry?: () => void;
   }) => void;
   showTransactionHistoryModal: (transaction: any) => void;
+  showProcessingLoaderModal: () => void;
+  hideProcessingLoaderModal: () => void;
   closeAllModals: () => void;
 }
 
@@ -69,6 +74,7 @@ const useGlobalModalsStore = create<GlobalModalsState>((set) => ({
   paymentFailedData: {},
   showTransactionHistory: false,
   transactionHistoryData: { transaction: null },
+  showProcessingLoader: false,
 
   // Handle error automatically
   handleError: (error: any, options?: {
@@ -154,6 +160,18 @@ const useGlobalModalsStore = create<GlobalModalsState>((set) => ({
     });
   },
 
+  showProcessingLoaderModal: () => {
+    set({
+      showProcessingLoader: true,
+    });
+  },
+
+  hideProcessingLoaderModal: () => {
+    set({
+      showProcessingLoader: false,
+    });
+  },
+
   closeAllModals: () => {
     set({
       showInsufficientFunds: false,
@@ -164,6 +182,7 @@ const useGlobalModalsStore = create<GlobalModalsState>((set) => ({
       paymentFailedData: {},
       showTransactionHistory: false,
       transactionHistoryData: { transaction: null },
+      showProcessingLoader: false,
     });
   },
 }));

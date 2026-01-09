@@ -40,7 +40,7 @@ export interface IForgotPassword {
 }
 
 export interface IResetPassword {
-  username: string;
-  password: string;
-  confirmPassword: string;
+  email: string;
+  otpCode: string;
+  newPassword: string;
 }

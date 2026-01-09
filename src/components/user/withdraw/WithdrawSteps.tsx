@@ -15,6 +15,7 @@ import { BankProps } from "@/constants/types";
 import SearchableDropdown from "@/components/shared/SearchableDropdown";
 import useOnClickOutside from "@/hooks/useOnClickOutside";
 import { useFingerprintForPayments } from "@/store/paymentPreferences.store";
+import useGlobalModalsStore from "@/store/globalModals.store";
 
 type Step = "details" | "confirm";
 
@@ -84,12 +85,18 @@ const WithdrawSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   }, [accountNumber, selectedBank?.bankCode, verifyAccount]);
 
   const onTransferError = async (error: any) => {
+    // Hide processing loader
+    useGlobalModalsStore.getState().hideProcessingLoaderModal();
+    
     const errorMessage = error?.response?.data?.message;
     const descriptions = Array.isArray(errorMessage) ? errorMessage : [errorMessage || "Withdrawal failed"];
     ErrorToast({ title: "Withdrawal Failed", descriptions });
   };
 
   const onTransferSuccess = (data: any) => {
+    // Hide processing loader
+    useGlobalModalsStore.getState().hideProcessingLoaderModal();
+    
     SuccessToast({ title: "Withdrawal successful", description: "Your withdrawal was successful" });
     const ref = data?.data?.data?.transactionRef || `withdraw_${Date.now()}`;
     const now = new Date().toISOString();
@@ -281,6 +288,10 @@ const WithdrawSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const bankCodeToUse = bankData?.bankCode || selectedBank?.bankCode;
     if (!bankCodeToUse) return;
     if (!canProceedConfirm) return;
+    
+    // Show processing loader
+    useGlobalModalsStore.getState().showProcessingLoaderModal("Processing your withdrawal...");
+    
     initiateTransfer({
       accountName: bankData.accountName,
       accountNumber,

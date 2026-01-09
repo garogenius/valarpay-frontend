@@ -228,39 +228,73 @@ const Navbar = () => {
 
           {/* Notification Dropdown */}
           {notifOpen && (
-            <div className="absolute right-0 top-12 w-[22rem] rounded-xl border border-gray-300 dark:border-gray-800 bg-white dark:bg-[#1C1C1E] shadow-2xl">
-              <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+            <div className="absolute right-0 top-12 z-50 w-[calc(100vw-2rem)] sm:w-[22rem] max-w-[22rem] rounded-xl border border-gray-300 dark:border-gray-800 bg-white dark:bg-[#1C1C1E] shadow-2xl max-h-[calc(100vh-6rem)] flex flex-col">
+              <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between flex-shrink-0">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white">Notifications</p>
                 <button
                   onClick={() => markAllRead()}
-                  className="text-xs text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-[#2C2C2E]"
+                  className="text-xs text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-[#2C2C2E] whitespace-nowrap"
                 >
                   Mark all as read
                 </button>
               </div>
-              <div className="max-h-96 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto min-h-0">
                 {(notifications || []).length === 0 ? (
                   <div className="px-4 py-6 text-center text-xs text-gray-600 dark:text-gray-400">No notifications</div>
                 ) : (
-                  notifications.slice(0, 8).map((n: any) => (
-                    <div key={n.id} className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-[#2C2C2E] transition-colors">
-                      <div className="flex items-start gap-3">
-                        <div className={`w-2 h-2 mt-2 rounded-full ${n.readAt ? "bg-transparent border border-gray-400 dark:border-gray-600" : "bg-red-500"}`}></div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-900 dark:text-white font-medium truncate">{n.title}</p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">{n.message}</p>
-                          {!n.readAt && (
-                            <button onClick={() => markRead(n.id)} className="mt-1 text-[11px] text-[#FF6B2C] hover:text-[#FF7D3D]">
-                              Mark as read
-                            </button>
-                          )}
+                  // Group notifications by category
+                  (() => {
+                    const grouped = {
+                      TRANSACTIONS: [] as any[],
+                      UPDATES: [] as any[],
+                      SERVICES: [] as any[],
+                      MESSAGES: [] as any[],
+                      OTHER: [] as any[],
+                    };
+                    
+                    (notifications || []).slice(0, 8).forEach((n: any) => {
+                      const category = (n.category || "").toUpperCase();
+                      if (category === "TRANSACTIONS") {
+                        grouped.TRANSACTIONS.push(n);
+                      } else if (category === "UPDATES") {
+                        grouped.UPDATES.push(n);
+                      } else if (category === "SERVICES") {
+                        grouped.SERVICES.push(n);
+                      } else if (category === "MESSAGES") {
+                        grouped.MESSAGES.push(n);
+                      } else {
+                        grouped.OTHER.push(n);
+                      }
+                    });
+                    
+                    const allNotifications = [
+                      ...grouped.TRANSACTIONS,
+                      ...grouped.UPDATES,
+                      ...grouped.SERVICES,
+                      ...grouped.MESSAGES,
+                      ...grouped.OTHER,
+                    ];
+                    
+                    return allNotifications.map((n: any) => (
+                      <div key={n.id} className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-[#2C2C2E] transition-colors">
+                        <div className="flex items-start gap-3">
+                          <div className={`w-2 h-2 mt-2 rounded-full flex-shrink-0 ${n.readAt ? "bg-transparent border border-gray-400 dark:border-gray-600" : "bg-red-500"}`}></div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-gray-900 dark:text-white font-medium truncate">{n.title}</p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2 break-words">{n.message}</p>
+                            {!n.readAt && (
+                              <button onClick={() => markRead(n.id)} className="mt-1 text-[11px] text-[#f76301] hover:text-[#e55a00]">
+                                Mark as read
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    ));
+                  })()
                 )}
               </div>
-              <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800">
+              <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 flex-shrink-0">
                 <Link href="/user/notifications" className="block w-full text-center text-sm text-[#f76301] hover:text-[#e55a00] font-medium">
                   View All Notifications
                 </Link>

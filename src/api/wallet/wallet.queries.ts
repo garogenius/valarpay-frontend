@@ -153,7 +153,7 @@ export const useGetExchangeRate = (payload: IGetExchangeRate & { enabled?: boole
   const { data, isPending, isError } = useQuery({
     queryKey: ["exchange-rate", payload],
     queryFn: () => getExchangeRateRequest(payload),
-    enabled: payload.enabled !== false && !!payload.fromCurrency && !!payload.toCurrency,
+    enabled: payload.enabled !== false && !!payload.currency && payload.amount > 0,
   });
 
   const exchangeRate: ExchangeRateData | undefined = data?.data?.data;

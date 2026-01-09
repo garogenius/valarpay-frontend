@@ -97,16 +97,14 @@ export const getMatchedBanksByAccountNumber = (accountNumber: string) => {
 };
 
 export const getExchangeRateRequest = async ({
-  fromCurrency,
-  toCurrency,
-  provider,
+  amount,
+  currency,
 }: IGetExchangeRate) => {
   const query = new URLSearchParams();
-  query.set("fromCurrency", fromCurrency);
-  query.set("toCurrency", toCurrency);
-  if (provider) query.set("provider", provider);
+  query.set("amount", amount.toString());
+  query.set("currency", currency);
   return request({
-    url: `/wallet/exchange-rate?${query.toString()}`,
+    url: `/bill/giftcard/get-fx-rate?${query.toString()}`,
     method: "get",
   });
 };

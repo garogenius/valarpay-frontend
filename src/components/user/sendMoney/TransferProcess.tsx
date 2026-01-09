@@ -43,6 +43,7 @@ import { FaFingerprint } from "react-icons/fa";
 import ConfirmTransactionModal from "@/components/shared/ConfirmTransactionModal";
 import TransactionResultModal from "@/components/shared/TransactionResultModal";
 import GlobalPaymentResultModal, { PaymentResultData } from "@/components/shared/GlobalPaymentResultModal";
+import useGlobalModalsStore from "@/store/globalModals.store";
 
 const transferMethods = [
   {
@@ -241,6 +242,8 @@ const TransferProcess = ({
   }, [selectedType, watchedAccountNumber, watchedBankCode, setValue]);
 
   const onError = async (error: any) => {
+    // Hide processing loader
+    useGlobalModalsStore.getState().hideProcessingLoaderModal();
     const errorMessage = error?.response?.data?.message;
     const errorCode = error?.response?.data?.code || error?.response?.data?.errorCode;
     const descriptions = Array.isArray(errorMessage)
@@ -303,6 +306,11 @@ const TransferProcess = ({
 
   const handleConfirmTransaction = (walletPin: string) => {
     if (bankData) {
+      // Show processing loader
+      useGlobalModalsStore.getState().showProcessingLoaderModal("Processing your transfer...");
+      
+      setShowConfirmModal(false);
+      
       initiateTransfer({
         accountName: bankData?.accountName,
         accountNumber: watchedAccountNumber,
@@ -314,7 +322,6 @@ const TransferProcess = ({
         currency: "NGN",
         ...(isBeneficiaryChecked ? { addBeneficiary: true } : {}),
       });
-      setShowConfirmModal(false);
     }
   };
 

@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CgClose } from "react-icons/cg";
-import { FiDownload, FiMessageCircle, FiCheckCircle, FiXCircle, FiClock } from "react-icons/fi";
+import { FiDownload, FiMessageCircle, FiCheckCircle, FiXCircle, FiClock, FiShare2 } from "react-icons/fi";
+import images from "../../../public/images";
 import { LuCopy } from "react-icons/lu";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
@@ -26,6 +27,8 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
 }) => {
   const navigate = useNavigate();
   const { user } = useUserStore();
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
   if (!isOpen || !transaction) return null;
@@ -138,231 +141,338 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
     navigate("/user/settings/support", "push");
   };
 
+  // Helper function to generate receipt as blob
+  const generateReceiptBlob = async (): Promise<Blob> => {
+    const receiptTransaction = convertToReceiptTransaction();
+    
+    // Format date as EEEE, MMMM d, yyyy h:mm a (e.g., "Monday, January 9, 2026 10:20 AM")
+    const formatReceiptDate = (dateString: string) => {
+      const date = new Date(dateString);
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const dayName = days[date.getDay()];
+      const monthName = months[date.getMonth()];
+      const day = date.getDate();
+      const year = date.getFullYear();
+      const hours = date.getHours();
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHours = hours % 12 || 12;
+      return `${dayName}, ${monthName} ${day}, ${year} ${displayHours}:${minutes} ${ampm}`;
+    };
+
+    // Get transaction type label
+    const getTransactionTypeLabel = () => {
+      if (receiptTransaction.type === "TRANSFER") return "Inter-bank Transfer";
+      if (receiptTransaction.type === "AIRTIME") return "Airtime";
+      if (receiptTransaction.type === "DATA") return "Mobile Data";
+      if (receiptTransaction.type === "CABLE") return "Cable / TV";
+      if (receiptTransaction.type === "ELECTRICITY") return "Electricity";
+      if (receiptTransaction.type === "INTERNET") return "Internet";
+      return "Bill Payment";
+    };
+
+    // Get sender name from transaction
+    const senderName = transaction.depositDetails?.senderName || user?.fullname || "N/A";
+    
+    // Get beneficiary details for transfers
+    const beneficiaryName = receiptTransaction.recipientName || "N/A";
+    const beneficiaryAccount = receiptTransaction.recipientAccount || "";
+    const beneficiaryBank = receiptTransaction.recipientBank || receiptTransaction.provider || "N/A";
+    
+    // Get bill payment details
+    const planName = receiptTransaction.planName || "";
+    const validity = receiptTransaction.validity || "";
+    const provider = receiptTransaction.provider || "";
+    const phoneNumber = receiptTransaction.billerNumber || "";
+    
+    // Get narration/description
+    const narration = receiptTransaction.description || receiptTransaction.reference || "N/A";
+    
+    // Status color and text
+    const statusColor = receiptTransaction.status === "SUCCESSFUL" ? "#22C55E" : receiptTransaction.status === "FAILED" ? "#EF4444" : "#F59E0B";
+    const statusText = receiptTransaction.status === "SUCCESSFUL" ? "Successful" : receiptTransaction.status === "FAILED" ? "Failed" : "Pending";
+    
+    // Format amount - remove decimal if whole number for NGN
+    const formatAmount = (amount: number, currency: string) => {
+      if (currency === "NGN") {
+        if (amount % 1 === 0) {
+          return `₦${amount.toLocaleString()}`;
+        }
+        return `₦${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+      return `${currency}${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    };
+    
+    // Get logo as base64 - try to load from public path
+    let logoBase64 = "";
+    try {
+      const logoResponse = await fetch('/images/logo.png');
+      if (logoResponse.ok) {
+        const logoBlob = await logoResponse.blob();
+        logoBase64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = () => resolve("");
+          reader.readAsDataURL(logoBlob);
+        });
+      }
+    } catch (error) {
+      console.warn("Could not load logo:", error);
+    }
+    
+    // Create a temporary receipt element
+    const tempDiv = document.createElement("div");
+    tempDiv.style.position = "absolute";
+    tempDiv.style.left = "-9999px";
+    tempDiv.style.top = "0";
+    tempDiv.style.width = "500px";
+    tempDiv.style.minHeight = "auto";
+    tempDiv.style.backgroundColor = "#ffffff";
+    tempDiv.style.padding = "0";
+    tempDiv.style.color = "#000000";
+    tempDiv.style.fontFamily = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    tempDiv.style.boxSizing = "border-box";
+    tempDiv.style.overflow = "visible";
+    document.body.appendChild(tempDiv);
+
+    // Build receipt HTML matching exact design from provided code
+    const isTransfer = receiptTransaction.type === "TRANSFER";
+    const formattedDate = formatReceiptDate(receiptTransaction.createdAt);
+    
+    const receiptHTML = `
+      <div id="receipt-container" style="flex-direction: column; max-width: 500px; margin: 0 auto; overflow: hidden; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <!-- Orange Header -->
+        <div style="background: #f76301; padding: 16px; border-radius: 16px 16px 0 0; position: relative;">
+          <!-- Circular cutouts -->
+          <div style="position: absolute; left: -12px; top: -4px; width: 24px; height: 24px; background: white; border-radius: 50%;"></div>
+          <div style="position: absolute; right: -12px; top: -4px; width: 24px; height: 24px; background: white; border-radius: 50%;"></div>
+          
+          <!-- Logo and Smart Banking -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; background: white; padding: 8px; border-radius: 8px;">
+              ${logoBase64 ? `<img src="${logoBase64}" alt="logo" style="height: 32px; width: auto; object-fit: contain; font-weight: bold;" />` : '<span style="color: #f76301; font-size: 20px; font-weight: bold;">V</span>'}
+            </div>
+            <div style="color: #374151; font-size: 14px; font-weight: 500;">Smart Banking</div>
+          </div>
+          
+          <!-- Transaction Receipt Title -->
+          <h1 style="font-size: 20px; font-weight: bold; text-align: center; color: #1F2937; margin: 0 0 4px 0;">Transaction Receipt</h1>
+          <p style="font-size: 12px; text-align: center; color: #6B7280; margin: 0;">
+            Generated by ValarPay on ${formattedDate}
+          </p>
+        </div>
+
+        <!-- Transaction Details -->
+        <div style="background: white;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Category</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${getTransactionTypeLabel()}</p>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Currency</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${receiptTransaction.currency}</p>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Transaction Type</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${receiptTransaction.type}</p>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Total Amount Paid</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${formatAmount(receiptTransaction.amount, receiptTransaction.currency)}</p>
+          </div>
+          
+          ${isTransfer ? `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Sender Name</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${senderName}</p>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Beneficiary Name</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${beneficiaryName}</p>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Beneficiary Bank Name</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${beneficiaryBank}</p>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Beneficiary Account Number</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${beneficiaryAccount || "N/A"}</p>
+          </div>
+          ` : `
+          ${planName ? `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Plan</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${planName}</p>
+          </div>
+          ` : ''}
+          ${validity ? `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Duration</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${validity}</p>
+          </div>
+          ` : ''}
+          ${provider ? `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Provider</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${provider}</p>
+          </div>
+          ` : ''}
+          ${phoneNumber ? `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Phone Number</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${phoneNumber}</p>
+          </div>
+          ` : ''}
+          `}
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Date & Time</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${formattedDate}</p>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #F3F4F6; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Transaction Ref</p>
+            <p style="color: #1F2937; font-size: 12px; font-weight: 500; text-align: right; margin: 0;">${receiptTransaction.reference}</p>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; width: 100%;">
+            <p style="color: #f76301; font-size: 12px; font-weight: 500; margin: 0;">Status</p>
+            <span style="display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; color: ${statusColor === "#22C55E" ? "#059669" : statusColor === "#EF4444" ? "#DC2626" : "#D97706"};">
+              ${statusText}
+            </span>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="background: white; padding: 12px; text-align: center; border-top: 1px solid #F3F4F6; border-radius: 0 0 16px 16px;">
+          <p style="font-size: 12px; color: #6B7280; margin: 0 0 4px 0;">
+            If You Have Questions Or You Would Like To Know More Informations About ValarPay, Please Call Our 24/7 Contact Centre On <span style="color: #f76301;">+2348134146906</span> Or Send Us Mail To <a href="mailto:support@valarpay.com" style="color: #f76301; text-decoration: none;">support@valarpay.com</a>
+          </p>
+          <p style="font-size: 12px; color: #6B7280; margin: 0;">
+            Thanks For Choosing ValarPay
+          </p>
+        </div>
+      </div>
+    `;
+
+    tempDiv.innerHTML = receiptHTML;
+
+    // Wait for content to render
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Get the actual rendered height
+    const actualHeight = tempDiv.scrollHeight;
+    const actualWidth = tempDiv.scrollWidth;
+
+    // Convert to canvas with proper dimensions
+    const canvas = await html2canvas(tempDiv, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff",
+      width: actualWidth,
+      height: actualHeight,
+      allowTaint: true,
+      windowWidth: actualWidth,
+      windowHeight: actualHeight,
+    });
+
+    // Convert canvas to blob
+    return new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error("Failed to create blob"));
+        }
+        // Clean up
+        document.body.removeChild(tempDiv);
+      }, "image/png", 1.0);
+    });
+  };
+
   const handleDownloadReceipt = async () => {
     setIsDownloading(true);
     try {
       const receiptTransaction = convertToReceiptTransaction();
+      const blob = await generateReceiptBlob();
       
-      // Format date as DD-MM-YYYY HH:MM AM/PM
-      const formatReceiptDate = (dateString: string) => {
-        const date = new Date(dateString);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        const hours = date.getHours();
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        const displayHours = hours % 12 || 12;
-        return `${day}-${month}-${year} ${displayHours}:${minutes} ${ampm}`;
-      };
-
-      // Get transaction type label
-      const getTransactionTypeLabel = () => {
-        if (receiptTransaction.type === "TRANSFER") return "Inter-bank Transfer";
-        if (receiptTransaction.type === "AIRTIME") return "Airtime";
-        if (receiptTransaction.type === "DATA") return "Mobile Data";
-        if (receiptTransaction.type === "CABLE") return "Cable / TV";
-        if (receiptTransaction.type === "ELECTRICITY") return "Electricity";
-        if (receiptTransaction.type === "INTERNET") return "Internet";
-        return "Bill Payment";
-      };
-
-      // Get sender name from transaction
-      const senderName = transaction.depositDetails?.senderName || user?.fullname || "N/A";
-      
-      // Get beneficiary details for transfers
-      const beneficiaryName = receiptTransaction.recipientName || "N/A";
-      const beneficiaryAccount = receiptTransaction.recipientAccount || "";
-      const beneficiaryBank = receiptTransaction.recipientBank || receiptTransaction.provider || "N/A";
-      
-      // Get bill payment details
-      const planName = receiptTransaction.planName || "";
-      const validity = receiptTransaction.validity || "";
-      const provider = receiptTransaction.provider || "";
-      const phoneNumber = receiptTransaction.billerNumber || "";
-      
-      // Get narration/description
-      const narration = receiptTransaction.description || receiptTransaction.reference || "N/A";
-      
-      // Status color and text
-      const statusColor = receiptTransaction.status === "SUCCESSFUL" ? "#22C55E" : receiptTransaction.status === "FAILED" ? "#EF4444" : "#F59E0B";
-      const statusText = receiptTransaction.status === "SUCCESSFUL" ? "Successful" : receiptTransaction.status === "FAILED" ? "Failed" : "Pending";
-      
-      // Format amount - remove decimal if whole number for NGN
-      const formatAmount = (amount: number, currency: string) => {
-        if (currency === "NGN") {
-          // For NGN, show without decimals if whole number, otherwise show 2 decimals
-          if (amount % 1 === 0) {
-            return `₦${amount.toLocaleString()}`;
-          }
-          return `₦${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        }
-        return `${currency}${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      };
-      
-      // Create a temporary receipt element
-      const tempDiv = document.createElement("div");
-      tempDiv.style.position = "absolute";
-      tempDiv.style.left = "-9999px";
-      tempDiv.style.top = "0";
-      tempDiv.style.width = "600px";
-      tempDiv.style.minHeight = "auto";
-      tempDiv.style.backgroundColor = "#1A1A1A";
-      tempDiv.style.padding = "40px";
-      tempDiv.style.color = "#FFFFFF";
-      tempDiv.style.fontFamily = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-      tempDiv.style.boxSizing = "border-box";
-      tempDiv.style.overflow = "visible";
-      document.body.appendChild(tempDiv);
-
-      // Build receipt HTML matching exact design
-      const isTransfer = receiptTransaction.type === "TRANSFER";
-      
-      const receiptHTML = `
-        <div style="background: #1A1A1A; color: #FFFFFF; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; width: 600px; box-sizing: border-box; overflow: visible;">
-          <!-- Header with Logo and Tagline -->
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding: 0;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div style="background: #2D7FF9; width: 40px; height: 40px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <span style="color: #FFFFFF; font-size: 24px; font-weight: bold; line-height: 1;">V</span>
-              </div>
-              <span style="color: #FFFFFF; font-size: 20px; font-weight: bold; letter-spacing: 0.5px;">VALARPAY</span>
-            </div>
-            <span style="color: #FFFFFF; font-size: 14px; opacity: 0.8; font-weight: 400;">Beyond Banking</span>
-          </div>
-
-          <!-- Transaction Receipt Banner -->
-          <div style="background: #f76301; padding: 14px 16px; text-align: center; margin-bottom: 30px; border-radius: 6px;">
-            <span style="color: #FFFFFF; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">Transaction Receipt</span>
-          </div>
-
-          <!-- Transaction Details with Dotted Lines -->
-          <div style="margin-bottom: 30px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Transaction Date:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${formatReceiptDate(receiptTransaction.createdAt)}</span>
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Transaction ID:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${receiptTransaction.reference}</span>
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Amount:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${formatAmount(receiptTransaction.amount, receiptTransaction.currency)}</span>
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Currency:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${receiptTransaction.currency}</span>
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Transaction Type:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${getTransactionTypeLabel()}</span>
-            </div>
-            
-            ${isTransfer ? `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Sender Name:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${senderName}</span>
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Beneficiary Details:</span>
-              <div style="text-align: right; flex-shrink: 0;">
-                <div style="color: #FFFFFF; font-size: 14px; font-weight: 500;">${beneficiaryName}</div>
-                ${beneficiaryAccount ? `<div style="color: #FFFFFF; font-size: 14px; font-weight: 500; margin-top: 2px;">(${beneficiaryAccount})</div>` : ''}
-              </div>
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Beneficiary Bank:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${beneficiaryBank}</span>
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Narration:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${narration}</span>
-            </div>
-            ` : `
-            ${planName ? `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Plan:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${planName}</span>
-            </div>
-            ` : ''}
-            ${validity ? `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Duration:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${validity}</span>
-            </div>
-            ` : ''}
-            ${provider ? `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Provider:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${provider}</span>
-            </div>
-            ` : ''}
-            ${phoneNumber ? `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px dotted #f76301;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Phone Number:</span>
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 500; text-align: right;">${phoneNumber}</span>
-            </div>
-            ` : ''}
-            `}
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0;">
-              <span style="color: #FFFFFF; font-size: 14px; font-weight: 400;">Status:</span>
-              <span style="color: ${statusColor}; font-size: 14px; font-weight: bold; text-align: right;">${statusText}</span>
-            </div>
-          </div>
-
-          <!-- Footer -->
-          <div style="text-align: center; color: #FFFFFF; font-size: 12px; margin-top: 40px; line-height: 1.8; padding-top: 20px;">
-            <p style="margin: 0 0 6px 0; font-weight: 400;">Thank you for banking with ValarPay. For support, contact us at Support@valarpay.com,</p>
-            <p style="margin: 0 0 6px 0; font-weight: 400;">call +2348134146906 or Head Office: C3&C4 Suite 2nd Floor Ejison Plaza 9a New Market Road Main Market Onitsha</p>
-          </div>
-        </div>
-      `;
-
-      tempDiv.innerHTML = receiptHTML;
-
-      // Wait for content to render
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      // Get the actual rendered height
-      const actualHeight = tempDiv.scrollHeight;
-      const actualWidth = tempDiv.scrollWidth;
-
-      // Convert to canvas with proper dimensions
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#1A1A1A",
-        width: actualWidth,
-        height: actualHeight,
-        allowTaint: true,
-        windowWidth: actualWidth,
-        windowHeight: actualHeight,
-      });
-
-      // Convert canvas to PNG and download
+      // Create download link with blob
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.download = `receipt-${receiptTransaction.reference || receiptTransaction.id}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.href = url;
+      document.body.appendChild(link);
       link.click();
-
-      // Clean up
-      document.body.removeChild(tempDiv);
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
       toast.success("Receipt downloaded as PNG");
     } catch (error) {
       console.error("Error generating PNG:", error);
       toast.error("Failed to download receipt");
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  const handleShareReceipt = async () => {
+    setIsSharing(true);
+    try {
+      const receiptTransaction = convertToReceiptTransaction();
+      const blob = await generateReceiptBlob();
+      
+      // Check if Web Share API is available
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], `receipt-${receiptTransaction.reference || receiptTransaction.id}.png`, {
+          type: "image/png",
+        });
+        
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: "Transaction Receipt",
+            text: `Transaction receipt for ${receiptTransaction.reference}`,
+          });
+          toast.success("Receipt shared successfully");
+        } else {
+          // Fallback to download if sharing is not supported
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.download = `receipt-${receiptTransaction.reference || receiptTransaction.id}.png`;
+          link.href = url;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          toast.success("Receipt downloaded (sharing not available)");
+        }
+      } else {
+        // Fallback to download if Web Share API is not available
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.download = `receipt-${receiptTransaction.reference || receiptTransaction.id}.png`;
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success("Receipt downloaded (sharing not supported on this device)");
+      }
+    } catch (error: any) {
+      if (error.name !== "AbortError") {
+        console.error("Error sharing receipt:", error);
+        toast.error("Failed to share receipt");
+      }
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -573,19 +683,30 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
 
               {/* Action Buttons */}
               <div className="px-6 pb-6 pt-4 border-t border-white/10">
-                <div className="flex gap-3">
-                  <CustomButton
-                    onClick={handleContactSupport}
-                    className="flex-1 bg-transparent border border-white/15 text-white hover:bg-white/5 rounded-xl py-3 flex items-center justify-center gap-2"
-                  >
-                    <FiMessageCircle className="text-base" />
-                    <span>Contact Support</span>
-                  </CustomButton>
+                <div className="flex flex-col gap-3">
+                  <div className="flex gap-3">
+                    <CustomButton
+                      onClick={handleContactSupport}
+                      className="flex-1 bg-transparent border border-white/15 text-white hover:bg-white/5 rounded-xl py-3 flex items-center justify-center gap-2"
+                    >
+                      <FiMessageCircle className="text-base" />
+                      <span>Contact Support</span>
+                    </CustomButton>
+                    <CustomButton
+                      onClick={handleShareReceipt}
+                      disabled={isSharing || isDownloading}
+                      isLoading={isSharing}
+                      className="flex-1 bg-transparent border border-white/15 text-white hover:bg-white/5 rounded-xl py-3 flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <FiShare2 className="text-base" />
+                      <span>{isSharing ? "Sharing..." : "Share Receipt"}</span>
+                    </CustomButton>
+                  </div>
                   <CustomButton
                     onClick={handleDownloadReceipt}
-                    disabled={isDownloading}
+                    disabled={isDownloading || isSharing}
                     isLoading={isDownloading}
-                    className="flex-1 bg-[#f76301] hover:bg-[#e55a00] text-black font-semibold rounded-xl py-3 flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full bg-[#f76301] hover:bg-[#e55a00] text-black font-semibold rounded-xl py-3 flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <FiDownload className="text-base" />
                     <span>{isDownloading ? "Downloading..." : "Download Receipt"}</span>

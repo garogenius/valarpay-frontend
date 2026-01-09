@@ -84,9 +84,17 @@ const ResetPasswordContent = () => {
   const resetPasswordLoading = resetPasswordPending && !resetPasswordError;
 
   const onSubmit = async (data: ResetPasswordFormData) => {
+    if (!authEmail || !authCode) {
+      ErrorToast({
+        title: "Error",
+        descriptions: ["Email or OTP code is missing. Please try again."],
+      });
+      return;
+    }
     resetPassword({
-      username: authEmail,
-      ...data,
+      email: authEmail,
+      otpCode: authCode,
+      newPassword: data.password,
     });
   };
 

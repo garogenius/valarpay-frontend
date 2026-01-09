@@ -42,15 +42,86 @@ const ConvertCurrencyBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }
   const [showSuccess, setShowSuccess] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
 
+  // Determine which currency to use for API call (foreign currency)
+  // The API converts foreign currency to NGN, so we always need a foreign currency
+  const foreignCurrency = useMemo(() => {
+    if (!fromCur || !toCur) return null;
+    // If converting FROM foreign currency TO NGN, use fromCur
+    if (fromCur !== "NGN" && toCur === "NGN") return fromCur;
+    // If converting FROM NGN TO foreign currency, use toCur
+    if (fromCur === "NGN" && toCur !== "NGN") return toCur;
+    // If both are foreign currencies, use fromCur (we'll need to handle this case)
+    if (fromCur !== "NGN" && toCur !== "NGN") return fromCur;
+    return null;
+  }, [fromCur, toCur]);
+
+  // Calculate the amount to send to API
+  // API expects amount in foreign currency, so:
+  // - If converting FROM foreign TO NGN: use the amount directly
+  // - If converting FROM NGN TO foreign: we need to estimate (use 1 as placeholder, rate will give us the conversion)
+  const apiAmount = useMemo(() => {
+    if (!fromCur || !toCur || amount <= 0) return 1;
+    // If converting FROM foreign TO NGN: use the foreign currency amount
+    if (fromCur !== "NGN" && toCur === "NGN") return amount;
+    // If converting FROM NGN TO foreign: use 1 to get the rate, then calculate
+    if (fromCur === "NGN" && toCur !== "NGN") return 1;
+    // If both are foreign: use fromCur amount
+    if (fromCur !== "NGN" && toCur !== "NGN") return amount;
+    return 1;
+  }, [amount, fromCur, toCur]);
+
+  // Only fetch rate when both currencies are selected, they're different, amount > 0, and we have a foreign currency
+  const shouldFetchRate = !!fromCur && !!toCur && fromCur !== toCur && amount > 0 && !!foreignCurrency;
+
   const { exchangeRate, isPending: ratePending, isError: rateError } = useGetExchangeRate({
-    fromCurrency: fromCur || ("USD" as Cur),
-    toCurrency: toCur || ("NGN" as Cur),
-    provider: "graph",
-    enabled: !!fromCur && !!toCur && fromCur !== toCur,
+    amount: apiAmount,
+    currency: (foreignCurrency as "USD" | "EUR" | "GBP") || "USD", // Type assertion safe because enabled prevents call when null
+    enabled: shouldFetchRate,
   });
 
-  const rate = Number(exchangeRate?.rate || 0) || 0;
-  const converted = useMemo(() => (amount > 0 && rate > 0 ? amount * rate : 0), [amount, rate]);
+  // Calculate rate and converted amount based on conversion direction
+  const rate = useMemo(() => {
+    if (!exchangeRate || !fromCur || !toCur) return 0;
+    
+    const apiRate = Number(exchangeRate.rate || 0);
+    if (apiRate <= 0) return 0;
+    
+    // If converting FROM foreign TO NGN: use rate directly (e.g., 1 USD = 1500 NGN)
+    if (fromCur !== "NGN" && toCur === "NGN") {
+      return apiRate;
+    }
+    
+    // If converting FROM NGN TO foreign: calculate inverse rate (e.g., 1 NGN = 1/1500 USD)
+    if (fromCur === "NGN" && toCur !== "NGN") {
+      return 1 / apiRate;
+    }
+    
+    // If both are foreign currencies, we'd need to convert through NGN
+    // For now, return 0 as this case might need special handling
+    return 0;
+  }, [exchangeRate, fromCur, toCur]);
+
+  const converted = useMemo(() => {
+    if (amount <= 0 || rate <= 0 || !fromCur || !toCur) return 0;
+    
+    // If converting FROM foreign TO NGN: use convertedAmount from API if available, otherwise calculate
+    if (fromCur !== "NGN" && toCur === "NGN") {
+      if (exchangeRate && Number(exchangeRate.convertedAmount) > 0) {
+        // Scale the convertedAmount based on the actual amount vs API amount
+        const scaleFactor = amount / apiAmount;
+        return Number(exchangeRate.convertedAmount) * scaleFactor;
+      }
+      return amount * rate;
+    }
+    
+    // If converting FROM NGN TO foreign: calculate using inverse rate
+    if (fromCur === "NGN" && toCur !== "NGN") {
+      return amount * rate;
+    }
+    
+    // If both are foreign currencies, calculate using rate (though this might not work correctly)
+    return amount * rate;
+  }, [amount, rate, fromCur, toCur, exchangeRate, apiAmount]);
 
   const onConvertError = (error: any) => {
     const errorMessage = error?.response?.data?.message;

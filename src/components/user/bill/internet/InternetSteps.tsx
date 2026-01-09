@@ -12,6 +12,7 @@ import { useGetInternetPlans, useGetInternetVariations, usePayForInternet } from
 import { CURRENCY, InternetPlan, InternetVariationProps } from "@/constants/types";
 import GlobalTransactionHistoryModal from "@/components/shared/GlobalTransactionHistoryModal";
 import { useFingerprintForPayments } from "@/store/paymentPreferences.store";
+import useGlobalModalsStore from "@/store/globalModals.store";
 
 type Step = "details" | "confirm";
 
@@ -89,12 +90,16 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     )}`;
 
   const onPayInternetError = (error: any) => {
+    // Hide processing loader
+    useGlobalModalsStore.getState().hideProcessingLoaderModal();
     const errorMessage = error?.response?.data?.message;
     const descriptions = Array.isArray(errorMessage) ? errorMessage : [errorMessage || "Internet purchase failed"];
     ErrorToast({ title: "Error during internet purchase", descriptions });
   };
 
   const onPayInternetSuccess = (data: any) => {
+    // Hide processing loader
+    useGlobalModalsStore.getState().hideProcessingLoaderModal();
     SuccessToast({ title: "Internet purchase successful", description: "Your purchase was successful" });
     const ref = data?.data?.data?.transactionRef || `internet_${Date.now()}`;
     const now = new Date().toISOString();
@@ -333,6 +338,10 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const handlePay = () => {
     if (!provider?.billerCode || !plan || !canPay) return;
+    
+    // Show processing loader
+    useGlobalModalsStore.getState().showProcessingLoaderModal("Processing your internet payment...");
+    
     payInternet({
       billerCode: provider.billerCode,
       billerNumber: phoneNumber,

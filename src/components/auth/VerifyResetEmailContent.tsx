@@ -28,7 +28,7 @@ const VerifyResetEmailContent = () => {
   const { authEmail, setAuthEmail, setAuthCode } = useAuthEmailStore();
   const [token, setToken] = useState("");
 
-  const isValid = token.length === 4;
+  const isValid = token.length === 6;
 
   const onVerificationSuccess = () => {
     setAuthCode(token);
@@ -140,7 +140,7 @@ const VerifyResetEmailContent = () => {
   };
 
   const handlePaste: React.ClipboardEventHandler = (event) => {
-    const data = event.clipboardData.getData("text").slice(0, 4); // Get first 6 characters
+    const data = event.clipboardData.getData("text").slice(0, 6); // Get first 6 characters
     setToken(data);
   };
 
@@ -208,7 +208,7 @@ const VerifyResetEmailContent = () => {
                 value={token}
                 onChange={(props) => setToken(props)}
                 onPaste={handlePaste}
-                numInputs={4}
+                numInputs={6}
                 renderSeparator={<span className="w-2 2xs:w-3 xs:w-4"></span>}
                 containerStyle={{}}
                 skipDefaultStyles
