@@ -48,7 +48,6 @@ const VirtualCardSection = () => {
 
   const { card } = useGetVirtualCardDetails({
     cardId: storedCardId || undefined,
-    provider: "graph",
     enabled: !!storedCardId,
   });
 

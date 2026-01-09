@@ -30,7 +30,9 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
 
-  if (!isOpen || !transaction) return null;
+  if (!isOpen || !transaction) {
+    return null;
+  }
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
