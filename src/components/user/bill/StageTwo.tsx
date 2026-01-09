@@ -87,7 +87,7 @@ const BillStageTwo: React.FC<StageTwoProps> = ({
 
   return (
     <div className={`w-full flex items-center justify-center ${compact ? "py-2" : "py-5 xs:py-10"} ${compact ? "" : "text-text-200 dark:text-text-400"}`}>
-      <div className={`${compact ? "w-full max-w-[420px] rounded-2xl border border-[#2a2a2a] bg-[#0c0c0c] px-5 py-5 shadow-2xl" : "w-[100%] sm:w-[85%] lg:w-[75%] xl:w-[65%] 2xl:w-[55%] flex flex-col gap-8 rounded-lg sm:rounded-xl p-0 2xs:p-4 md:p-8"}`}>
+      <div className={`${compact ? "w-full px-5 py-5" : "w-[100%] sm:w-[85%] lg:w-[75%] xl:w-[65%] 2xl:w-[55%] flex flex-col gap-8 rounded-lg sm:rounded-xl p-0 2xs:p-4 md:p-8"}`}>
         {compact ? (
           <div className="flex items-start justify-between">
             <div>

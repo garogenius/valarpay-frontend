@@ -209,8 +209,7 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
 
   return (
     <>
-      <div className="w-full flex items-center justify-center py-2">
-        <div className="w-full max-w-[420px] rounded-2xl border border-[#2a2a2a] bg-[#0c0c0c] px-5 py-5 shadow-2xl">
+      <div className="w-full px-5 py-5">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="w-full flex flex-col gap-4"
@@ -687,7 +686,6 @@ const BuyGiftCardStageOne: React.FC<StageOneProps> = ({
               Next{" "}
             </CustomButton>
           </form>
-        </div>
       </div>
       {product?.redeemInstruction && (
         <RedeemInstructionModal
