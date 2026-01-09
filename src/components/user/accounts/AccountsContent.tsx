@@ -310,6 +310,7 @@ const AccountsContent: React.FC = () => {
 
     createAccount({
       currency: selectedCurrency as "USD" | "EUR" | "GBP",
+      label: accountLabel.trim(),
     });
   };
 

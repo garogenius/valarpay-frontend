@@ -251,7 +251,7 @@ export const createMultiCurrencyAccountRequest = async (
   // Remove provider property as it's not accepted by the API
   const { provider, ...dataWithoutProvider } = formdata;
   return request({
-    url: "/user/create-foreign-account",
+    url: "/wallet/create-account",
     method: "post",
     data: dataWithoutProvider,
   });

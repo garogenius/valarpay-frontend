@@ -13,7 +13,7 @@ import {
 
 export const createCurrencyAccountRequest = async (data: ICreateCurrencyAccount) => {
   return request({
-    url: "/user/create-foreign-account",
+    url: "/wallet/create-account",
     method: "post",
     data,
   });

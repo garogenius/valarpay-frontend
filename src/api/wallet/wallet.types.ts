@@ -25,6 +25,7 @@ export type WALLET_CURRENCY = "NGN" | "USD" | "EUR" | "GBP";
 
 export interface ICreateMultiCurrencyAccount {
   currency: Exclude<WALLET_CURRENCY, "NGN">;
+  label?: string; // Optional label for account identification
   provider?: WALLET_PROVIDER; // Optional - stripped by API function before sending
 }
 

@@ -58,7 +58,11 @@ const VerifyBvnForm = ({
     // Only proceed if verification was successful
     // Failed verification should keep user on the form to try again
     if (resultType === "success") {
-      handleComplete(1.5);
+      // Wait a moment for user data to refresh before proceeding
+      // The parent component will handle progression based on actual verification status
+      setTimeout(() => {
+        handleComplete(1.5);
+      }, 500);
     }
     // If error, user stays on OTP form to try again
   };

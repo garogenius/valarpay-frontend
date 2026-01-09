@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { IoClose } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
 import useUserStore from "@/store/user.store";
 import { TIER_LEVEL } from "@/constants/types";
 import BvnForm from "@/components/user/dashboard/BvnForm";
@@ -29,6 +30,7 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
   isRequired = false,
 }) => {
   const { user } = useUserStore();
+  const queryClient = useQueryClient();
   const hasNgnWallet = !!user?.wallet?.find((w: any) => w.currency === "NGN");
   const isBvnVerified =
     hasNgnWallet || (user?.tierLevel !== TIER_LEVEL.notSet && user?.isBvnVerified);
@@ -117,9 +119,15 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
 
   // Update current step when user data changes
   useEffect(() => {
-    setCurrentStep(
-      (isIdentityVerified && !isPinCreated) ? 2 : (isIdentityVerified && isPinCreated) ? 2 : 1
-    );
+    const newStep = (isIdentityVerified && !isPinCreated) ? 2 : (isIdentityVerified && isPinCreated) ? 2 : 1;
+    
+    // Only update step if BVN is actually verified (prevents premature progression)
+    if (isIdentityVerified && currentStep === 1.5) {
+      // BVN verification just completed - move to PIN step
+      setCurrentStep(2);
+    } else if (newStep !== currentStep) {
+      setCurrentStep(newStep);
+    }
     
     // If verification is complete and modal is required, call onSuccess
     // This will trigger user data refresh and modal will close when isIdentityVerified becomes true
@@ -129,7 +137,7 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
         onSuccess?.();
       }, 1500);
     }
-  }, [isBvnVerified, isIdentityVerified, isPinCreated, isRequired, onSuccess]);
+  }, [isBvnVerified, isIdentityVerified, isPinCreated, isRequired, onSuccess, currentStep]);
 
   // OTP Validation handlers
   const onOtpValidationError = (error: any) => {
@@ -138,14 +146,26 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
     ErrorToast({ title: "Verification Failed", descriptions });
   };
 
-  const onOtpValidationSuccess = (data: any) => {
-    // Don't manually update user - let the API refresh handle it
-    // The invalidateQueries in the mutation will refresh user data from API
-    // This ensures we get the actual verification status from the server
-    
-    // Mark BVN step as complete and move to PIN
-    // User data will be refreshed automatically via query invalidation
-    handleComplete(1.5);
+  const onOtpValidationSuccess = async (data: any) => {
+    // Wait for user data to be refreshed from API before allowing progression
+    // This ensures verification is actually complete before moving to next step
+    try {
+      // Refetch user data and wait for it to complete
+      await queryClient.refetchQueries({ queryKey: ["user"] });
+      
+      // Wait a bit more to ensure user store is updated with fresh data
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Now check if verification is actually successful before proceeding
+      // The useEffect will handle moving to next step when isBvnVerified becomes true
+      // Don't immediately call handleComplete - let the useEffect handle it based on actual user data
+    } catch (error) {
+      // If refetch fails, still allow progression after a delay
+      // The mutation already invalidated queries, so data should refresh eventually
+      setTimeout(() => {
+        handleComplete(1.5);
+      }, 1000);
+    }
   };
 
   const { mutate: validateOtp, isPending: validatingOtp } = useValidateBvnVerification(
