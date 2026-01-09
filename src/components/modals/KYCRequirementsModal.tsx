@@ -28,21 +28,6 @@ const KYCRequirementsModal: React.FC<KYCRequirementsModalProps> = ({
     navigate("/user/settings/profile", "push");
   };
 
-  // Parse the error message to extract required fields
-  const requiredFields = [
-    "postal code",
-    "passport number",
-    "passport country",
-    "passport issue date",
-    "passport expiry date",
-    "employment status",
-    "occupation",
-    "primary purpose",
-    "source of funds",
-    "expected monthly inflow",
-    "KYC document (passport scan, bank statement, utility bill, etc.)",
-  ];
-
   return (
     <div className="z-[999999] overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 flex justify-center items-center w-full md:inset-0 h-[100dvh]">
       <div className="fixed inset-0 transition-opacity" aria-hidden="true">
@@ -74,24 +59,16 @@ const KYCRequirementsModal: React.FC<KYCRequirementsModalProps> = ({
             The following information is required to create a {currency} account:
           </p>
 
-          {/* Required Fields List */}
-          <div className="bg-bg-500 dark:bg-bg-900 border border-border-700 dark:border-border-600 rounded-xl p-4 mb-6 max-h-[300px] overflow-y-auto">
-            <div className="flex items-start gap-3 mb-3">
+          {/* Required Fields Message */}
+          <div className="bg-bg-500 dark:bg-bg-900 border border-border-700 dark:border-border-600 rounded-xl p-4 mb-6">
+            <div className="flex items-start gap-3">
               <div className="mt-0.5">
                 <FiFileText className="text-[#f76301] text-lg flex-shrink-0" />
               </div>
               <div className="flex-1">
-                <h3 className="text-white font-medium text-sm mb-3">
-                  Required Information for KYC Verification:
+                <h3 className="text-white font-medium text-sm">
+                  Required Information for KYC Verification
                 </h3>
-                <ul className="text-white/70 text-xs sm:text-sm space-y-2">
-                  {requiredFields.map((field, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <span className="text-[#f76301] mt-1">•</span>
-                      <span className="flex-1 capitalize">{field}</span>
-                    </li>
-                  ))}
-                </ul>
               </div>
             </div>
           </div>
