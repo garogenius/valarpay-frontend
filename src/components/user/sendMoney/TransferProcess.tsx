@@ -165,13 +165,6 @@ const TransferProcess = ({
   const watchedDescription = watch("description");
   const watchedSessionId = watch("sessionId");
 
-  const canProceedToConfirm =
-    isValid &&
-    !verifyLoading &&
-    !!bankData?.accountName &&
-    !!watchedSessionId &&
-    (selectedType !== "bank" || !!watchedBankCode);
-
   const { fee } = useGetTransferFee({
     currency: "NGN",
     amount: watchedAmount,
@@ -206,6 +199,13 @@ const TransferProcess = ({
   } = useVerifyAccount(onVerifyAccountError, onVerifyAccountSuccess);
 
   const verifyLoading = verifyAccountPending && !verifyAccountError;
+
+  const canProceedToConfirm =
+    isValid &&
+    !verifyLoading &&
+    !!bankData?.accountName &&
+    !!watchedSessionId &&
+    (selectedType !== "bank" || !!watchedBankCode);
 
   useEffect(() => {
     if (fixedType) {
