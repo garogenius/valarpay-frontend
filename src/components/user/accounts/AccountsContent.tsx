@@ -240,6 +240,7 @@ const AccountsContent: React.FC = () => {
     }
     setOpenCreateCard(false);
     setCardLabel("");
+    setCardPinInput("");
     refetchCards();
   };
 
@@ -269,16 +270,25 @@ const AccountsContent: React.FC = () => {
     if (!cardLabel.trim()) {
       ErrorToast({
         title: "Validation Error",
-        descriptions: ["Card label is required"],
+        descriptions: ["Cardholder name is required"],
       });
       return;
     }
 
-    const cardholderName = (user?.fullname || "CARD HOLDER").toUpperCase();
+    if (!/^\d{8}$/.test(cardPinInput.trim())) {
+      ErrorToast({
+        title: "Validation Error",
+        descriptions: ["Card PIN must be exactly 8 digits."],
+      });
+      return;
+    }
+
+    const cardholderName = (cardLabel.trim() || user?.fullname || "CARD HOLDER").toUpperCase();
     createCard({
       walletId: currencyAccount.id,
       currency: selectedCurrency as "USD" | "NGN",
       cardholderName,
+      pin: cardPinInput.trim(),
     });
   };
 
@@ -327,6 +337,7 @@ const AccountsContent: React.FC = () => {
   const [openTier3Modal, setOpenTier3Modal] = useState(false);
   const [openCreateCard, setOpenCreateCard] = useState(false);
   const [cardLabel, setCardLabel] = useState("");
+  const [cardPinInput, setCardPinInput] = useState("");
   const [selectedCard, setSelectedCard] = useState<any | null>(null);
 
   // Tier status calculations
@@ -575,19 +586,36 @@ const AccountsContent: React.FC = () => {
                         ) : (
                               <div className="w-full max-w-sm flex flex-col gap-3">
                                 <div className="flex flex-col gap-1">
-                                  <label className="text-white/70 text-xs">Card Label</label>
+                                  <label className="text-white/70 text-xs">Cardholder Name</label>
                                   <input
                                     className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-2 px-3 text-white text-sm placeholder:text-white/50 outline-none"
-                                    placeholder="e.g., Personal USD Card"
+                                    placeholder="e.g., JOHN DOE"
                                     value={cardLabel}
                                     onChange={(e) => setCardLabel(e.target.value)}
                                   />
                 </div>
+                                <div className="flex flex-col gap-1">
+                                  <label className="text-white/70 text-xs">Card PIN (8 digits)</label>
+                                  <input
+                                    inputMode="numeric"
+                                    className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-2 px-3 text-white text-sm placeholder:text-white/50 outline-none"
+                                    placeholder="e.g., 12345678"
+                                    value={cardPinInput}
+                                    maxLength={8}
+                                    onChange={(e) =>
+                                      setCardPinInput(e.target.value.replace(/\D/g, "").slice(0, 8))
+                                    }
+                                  />
+                                  <p className="text-white/50 text-[10px] mt-1">
+                                    Must be exactly 8 digits.
+                                  </p>
+                                </div>
                                 <div className="flex gap-2">
                                   <CustomButton
                                     onClick={() => {
                                       setOpenCreateCard(false);
                                       setCardLabel("");
+                                      setCardPinInput("");
                                     }}
                                     className="flex-1 bg-transparent border border-white/15 text-white rounded-lg py-2"
                                   >
@@ -595,7 +623,12 @@ const AccountsContent: React.FC = () => {
                                   </CustomButton>
                                   <CustomButton
                                     onClick={handleCreateCard}
-                                    disabled={creatingCard || !cardLabel.trim() || !currencyAccount}
+                                    disabled={
+                                      creatingCard ||
+                                      !cardLabel.trim() ||
+                                      !/^\d{8}$/.test(cardPinInput.trim()) ||
+                                      !currencyAccount
+                                    }
                                     isLoading={creatingCard}
                                     className="flex-1 bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black rounded-lg py-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
