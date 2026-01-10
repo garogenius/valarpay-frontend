@@ -25,7 +25,7 @@ export interface ICreateCardPayload {
   walletId: string;
   currency: CardCurrency;
   cardholderName: string;
-  pin: string; // 4-digit card PIN
+  pin: string; // 8-digit card PIN required by backend
   initialBalance?: number;
 }
 

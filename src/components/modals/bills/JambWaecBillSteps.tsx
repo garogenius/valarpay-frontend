@@ -5,7 +5,6 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { IoClose } from "react-icons/io5";
 import { FaFingerprint } from "react-icons/fa";
-import SpinnerLoader from "@/components/Loader/SpinnerLoader";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
 import useUserStore from "@/store/user.store";
@@ -14,8 +13,6 @@ import GlobalTransactionHistoryModal from "@/components/shared/GlobalTransaction
 import { useFingerprintForPayments } from "@/store/paymentPreferences.store";
 import useGlobalModalsStore from "@/store/globalModals.store";
 import {
-  useGetWaecPlan,
-  useGetJambPlan,
   useVerifyWaecBillerNumber,
   useVerifyJambBillerNumber,
   usePayWaec,
@@ -24,6 +21,13 @@ import {
 
 type Step = "details" | "confirm";
 type ExamType = "JAMB" | "WAEC" | null;
+
+type ProductOption = {
+  itemCode: string;
+  name: string;
+  // Optional display amount; actual amount is always taken from verify response
+  displayAmount?: number;
+};
 
 const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { user } = useUserStore();
@@ -40,27 +44,40 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const planRef = useRef<HTMLDivElement>(null);
   const examTypeRef = useRef<HTMLDivElement>(null);
 
-  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductOption | null>(null);
   const [billerNumber, setBillerNumber] = useState("");
   const [walletPin, setWalletPin] = useState("");
 
   const [verifiedCustomerName, setVerifiedCustomerName] = useState("");
+  const [verifiedAmount, setVerifiedAmount] = useState<number>(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
 
-  // Fetch plans based on exam type - only fetch when exam type is selected
-  const { planData: waecPlanData, isPending: waecPlanPending, isError: waecPlanError } = useGetWaecPlan(examType === "WAEC");
-  const { planData: jambPlanData, isPending: jambPlanPending, isError: jambPlanError } = useGetJambPlan(examType === "JAMB");
+  // Opay-style: fixed product IDs
+  const waecProducts: ProductOption[] = useMemo(
+    () => [
+      { itemCode: "1473", name: "Result Checker", displayAmount: 4000 },
+      { itemCode: "1474", name: "Registration PIN", displayAmount: 27000 },
+    ],
+    []
+  );
 
-  const currentPlanData = examType === "WAEC" ? waecPlanData : examType === "JAMB" ? jambPlanData : null;
-  const plansLoading = (examType === "WAEC" && waecPlanPending) || (examType === "JAMB" && jambPlanPending);
-  const plansError = (examType === "WAEC" && waecPlanError) || (examType === "JAMB" && jambPlanError);
+  const jambProducts: ProductOption[] = useMemo(
+    () => [
+      { itemCode: "308", name: "JAMB DE", displayAmount: 5700 },
+      { itemCode: "309", name: "JAMB UME Mock", displayAmount: 8700 },
+      { itemCode: "1612", name: "JAMB UTME (Variable)" },
+      { itemCode: "1613", name: "JAMB UTME Mock (Variable)" },
+      { itemCode: "1614", name: "Mock Only", displayAmount: 3500 },
+    ],
+    []
+  );
 
-  const plans = currentPlanData?.plans || [];
-  const billerCode = currentPlanData?.billerCode || "";
-  const billerName = currentPlanData?.billerName || examType || "";
+  const products = examType === "WAEC" ? waecProducts : examType === "JAMB" ? jambProducts : [];
+  const billerCode = examType || "";
+  const billerName = examType || "";
 
-  const amount = useMemo(() => Number(selectedPlan?.amount) || 0, [selectedPlan]);
+  const amount = useMemo(() => Number(verifiedAmount) || 0, [verifiedAmount]);
 
   const formatNgn = (v: number) =>
     `₦${new Intl.NumberFormat("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
@@ -69,17 +86,20 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   // Reset plan when exam type changes
   useEffect(() => {
-    setSelectedPlan(null);
+    setSelectedProduct(null);
     setBillerNumber("");
     setVerifiedCustomerName("");
+    setVerifiedAmount(0);
+    setWalletPin("");
+    setStep("details");
   }, [examType]);
 
   const onVerifyError = (error: any) => {
       handleError(error, {
         currency: "NGN",
         onRetry: () => {
-          if (!examType || !selectedPlan || !billerNumber) return;
-          const itemCode = selectedPlan.itemCode || `${examType}-REG`;
+          if (!examType || !selectedProduct || !billerNumber) return;
+          const itemCode = selectedProduct.itemCode;
           if (examType === "WAEC") {
             verifyWaec({ itemCode, billerCode, billerNumber });
           } else {
@@ -92,6 +112,7 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const onVerifySuccess = (data: any) => {
     const payload = data?.data?.data;
     setVerifiedCustomerName(String(payload?.customerName || payload?.name || ""));
+    setVerifiedAmount(Number(payload?.amount) || 0);
     setStep("confirm");
   };
 
@@ -110,8 +131,8 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       handleError(error, {
         currency: "NGN",
         onRetry: () => {
-          if (!examType || !selectedPlan || !billerNumber || !walletPin) return;
-          const itemCode = selectedPlan.itemCode || `${examType}-REG`;
+          if (!examType || !selectedProduct || !billerNumber || !walletPin) return;
+          const itemCode = selectedProduct.itemCode;
           if (examType === "WAEC") {
             payWaec({
               itemCode,
@@ -156,10 +177,10 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       recipientName: billerName,
       recipientAccount: billerNumber,
       recipientBank: billerName,
-      description: selectedPlan?.name || `${examType} Payment`,
+      description: selectedProduct?.name || `${examType} Payment`,
       provider: billerName,
       billerNumber,
-      planName: selectedPlan?.name || undefined,
+      planName: selectedProduct?.name || undefined,
     });
     setShowSuccess(true);
   };
@@ -170,8 +191,8 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const paying = (examType === "WAEC" && payWaecPending) || (examType === "JAMB" && payJambPending);
 
   const canNext =
-    !!examType && !!selectedPlan && !!billerCode && billerNumber.length >= 6 && amount > 0;
-  const canPay = canNext && walletPin.length === 4 && !!verifiedCustomerName;
+    !!examType && !!selectedProduct && !!billerCode && billerNumber.trim().length >= 6;
+  const canPay = canNext && walletPin.length === 4 && !!verifiedCustomerName && amount > 0;
 
   return (
     <>
@@ -241,50 +262,41 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <label className="text-[11px] text-gray-500 dark:text-gray-400">Plan</label>
                 <button
                   type="button"
-                  disabled={!examType || plansLoading}
-                  onClick={() => examType && !plansLoading && setPlanOpen((v) => !v)}
+                  disabled={!examType}
+                  onClick={() => examType && setPlanOpen((v) => !v)}
                   className="w-full flex items-center justify-between bg-[#F4F4F5] dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm text-black dark:text-white disabled:opacity-60"
                 >
-                  <span className={selectedPlan ? "text-black dark:text-white" : "text-gray-500 dark:text-gray-600"}>
-                    {plansLoading
-                      ? "Loading plans..."
-                      : selectedPlan
-                      ? selectedPlan.name
+                  <span className={selectedProduct ? "text-black dark:text-white" : "text-gray-500 dark:text-gray-600"}>
+                    {selectedProduct
+                      ? selectedProduct.name
                       : examType
-                      ? "Select plan"
-                      : "Select exam type first"}
+                        ? "Select plan"
+                        : "Select exam type first"}
                   </span>
                   <span className="text-gray-500 dark:text-gray-500">▾</span>
                 </button>
-                {plansError && examType ? (
-                  <p className="text-[11px] text-red-500 mt-1">
-                    Unable to load {examType} plans. Please try again later.
-                  </p>
-                ) : null}
                 {planOpen && examType && (
                   <div className="relative left-0 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-2xl z-[9999] mt-2">
-                    {plansLoading ? (
-                      <div className="p-4 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
-                        <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...
-                      </div>
-                    ) : plans.length === 0 ? (
+                    {products.length === 0 ? (
                       <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">
-                        {plansError ? "Unable to load plans" : "No plans available"}
+                        No plans available
                       </div>
                     ) : (
-                      plans.map((plan: any) => (
+                      products.map((p) => (
                         <button
-                          key={plan.id}
+                          key={p.itemCode}
                           type="button"
                           onClick={() => {
-                            setSelectedPlan(plan);
+                            setSelectedProduct(p);
                             setPlanOpen(false);
                           }}
                           className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
                         >
                           <div className="flex items-center justify-between">
-                            <span>{plan.name}</span>
-                            <span className="text-gray-500 dark:text-gray-400">{formatNgn(plan.amount)}</span>
+                            <span>{p.name}</span>
+                            <span className="text-gray-500 dark:text-gray-400">
+                              {typeof p.displayAmount === "number" ? formatNgn(p.displayAmount) : "—"}
+                            </span>
                           </div>
                         </button>
                       ))
@@ -309,16 +321,14 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </div>
               </div>
 
-              {/* Amount Display */}
-              {amount > 0 && (
-                <div className="w-full flex items-center justify-between px-4 py-3 rounded-lg bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-800/40">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-green-600 dark:bg-green-400" />
-                    <p className="text-xs text-green-700 dark:text-green-300 font-medium">{formatNgn(amount)}</p>
-                  </div>
-                  <p className="text-[11px] text-green-700 dark:text-green-300">From Available Balance</p>
+              {/* Note */}
+              {examType && selectedProduct ? (
+                <div className="w-full px-4 py-3 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-800/40">
+                  <p className="text-[11px] text-blue-700 dark:text-blue-300">
+                    Tap <span className="font-semibold">Next</span> to verify the number and fetch the payable amount.
+                  </p>
                 </div>
-              )}
+              ) : null}
             </div>
           ) : (
             <div className="w-full flex flex-col gap-4">
@@ -329,7 +339,7 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <p className="text-xs text-gray-600 dark:text-gray-400">Plan</p>
-                  <p className="text-xs font-medium text-black dark:text-white">{selectedPlan?.name || "-"}</p>
+                  <p className="text-xs font-medium text-black dark:text-white">{selectedProduct?.name || "-"}</p>
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -386,9 +396,8 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           {step === "details" ? (
             <button
               onClick={() => {
-                if (!examType || !selectedPlan || !billerNumber || !billerCode) return;
-                // Construct itemCode: use plan.itemCode if available, otherwise construct from exam type
-                const itemCode = selectedPlan.itemCode || `${examType}-REG`;
+                if (!examType || !selectedProduct || !billerNumber || !billerCode) return;
+                const itemCode = selectedProduct.itemCode;
                 if (examType === "WAEC") {
                   verifyWaec({ itemCode, billerCode, billerNumber });
                 } else {
@@ -410,9 +419,8 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </button>
               <button
                 onClick={() => {
-                  if (!examType || !selectedPlan || !billerNumber || !walletPin) return;
-                  // Construct itemCode: use plan.itemCode if available, otherwise construct from exam type
-                  const itemCode = selectedPlan.itemCode || `${examType}-REG`;
+                  if (!examType || !selectedProduct || !billerNumber || !walletPin) return;
+                  const itemCode = selectedProduct.itemCode;
                   if (examType === "WAEC") {
                     payWaec({
                       itemCode,
@@ -453,10 +461,11 @@ const JambWaecBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             setTransactionData(null);
             setStep("details");
             setExamType(null);
-            setSelectedPlan(null);
+            setSelectedProduct(null);
             setBillerNumber("");
             setWalletPin("");
             setVerifiedCustomerName("");
+            setVerifiedAmount(0);
             onClose();
           }}
           transaction={transactionData}

@@ -314,10 +314,10 @@ const CardsContent: React.FC = () => {
       return;
     }
 
-    if (!/^\d{4}$/.test(cardPinInput.trim())) {
+    if (!/^\d{8}$/.test(cardPinInput.trim())) {
       ErrorToast({
         title: "Validation Error",
-        descriptions: ["Card PIN must be exactly 4 digits."],
+        descriptions: ["Card PIN must be exactly 8 digits."],
       });
       return;
     }
@@ -899,19 +899,19 @@ const CardsContent: React.FC = () => {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-white/70 text-xs">Card PIN (4 digits)</label>
+                <label className="text-white/70 text-xs">Card PIN (8 digits)</label>
                 <input
                   inputMode="numeric"
                   className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3 px-3 text-white text-sm placeholder:text-white/50 outline-none focus:border-[#f76301]"
-                  placeholder="e.g., 1234"
+                  placeholder="e.g., 12345678"
                   value={cardPinInput}
-                  maxLength={4}
+                  maxLength={8}
                   onChange={(e) =>
-                    setCardPinInput(e.target.value.replace(/\D/g, "").slice(0, 4))
+                    setCardPinInput(e.target.value.replace(/\D/g, "").slice(0, 8))
                   }
                 />
                 <p className="text-white/50 text-[10px] mt-1">
-                  This is your card PIN (must be exactly 4 digits).
+                  This is your card PIN (must be exactly 8 digits).
                 </p>
               </div>
               <div className="flex flex-col gap-1">
@@ -955,7 +955,7 @@ const CardsContent: React.FC = () => {
                   disabled={
                     creatingCard ||
                     !cardholderNameInput.trim() ||
-                    !/^\d{4}$/.test(cardPinInput.trim()) ||
+                    !/^\d{8}$/.test(cardPinInput.trim()) ||
                     !hasCurrencyAccount(selectedCurrency)
                   }
                   isLoading={creatingCard}

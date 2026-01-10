@@ -404,7 +404,7 @@ const ProfileSettingsContent = () => {
       title: "Document Uploaded!",
       description: responseData?.data?.message || "Your document has been uploaded successfully",
     });
-
+    
     // Keep the saved document information visible after upload
     const documentData = responseData?.data?.data;
     if (documentData?.documentType) {

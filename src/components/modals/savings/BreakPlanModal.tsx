@@ -184,17 +184,17 @@ const BreakPlanModal: React.FC<BreakPlanModalProps> = ({
       Number.isFinite(n) ? n : 0
     )}`;
 
-  // Preview breakdown (estimate): most products forfeit accrued interest on early break
-  const estimatedInterestForfeited = isEarly ? Number(interestEarned || 0) : 0;
-  const estimatedPenalty = isEarly ? Number(currentAmount || 0) * Number(penaltyRate || 0) : 0;
-  const estimatedPayout = Math.max(0, Number(currentAmount || 0) - estimatedPenalty);
-
   const now = new Date();
   const maturityDate = plan?.maturityDate ? new Date(plan.maturityDate) : null;
   const isEarly = maturityDate ? now < maturityDate : true;
   const earlyEnabledForEasyLife =
     planType !== "easylife" ? true : !!(plan as EasyLifePlan | null)?.earlyWithdrawalEnabled;
   const canBreak = isEarly && earlyEnabledForEasyLife;
+
+  // Preview breakdown (estimate): most products forfeit accrued interest on early break
+  const estimatedInterestForfeited = isEarly ? Number(interestEarned || 0) : 0;
+  const estimatedPenalty = isEarly ? Number(currentAmount || 0) * Number(penaltyRate || 0) : 0;
+  const estimatedPayout = Math.max(0, Number(currentAmount || 0) - estimatedPenalty);
 
   const reasons = [
     { value: "emergency", label: "Emergency Expenses" },
