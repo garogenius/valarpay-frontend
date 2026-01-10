@@ -20,6 +20,7 @@ import {
   useGetSchoolBillInfo,
   useVerifySchoolBillerNumber,
   usePaySchoolFee,
+  useGetSchoolFeePlan,
 } from "@/api/education/education.queries";
 
 type Step = "details" | "confirm";
@@ -54,16 +55,22 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
   const [showSuccess, setShowSuccess] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
 
-  const { billers, isPending: billersPending, isError: billersError } = useGetEducationBillers();
-  const billersLoading = billersPending && !billersError;
+  // Institutions list must come from GET /bill/school/get-plan?currency=NGN
+  const {
+    institutions,
+    isPending: institutionsPending,
+    isError: institutionsError,
+  } = useGetSchoolFeePlan("NGN", true);
+  const institutionsLoading = institutionsPending && !institutionsError;
 
   const filteredBillers = useMemo(() => {
-    const list = billers || [];
+    const list = institutions || [];
     return billerNameFilter
       ? list.filter((b: any) => billerNameFilter(String(b.billerName || b.name || "")))
       : list;
-  }, [billers, billerNameFilter]);
+  }, [institutions, billerNameFilter]);
 
+  // Schools: returned shape: { id, name, amount, billerCode }
   const billerCode = String(biller?.billerCode || biller?.billerId || "");
   // Use school bill info endpoint to get plans/services
   const { plans, isPending: itemsPending, isError: itemsError } = useGetSchoolBillInfo(billerCode);
@@ -86,6 +93,11 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
   const onVerifySuccess = (data: any) => {
     const payload = data?.data?.data;
     setVerifiedCustomerName(String(payload?.customerName || payload?.name || ""));
+    // Spec returns amount on verify; prefer it
+    const verifiedAmount = Number(payload?.amount);
+    if (Number.isFinite(verifiedAmount) && verifiedAmount > 0) {
+      setAmountText(String(verifiedAmount));
+    }
     setStep("confirm");
   };
 
@@ -176,8 +188,8 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
                   <span className="text-gray-500 dark:text-gray-500">▾</span>
                 </button>
                 {institutionOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-56 overflow-y-auto shadow-2xl z-[9999]">
-                    {billersLoading ? (
+                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-x-hidden overflow-y-auto max-h-56 overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] shadow-2xl z-[9999]">
+                    {institutionsLoading ? (
                       <div className="p-4 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
                         <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...
                       </div>
@@ -215,7 +227,7 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
                   <span className="text-gray-500 dark:text-gray-500">▾</span>
                 </button>
                 {serviceOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-56 overflow-y-auto shadow-2xl z-[9999]">
+                  <div className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-x-hidden overflow-y-auto max-h-56 overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] shadow-2xl z-[9999]">
                     {itemsLoading ? (
                       <div className="p-4 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
                         <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...

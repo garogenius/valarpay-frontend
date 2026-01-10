@@ -333,7 +333,20 @@ const InternetStageOne: React.FC<StageOneProps> = ({
             {providerState && (
               <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
                 <SearchableDropdown
-                  items={internetPlans}
+                  // API returns { name, amount, billerCode }. We show providers uniquely by billerCode.
+                  items={(Array.isArray(internetPlans) ? internetPlans : [])
+                    .reduce((acc: any[], p: any) => {
+                      const code = String(p?.billerCode || "").trim();
+                      if (!code) return acc;
+                      if (acc.some((x) => String(x?.billerCode) === code)) return acc;
+                      acc.push({
+                        ...p,
+                        shortName:
+                          String(p?.billerCode || "").replace(/_/g, " ") ||
+                          String(p?.name || "Internet"),
+                      });
+                      return acc;
+                    }, [])}
                   searchKey="shortName"
                   displayFormat={(provider) => {
                     // const providerData = ElectricityProvidersData.find(
@@ -347,15 +360,19 @@ const InternetStageOne: React.FC<StageOneProps> = ({
                           className="w-7 h-7 rounded-full"
                         /> */}
                         <p className="uppercase 2xs:text-base text-sm font-medium text-text-200 dark:text-text-400">
-                          {provider.shortName}
+                          {String(provider.shortName || provider.billerCode || provider.name || "").toUpperCase()}
                         </p>
                       </div>
                     );
                   }}
                   onSelect={(plan) => {
-                    setValue("billerCode", plan.billerCode);
-                    setValue("provider", plan.shortName);
+                    setValue("billerCode", String((plan as any).billerCode || ""));
+                    setValue(
+                      "provider",
+                      String((plan as any).shortName || (plan as any).billerCode || (plan as any).name || "")
+                    );
                     setValue("itemCode", "");
+                    setValue("plan", "");
                     clearErrors("billerCode");
                     clearErrors("provider");
                     setProviderState(false);
@@ -431,31 +448,36 @@ const InternetStageOne: React.FC<StageOneProps> = ({
             {planState && (
               <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
                 <SearchableDropdown
-                  items={variations}
-                  searchKey="short_name"
+                  // bill-info returns { plans: [{ id, name, amount, ...maybe itemCode }] }
+                  items={Array.isArray(variations) ? variations : []}
+                  searchKey="name"
                   displayFormat={(plan) => {
                     return (
                       <div className="flex items-center gap-2">
                         <p className="uppercase 2xs:text-base text-sm font-medium text-text-200 dark:text-text-400">
-                          {plan.short_name}
+                          {String((plan as any).name || "")}
                         </p>
                       </div>
                     );
                   }}
                   onSelect={(plan) => {
-                    setValue("plan", plan.short_name);
-                    setValue("itemCode", plan.item_code);
+                    const name = String((plan as any).name || "");
+                    const billerCode = String(watchedBillerCode || "");
+                    const itemCode =
+                      String((plan as any).itemCode || (plan as any).item_code || "").trim() ||
+                      (String((plan as any).id || "").trim()
+                        ? `${billerCode}-${String((plan as any).id).trim()}`
+                        : `${billerCode}-${name.toUpperCase().replace(/\s+/g, "-")}`);
+
+                    setValue("plan", name);
+                    setValue("itemCode", itemCode);
                     clearErrors("plan");
                     clearErrors("itemCode");
                     setProviderState(false);
                     setPlanState(false);
-                    if (plan.amount === 0) {
-                      setValue("amount", 0);
-                      setFee(plan.payAmount);
-                    } else {
-                      setValue("amount", plan.payAmount);
-                      setFee(0);
-                    }
+                    const amt = Number((plan as any).amount || 0);
+                    setValue("amount", Number.isFinite(amt) ? amt : 0);
+                    setFee(0);
                   }}
                   showSearch={false}
                   placeholder="Search Plan..."

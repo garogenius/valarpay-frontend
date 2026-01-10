@@ -459,6 +459,27 @@ const InvestmentModal: React.FC<InvestmentModalProps> = ({ isOpen, onClose }) =>
                 </p>
               </div>
 
+              <div className="rounded-xl border border-white/10 bg-bg-2400/40 dark:bg-bg-2100/40 px-4 py-3">
+                <p className="text-white font-medium text-sm">Need support?</p>
+                <p className="text-white/60 text-xs mt-1">
+                  Contact ValarPay support:
+                </p>
+                <div className="mt-2 flex flex-col gap-1 text-sm">
+                  <a
+                    href="tel:+2348134146906"
+                    className="text-[#f76301] hover:text-[#e55a00] transition-colors font-medium"
+                  >
+                    +2348134146906
+                  </a>
+                  <a
+                    href="mailto:Support@valarpay.com"
+                    className="text-[#f76301] hover:text-[#e55a00] transition-colors font-medium"
+                  >
+                    Support@valarpay.com
+                  </a>
+                </div>
+              </div>
+
               <div className="flex gap-3">
                 <CustomButton
                   onClick={() => setStep(1)}

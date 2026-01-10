@@ -7,7 +7,7 @@ import { IoClose } from "react-icons/io5";
 import CustomButton from "@/components/shared/Button";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
-import { useCreateVirtualCard } from "@/api/wallet/wallet.queries";
+import { useCreateCard } from "@/api/currency/cards.queries";
 
 interface GetVirtualCardModalProps {
   isOpen: boolean;
@@ -29,6 +29,7 @@ const GetVirtualCardModal: React.FC<GetVirtualCardModalProps> = ({
   const [step, setStep] = useState<Step>("amount");
   const [amount, setAmount] = useState("");
   const [cardName, setCardName] = useState("");
+  const [cardPin, setCardPin] = useState("");
 
   if (!isOpen) return null;
 
@@ -51,7 +52,7 @@ const GetVirtualCardModal: React.FC<GetVirtualCardModalProps> = ({
       description: data?.data?.message || "Your USD virtual card has been created",
     });
 
-    const cardId = data?.data?.data?.cardId;
+    const cardId = data?.data?.data?.id || data?.data?.data?.cardId;
     if (cardId && typeof window !== "undefined") {
       localStorage.setItem("usdVirtualCardId", cardId);
     }
@@ -59,13 +60,14 @@ const GetVirtualCardModal: React.FC<GetVirtualCardModalProps> = ({
     setStep("success");
   };
 
-  const { mutate: createCard, isPending } = useCreateVirtualCard(onError, onCreateSuccess);
+  const { mutate: createCard, isPending } = useCreateCard(onError, onCreateSuccess);
 
   useEffect(() => {
     if (!isOpen) return;
     setStep("amount");
     setAmount("");
     setCardName("");
+    setCardPin("");
   }, [isOpen]);
 
   const handleNext = () => {
@@ -79,6 +81,8 @@ const GetVirtualCardModal: React.FC<GetVirtualCardModalProps> = ({
         walletId,
         currency: "USD",
         cardholderName,
+        pin: cardPin.trim(),
+        initialBalance: amount ? Number(amount) : undefined,
       });
       return;
     }
@@ -97,6 +101,18 @@ const GetVirtualCardModal: React.FC<GetVirtualCardModalProps> = ({
           placeholder="e.g., Shopping Card"
           value={cardName}
           onChange={(e) => setCardName(e.target.value)}
+          className="w-full bg-[#1C1C1E] border border-gray-700 rounded-lg px-4 py-3 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#FF6B2C]"
+        />
+      </div>
+
+      <div>
+        <label className="text-gray-400 text-xs mb-2 block">Card PIN (8 digits)</label>
+        <input
+          inputMode="numeric"
+          placeholder="e.g., 12345678"
+          value={cardPin}
+          maxLength={8}
+          onChange={(e) => setCardPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
           className="w-full bg-[#1C1C1E] border border-gray-700 rounded-lg px-4 py-3 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#FF6B2C]"
         />
       </div>

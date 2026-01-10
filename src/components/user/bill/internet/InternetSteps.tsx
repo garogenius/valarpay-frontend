@@ -79,9 +79,8 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const amount = useMemo(() => {
     if (!plan) return 0;
-    const base = Number((plan as any).payAmount || plan.amount || 0);
-    const fee = Number((plan as any).fee || 0);
-    return base + fee;
+    const base = Number((plan as any).amount || 0);
+    return Number.isFinite(base) ? base : 0;
   }, [plan]);
 
   const formatNgn = (v: number) =>
@@ -173,7 +172,7 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
         {providerOpen && (
           <div
-            className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-20"
+            className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-x-hidden overflow-y-auto max-h-52 overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] shadow-2xl z-20"
             style={{ scrollbarWidth: "thin", scrollbarColor: "#2C2C2E transparent" }}
           >
             {plansLoading ? (
@@ -181,7 +180,16 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...
               </div>
             ) : (
-              (internetPlans || []).map((p) => (
+              (internetPlans || [])
+                // Show unique providers (billerCode) instead of every plan row
+                .reduce((acc: any[], p: any) => {
+                  const code = String(p?.billerCode || "").trim();
+                  if (!code) return acc;
+                  if (acc.some((x) => String(x?.billerCode) === code)) return acc;
+                  acc.push(p);
+                  return acc;
+                }, [])
+                .map((p) => (
                 <button
                   key={p.id}
                   type="button"
@@ -191,10 +199,8 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   }}
                   className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
                 >
-                  {String((p as any).planName || "").trim() ||
-                    String((p as any).shortName || "").trim() ||
-                    String((p as any).description || "").trim() ||
-                    String((p as any).billerCode || "").trim() ||
+                  {String((p as any).billerCode || "").trim() ||
+                    String((p as any).name || "").split(" ")[0] ||
                     "Internet"}
                 </button>
               ))
@@ -241,7 +247,7 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
         {planOpen && (
           <div
-            className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden max-h-52 overflow-y-auto shadow-2xl z-20"
+            className="absolute left-0 top-full mt-2 w-full bg-white dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-xl overflow-x-hidden overflow-y-auto max-h-52 overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] shadow-2xl z-20"
             style={{ scrollbarWidth: "thin", scrollbarColor: "#2C2C2E transparent" }}
           >
             {variationsLoading ? (
@@ -251,7 +257,7 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             ) : (
               (variations || []).map((v) => (
                 <button
-                  key={v.id}
+                  key={String((v as any).id ?? (v as any).itemCode ?? (v as any).name)}
                   type="button"
                   onClick={() => {
                     setPlan(v);

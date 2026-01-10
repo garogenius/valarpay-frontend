@@ -72,6 +72,19 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
     const d = data?.data?.data;
     setAccountName(d?.accountName || "");
     setSessionId(d?.sessionId || "");
+
+    // Auto-detect bank when backend provides it
+    const bankCode = d?.bankCode ? String(d.bankCode) : "";
+    const bankName = d?.bankName ? String(d.bankName) : "";
+    if (bankCode || bankName) {
+      const matched = (banks || []).find((b: any) => String(b.bankCode) === bankCode);
+      if (matched) {
+        setSelectedBank({ name: matched.name, bankCode: String(matched.bankCode) });
+      } else if (bankCode) {
+        setSelectedBank({ name: bankName || "Bank", bankCode });
+      }
+      setBankOpen(false);
+    }
   };
   const { mutate: verifyAccount } = useVerifyAccount(onVerifyAccountError, onVerifyAccountSuccess);
 
@@ -405,8 +418,15 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
                         onChange={(e)=> {
                           const v = e.target.value.replace(/\D/g,"");
                           setAccountNumber(v);
-                          if (selectedBank && v.length === 10) {
-                            verifyAccount({ accountNumber: v, bankCode: selectedBank.bankCode });
+                          if (v.length === 10) {
+                            verifyAccount(
+                              selectedBank?.bankCode
+                                ? { accountNumber: v, bankCode: selectedBank.bankCode }
+                                : { accountNumber: v }
+                            );
+                          } else {
+                            setAccountName("");
+                            setSessionId("");
                           }
                         }}
                       />

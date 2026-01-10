@@ -34,7 +34,10 @@ export const useGetInternetVariations = (
     enabled: !!payload.billerCode,
   });
 
-  const variations: InternetVariationProps[] = data?.data?.data;
+  // New API shape:
+  // { statusCode: 200, data: { billerCode, billerName, plans: [{ id, name, amount, ...maybe itemCode }] } }
+  const billInfo = data?.data?.data ?? data?.data ?? null;
+  const variations: any[] = Array.isArray(billInfo?.plans) ? billInfo.plans : [];
   return { isLoading, isError, variations };
 };
 

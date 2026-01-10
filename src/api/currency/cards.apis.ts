@@ -12,10 +12,12 @@ import type {
 
 // Create virtual card
 export const createCardRequest = async (data: ICreateCardPayload) => {
+  // Backend rejects unknown fields like `label` (older UI used it)
+  const { label, ...safe } = data as any;
   return request({
-    url: "/wallet/virtual-card/create",
+    url: "/currency/cards",
     method: "post",
-    data,
+    data: safe,
   });
 };
 
@@ -65,8 +67,21 @@ export const closeCardRequest = async (cardId: string, data: ICloseCardPayload) 
 // Freeze/unfreeze card
 export const freezeCardRequest = async (cardId: string, freeze: boolean = true) => {
   return request({
-    url: `/currency/cards/${cardId}/freeze?freeze=${freeze}`,
+    url: `/currency/cards/${cardId}/freeze`,
     method: "patch",
+    data: { freeze },
+  });
+};
+
+// Update card secure settings
+export const updateCardSecureSettingsRequest = async (
+  cardId: string,
+  data: Record<string, any>
+) => {
+  return request({
+    url: `/currency/cards/${cardId}/secure-settings`,
+    method: "patch",
+    data,
   });
 };
 

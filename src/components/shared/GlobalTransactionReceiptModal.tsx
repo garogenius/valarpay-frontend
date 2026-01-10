@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CgClose } from "react-icons/cg";
 import { LuCopy } from "react-icons/lu";
-import { FiDownload } from "react-icons/fi";
+import { FiDownload, FiShare2 } from "react-icons/fi";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
@@ -175,144 +175,143 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
             </div>
 
             {/* Receipt Content */}
-            <div className="flex-1 overflow-y-auto px-6 py-4">
-              <div id="global-transaction-receipt" className="text-white bg-[#1C1C1E] rounded-xl p-6">
-                {/* Rows with dotted orange separators */}
-                <div className="space-y-0">
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/30">
-                    <span className="text-xs text-white/60">Transaction Date</span>
-                    <span className="text-xs text-white font-medium">
+            <div className="flex-1 overflow-y-auto p-0">
+              <div id="global-transaction-receipt" className="text-white bg-[#000000] p-8 font-sans">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+                      <span className="text-[#f76301] font-bold text-lg">V</span>
+                    </div>
+                    <span className="text-white font-bold text-xl tracking-tight">VALARPAY</span>
+                  </div>
+                  <span className="text-white/90 text-sm font-medium">Beyond Banking</span>
+                </div>
+
+                {/* Title */}
+                <div className="flex justify-center mb-10">
+                  <div className="bg-[#f76301] px-10 py-3 rounded-xl">
+                    <span className="text-black font-bold text-lg">Transaction Receipt</span>
+                  </div>
+                </div>
+
+                {/* Content Rows */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between py-4">
+                    <span className="text-white/60 text-sm">Transaction Date</span>
+                    <span className="text-white text-sm font-medium">
                       {format(new Date(transaction.createdAt), "dd-MM-yyyy hh:mm a")}
                     </span>
                   </div>
+                  <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
 
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/30">
-                    <span className="text-xs text-white/60">Transaction ID</span>
-                    <div className="flex items-center gap-2 max-w-[210px]">
-                      <span className="text-xs text-white font-medium truncate">
-                        {transaction.reference || transaction.id}
-                      </span>
-                      <button
-                        onClick={() => copyToClipboard(transaction.reference || transaction.id)}
-                        className="text-white/60 hover:text-white transition-colors"
-                        aria-label="Copy transaction id"
-                      >
-                        <LuCopy className="w-3 h-3" />
-                      </button>
-                    </div>
+                  <div className="flex items-center justify-between py-4">
+                    <span className="text-white/60 text-sm">Transaction ID</span>
+                    <span className="text-white text-sm font-medium truncate ml-4 max-w-[200px]">
+                      {transaction.reference || transaction.id}
+                    </span>
                   </div>
+                  <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
 
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/30">
-                    <span className="text-xs text-white/60">Amount</span>
-                    <span className="text-xs text-white font-medium">
+                  <div className="flex items-center justify-between py-4">
+                    <span className="text-white/60 text-sm">Amount</span>
+                    <span className="text-white text-sm font-medium">
                       {transaction.currency === "NGN" ? "₦" : transaction.currency}
                       {Number(transaction.amount).toLocaleString()}
                     </span>
                   </div>
+                  <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
 
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/30">
-                    <span className="text-xs text-white/60">Currency</span>
-                    <span className="text-xs text-white font-medium">{transaction.currency}</span>
+                  <div className="flex items-center justify-between py-4">
+                    <span className="text-white/60 text-sm">Currency</span>
+                    <span className="text-white text-sm font-medium">{transaction.currency}</span>
                   </div>
+                  <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
 
-                  <div className="flex items-center justify-between py-3 border-b border-dashed border-[#f76301]/30">
-                    <span className="text-xs text-white/60">Transaction Type</span>
-                    <span className="text-xs text-white font-medium">{getTransactionTypeLabel()}</span>
+                  <div className="flex items-center justify-between py-4">
+                    <span className="text-white/60 text-sm">Transaction Type</span>
+                    <span className="text-white text-sm font-medium">{getTransactionTypeLabel()}</span>
                   </div>
+                  <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
 
                   {/* Transfer specific */}
                   {transaction.type === "TRANSFER" && (
                     <>
-                      {transaction.senderName && (
-                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
-                          <span className="text-xs text-white/60">Sender Name</span>
-                          <span className="text-xs text-white font-medium">{transaction.senderName}</span>
-                        </div>
-                      )}
-                      {transaction.recipientName && (
-                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
-                          <span className="text-xs text-white/60">Beneficiary Details</span>
-                          <span className="text-xs text-white font-medium text-right">
-                            {transaction.recipientName}
-                            {transaction.recipientAccount ? ` (${transaction.recipientAccount})` : ""}
-                          </span>
-                        </div>
-                      )}
-                      {transaction.recipientBank && (
-                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
-                          <span className="text-xs text-white/60">Beneficiary Bank</span>
-                          <span className="text-xs text-white font-medium">{transaction.recipientBank}</span>
-                        </div>
-                      )}
-                      {transaction.description && (
-                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
-                          <span className="text-xs text-white/60">Narration</span>
-                          <span className="text-xs text-white font-medium text-right truncate max-w-[200px]">
-                            {transaction.description}
-                          </span>
-                        </div>
-                      )}
+                      <div className="flex justify-between items-center py-4">
+                        <span className="text-white/60 text-sm">Sender Name</span>
+                        <span className="text-white text-sm font-medium text-right uppercase">{transaction.senderName || "N/A"}</span>
+                      </div>
+                      <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
+
+                      <div className="flex justify-between items-center py-4">
+                        <span className="text-white/60 text-sm">Beneficiary Details</span>
+                        <span className="text-white text-sm font-medium text-right">
+                          <span className="uppercase">{transaction.recipientName}</span>
+                          {transaction.recipientAccount ? ` (${transaction.recipientAccount})` : ""}
+                        </span>
+                      </div>
+                      <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
+
+                      <div className="flex justify-between items-center py-4">
+                        <span className="text-white/60 text-sm">Beneficiary Bank</span>
+                        <span className="text-white text-sm font-medium text-right">{transaction.recipientBank || "N/A"}</span>
+                      </div>
+                      <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
+
+                      <div className="flex justify-between items-center py-4">
+                        <span className="text-white/60 text-sm">Narration</span>
+                        <span className="text-white text-sm font-medium text-right truncate ml-4 max-w-[200px]">
+                          {transaction.description || "N/A"}
+                        </span>
+                      </div>
+                      <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
                     </>
                   )}
 
-                  {/* Bill Payment specific */}
-                  {(transaction.type === "DATA" || transaction.type === "AIRTIME" || transaction.type === "CABLE" || transaction.type === "ELECTRICITY" || transaction.type === "INTERNET") && (
-                    <>
-                      {transaction.planName && (
-                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
-                          <span className="text-xs text-white/60">Plan</span>
-                          <span className="text-xs text-white font-medium">{transaction.planName}</span>
-                        </div>
-                      )}
-                      {transaction.validity && (
-                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
-                          <span className="text-xs text-white/60">Duration</span>
-                          <span className="text-xs text-white font-medium">{transaction.validity}</span>
-                        </div>
-                      )}
-                      {transaction.provider && (
-                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
-                          <span className="text-xs text-white/60">Provider</span>
-                          <span className="text-xs text-white font-medium">{transaction.provider}</span>
-                        </div>
-                      )}
-                      {transaction.billerNumber && (
-                        <div className="flex justify-between items-center py-3 border-b border-dashed border-[#f76301]/30">
-                          <span className="text-xs text-white/60">Phone Number</span>
-                          <span className="text-xs text-white font-medium">{transaction.billerNumber}</span>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  <div className="flex justify-between items-center py-3">
-                    <span className="text-xs text-white/60">Status</span>
-                    <span
-                      className={`text-xs font-semibold ${
-                        transaction.status === "SUCCESSFUL"
-                          ? "text-green-500"
-                          : transaction.status === "FAILED"
-                            ? "text-red-500"
-                            : "text-yellow-500"
-                      }`}
-                    >
-                      {transaction.status === "SUCCESSFUL" ? "Successful" : transaction.status}
-                    </span>
+                  <div className="flex justify-between items-center py-4">
+                    <span className="text-white/60 text-sm">Status</span>
+                    <span className="text-[#22C55E] text-sm font-bold uppercase tracking-wide">Successful</span>
                   </div>
+                  <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
                 </div>
 
                 {/* Footer */}
-                <div className="mt-8 pt-6 border-t border-dashed border-[#f76301]/30">
-                  <p className="text-xs text-white/60 text-center mb-4">
-                    Thank you for banking with ValarPay.
+                <div className="mt-12">
+                  <p className="text-[10px] text-white/70 leading-relaxed font-light">
+                    Thank you for banking with ValarPay. For support, contact us at Support@valarpay.com, 
+                    call +2348134146906 or Head Office: C3&C4 Suite 2nd Floor Ejison Plaza 9a New Market Road Main Market Onitsha
                   </p>
-                  <div className="text-xs text-white/50 text-center space-y-1">
-                    <p>For support, contact us at Support@valarpay.com.</p>
-                    <p>call +2348134146006 or</p>
-                    <p>Head Office: C3 C4 Suite 2nd Floor Eison Plaza 9a New Market Road Main Market Oritsha</p>
-                  </div>
                 </div>
               </div>
+
+              {/* Action Buttons */}
+              <div className="p-6 flex gap-4 bg-bg-600 dark:bg-bg-1100">
+                <button
+                  onClick={() => {
+                    const shareText = `Transaction Receipt\nAmount: ${transaction.currency}${Number(transaction.amount).toLocaleString()}\nStatus: Successful\nID: ${transaction.reference || transaction.id}`;
+                    if (navigator.share) {
+                      navigator.share({
+                        title: 'ValarPay Receipt',
+                        text: shareText,
+                        url: window.location.href
+                      }).catch(console.error);
+                    } else {
+                      copyToClipboard(shareText);
+                    }
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#f76301] text-[#f76301] hover:bg-[#f76301]/10 transition-colors font-semibold"
+                >
+                  <FiShare2 /> Share
+                </button>
+                <button
+                  onClick={downloadReceiptAsPNG}
+                  disabled={isDownloading}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#f76301] hover:bg-[#e55a00] text-black transition-colors disabled:opacity-50 font-semibold"
+                >
+                  <FiDownload /> {isDownloading ? "..." : "Download"}
+                </button>
+              </div>
+            </div>
 
               {/* Download Button */}
               <div className="mt-6">

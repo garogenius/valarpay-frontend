@@ -95,6 +95,7 @@ interface BankResponseData {
   responseMessage: string;
   sessionId: string;
   bankCode: string;
+  bankName?: string;
   accountNumber: string;
   accountName: string;
   kycLevel: string;
@@ -134,6 +135,7 @@ const TransferProcess = ({
   const [paymentResultData, setPaymentResultData] = useState<PaymentResultData | null>(null);
 
   const { banks } = useGetAllBanks();
+  const lastVerifyKeyRef = useRef<string>("");
 
   const form = useForm<TransferFormData>({
     defaultValues: {
@@ -164,6 +166,7 @@ const TransferProcess = ({
   const watchedAmount = Number(watch("amount"));
   const watchedDescription = watch("description");
   const watchedSessionId = watch("sessionId");
+  const effectiveBankCode = String(watchedBankCode || bankData?.bankCode || "");
 
   const { fee } = useGetTransferFee({
     currency: "NGN",
@@ -184,11 +187,36 @@ const TransferProcess = ({
   };
 
   const onVerifyAccountSuccess = (data: any) => {
-    setBankData(data?.data?.data);
-    setValue("sessionId", data?.data?.data?.sessionId);
+    const d = data?.data?.data;
+    setBankData(d);
+    setValue("sessionId", d?.sessionId || "");
 
-    if (selectedType === "valarpay") {
-      setValue("bankCode", data?.data?.data?.bankCode);
+    // Always hydrate bankCode/bankName when backend provides it (enables auto-detect for bank transfers)
+    const verifiedBankCode = d?.bankCode ? String(d.bankCode) : "";
+    const verifiedBankName = d?.bankName ? String(d.bankName) : "";
+
+    if (verifiedBankCode) {
+      setValue("bankCode", verifiedBankCode);
+    }
+
+    const matchedBank = verifiedBankCode
+      ? (banks || []).find((b) => String(b.bankCode) === verifiedBankCode)
+      : undefined;
+    if (matchedBank) {
+      setSelectedBank(matchedBank);
+      setBankName(matchedBank.name);
+    } else if (verifiedBankName) {
+      setBankName(verifiedBankName);
+    }
+
+    // Prevent redundant verify call after we auto-set bankCode
+    const acct = String(d?.accountNumber || watchedAccountNumber || "");
+    if (acct.length === 10) {
+      if (selectedType === "bank") {
+        lastVerifyKeyRef.current = `bank|${acct}|${verifiedBankCode || "AUTO"}`;
+      } else {
+        lastVerifyKeyRef.current = `valarpay|${acct}`;
+      }
     }
   };
 
@@ -205,7 +233,7 @@ const TransferProcess = ({
     !verifyLoading &&
     !!bankData?.accountName &&
     !!watchedSessionId &&
-    (selectedType !== "bank" || !!watchedBankCode);
+    (selectedType !== "bank" || !!effectiveBankCode);
 
   useEffect(() => {
     if (fixedType) {
@@ -221,14 +249,21 @@ const TransferProcess = ({
   useEffect(() => {
     if (watchedAccountNumber && watchedAccountNumber.length === 10) {
       if (selectedType === "valarpay") {
+        const key = `valarpay|${watchedAccountNumber}`;
+        if (lastVerifyKeyRef.current === key) return;
+        lastVerifyKeyRef.current = key;
         verifyAccount({ accountNumber: watchedAccountNumber });
       } else {
-        if (watchedBankCode) {
-          verifyAccount({
-            accountNumber: watchedAccountNumber,
-            bankCode: watchedBankCode,
-          });
-        }
+        const bankCodeToUse = String(watchedBankCode || "");
+        const key = `bank|${watchedAccountNumber}|${bankCodeToUse || "AUTO"}`;
+        if (lastVerifyKeyRef.current === key) return;
+        lastVerifyKeyRef.current = key;
+        // Bank auto-detect: allow verify without bankCode (backend returns bankCode + bankName)
+        verifyAccount(
+          bankCodeToUse
+            ? { accountNumber: watchedAccountNumber, bankCode: bankCodeToUse }
+            : { accountNumber: watchedAccountNumber }
+        );
       }
     }
   }, [watchedAccountNumber, watchedBankCode, selectedType, verifyAccount]);
@@ -236,14 +271,19 @@ const TransferProcess = ({
   // Reset verified data when inputs are incomplete or change
   useEffect(() => {
     if (selectedType === "bank") {
-      if (!watchedAccountNumber || watchedAccountNumber.length !== 10 || !watchedBankCode) {
+      if (!watchedAccountNumber || watchedAccountNumber.length !== 10) {
         setBankData(null);
         setValue("sessionId", "");
+        setValue("bankCode", "");
+        setSelectedBank(undefined);
+        setBankName("");
+        lastVerifyKeyRef.current = "";
       }
     } else if (selectedType === "valarpay") {
       if (!watchedAccountNumber || watchedAccountNumber.length !== 10) {
         setBankData(null);
         setValue("sessionId", "");
+        lastVerifyKeyRef.current = "";
       }
     }
   }, [selectedType, watchedAccountNumber, watchedBankCode, setValue]);
@@ -327,10 +367,10 @@ const TransferProcess = ({
       return;
     }
 
-    if (selectedType === "bank" && !watchedBankCode) {
+    if (selectedType === "bank" && !effectiveBankCode) {
       ErrorToast({
         title: "Select a bank",
-        descriptions: ["Please select the recipient bank to continue."],
+        descriptions: ["Unable to detect recipient bank. Please select the recipient bank to continue."],
       });
       return;
     }
@@ -355,10 +395,10 @@ const TransferProcess = ({
       return;
     }
 
-    if (selectedType === "bank" && !watchedBankCode) {
+    if (selectedType === "bank" && !effectiveBankCode) {
       ErrorToast({
         title: "Select a bank",
-        descriptions: ["Please select the recipient bank to continue."],
+        descriptions: ["Unable to detect recipient bank. Please select the recipient bank to continue."],
       });
       return;
     }
@@ -383,7 +423,7 @@ const TransferProcess = ({
       description: watchedDescription,
       walletPin,
       sessionId: watchedSessionId,
-      bankCode: watchedBankCode || "",
+      bankCode: effectiveBankCode,
       currency: "NGN",
       ...(isBeneficiaryChecked ? { addBeneficiary: true } : {}),
     });
@@ -417,6 +457,11 @@ const TransferProcess = ({
               bankCode: bank.bankCode,
             });
           }
+        }
+      } else if (selectedType === "bank") {
+        // Bank code missing on beneficiary: try auto-detect verify
+        if (beneficiary.accountNumber.length === 10) {
+          verifyAccount({ accountNumber: beneficiary.accountNumber });
         }
       } else if (selectedType === "valarpay") {
         // For ValarPay transfers, bank code might be optional

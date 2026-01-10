@@ -212,248 +212,111 @@ const TransactionReceipt = ({ isOpen, onClose, transaction }: TransactionReceipt
             </div>
 
             {/* Receipt Content */}
-            <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
-              <div id="transaction-receipt" className="p-6 bg-[#1C1C1E] text-white">
-                {/* Transaction Status */}
-                <div className="text-center mb-6">
-                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${
-                    transaction.status === "SUCCESSFUL" ? "bg-green-900/30 border border-green-800" :
-                    transaction.status === "FAILED" ? "bg-red-900/30 border border-red-800" :
-                    "bg-yellow-900/30 border border-yellow-800"
-                  }`}>
-                    <div className={`w-2 h-2 rounded-full ${
-                      transaction.status === "SUCCESSFUL" ? "bg-green-500" :
-                      transaction.status === "FAILED" ? "bg-red-500" :
-                      "bg-yellow-500"
-                    }`} />
-                    <span className={`text-sm font-medium ${getStatusColor()}`}>
-                      {transaction.status === "SUCCESSFUL" ? "Successful" : transaction.status}
-                    </span>
+            <div className="overflow-y-auto max-h-[calc(90vh-80px)] p-0">
+              <div id="transaction-receipt" className="text-white bg-[#000000] p-8 font-sans">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+                      <span className="text-[#f76301] font-bold text-lg">V</span>
+                    </div>
+                    <span className="text-white font-bold text-xl tracking-tight uppercase">VALARPAY</span>
+                  </div>
+                  <span className="text-white/90 text-sm font-medium">Beyond Banking</span>
+                </div>
+
+                {/* Title */}
+                <div className="flex justify-center mb-10">
+                  <div className="bg-[#f76301] px-10 py-3 rounded-xl">
+                    <span className="text-black font-bold text-lg uppercase tracking-wider">Transaction Receipt</span>
                   </div>
                 </div>
 
-                {/* Amount */}
-                <div className="text-center mb-8">
-                  <p className="text-3xl font-bold text-white">
-                    {transaction.currency === "NGN" ? "₦" : transaction.currency}
-                    {transaction.amount.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-400 mt-1">{getTransactionTitle()}</p>
-                </div>
-
-                {/* Transaction Details */}
-                <div className="space-y-4">
-                  {/* Transaction Date */}
-                  <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                    <span className="text-sm text-gray-400">Transaction Date</span>
-                    <span className="text-sm text-white font-medium">
-                      {format(new Date(transaction.createdAt), "dd-MM-yyyy HH:mm")}
+                {/* Content Rows */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between py-4">
+                    <span className="text-white/60 text-sm">Transaction Date</span>
+                    <span className="text-white text-sm font-medium">
+                      {format(new Date(transaction.createdAt), "dd-MM-yyyy hh:mm a")}
                     </span>
                   </div>
+                  <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
 
-                  {/* Transaction ID */}
-                  <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                    <span className="text-sm text-gray-400">Transaction ID</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-white font-medium font-mono">
-                        {transaction.id.slice(0, 12)}...
-                      </span>
-                      <button
-                        onClick={() => copyToClipboard(transaction.id)}
-                        className="p-1 hover:bg-[#2C2C2E] rounded text-gray-400 hover:text-white"
-                      >
-                        <LuCopy className="w-3 h-3" />
-                      </button>
-                    </div>
+                  <div className="flex items-center justify-between py-4">
+                    <span className="text-white/60 text-sm">Transaction ID</span>
+                    <span className="text-white text-sm font-medium truncate ml-4 max-w-[200px]">
+                      {transaction.reference || transaction.id}
+                    </span>
                   </div>
+                  <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
 
-                  {/* Reference */}
-                  <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                    <span className="text-sm text-gray-400">Reference</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-white font-medium font-mono">
-                        {transaction.reference}
-                      </span>
-                      <button
-                        onClick={() => copyToClipboard(transaction.reference)}
-                        className="p-1 hover:bg-[#2C2C2E] rounded text-gray-400 hover:text-white"
-                      >
-                        <LuCopy className="w-3 h-3" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Amount Breakdown */}
-                  <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                    <span className="text-sm text-gray-400">Amount</span>
-                    <span className="text-sm text-white font-medium">
+                  <div className="flex items-center justify-between py-4">
+                    <span className="text-white/60 text-sm">Amount</span>
+                    <span className="text-white text-sm font-medium">
                       {transaction.currency === "NGN" ? "₦" : transaction.currency}
-                      {transaction.amount.toLocaleString()}
+                      {Number(transaction.amount).toLocaleString()}
                     </span>
                   </div>
+                  <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
 
-                  {transaction.fee && transaction.fee > 0 && (
-                    <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                      <span className="text-sm text-gray-400">Fee</span>
-                      <span className="text-sm text-white font-medium">
-                        {transaction.currency === "NGN" ? "₦" : transaction.currency}
-                        {transaction.fee.toLocaleString()}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between py-4">
+                    <span className="text-white/60 text-sm">Currency</span>
+                    <span className="text-white text-sm font-medium">{transaction.currency}</span>
+                  </div>
+                  <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
 
-                  {/* Transfer specific details */}
+                  <div className="flex items-center justify-between py-4">
+                    <span className="text-white/60 text-sm">Transaction Date</span>
+                    <span className="text-white text-sm font-medium">{getTransactionTitle()}</span>
+                  </div>
+                  <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
+
+                  {/* Transfer specific */}
                   {transaction.type === "TRANSFER" && (
                     <>
-                      {transaction.recipientName && (
-                        <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                          <span className="text-sm text-gray-400">Recipient</span>
-                          <span className="text-sm text-white font-medium">{transaction.recipientName}</span>
-                        </div>
-                      )}
-                      
-                      {transaction.recipientAccount && (
-                        <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                          <span className="text-sm text-gray-400">Account Number</span>
-                          <span className="text-sm text-white font-medium font-mono">{transaction.recipientAccount}</span>
-                        </div>
-                      )}
-                      
-                      {transaction.recipientBank && (
-                        <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                          <span className="text-sm text-gray-400">Bank</span>
-                          <span className="text-sm text-white font-medium">{transaction.recipientBank}</span>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {/* Bill payment specific details */}
-                  {(transaction.type === "AIRTIME" || transaction.type === "DATA") && (
-                    <>
-                      {transaction.billerNumber && (
-                        <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                          <span className="text-sm text-gray-400">Phone Number</span>
-                          <span className="text-sm text-white font-medium font-mono">{transaction.billerNumber}</span>
-                        </div>
-                      )}
-                      
-                      {transaction.network && (
-                        <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                          <span className="text-sm text-gray-400">Network</span>
-                          <span className="text-sm text-white font-medium">{transaction.network}</span>
-                        </div>
-                      )}
-                      
-                      {transaction.planName && (
-                        <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                          <span className="text-sm text-gray-400">Plan</span>
-                          <span className="text-sm text-white font-medium">{transaction.planName}</span>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {transaction.type === "CABLE" && (
-                    <>
-                      {transaction.billerNumber && (
-                        <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                          <span className="text-sm text-gray-400">Smartcard Number</span>
-                          <span className="text-sm text-white font-medium font-mono">{transaction.billerNumber}</span>
-                        </div>
-                      )}
-                      
-                      {transaction.billerName && (
-                        <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                          <span className="text-sm text-gray-400">Provider</span>
-                          <span className="text-sm text-white font-medium">{transaction.billerName}</span>
-                        </div>
-                      )}
-                      
-                      {transaction.planName && (
-                        <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                          <span className="text-sm text-gray-400">Package</span>
-                          <span className="text-sm text-white font-medium">{transaction.planName}</span>
-                        </div>
-                      )}
-                      
-                      {transaction.validity && (
-                        <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                          <span className="text-sm text-gray-400">Validity</span>
-                          <span className="text-sm text-white font-medium">{transaction.validity}</span>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {transaction.type === "ELECTRICITY" && (
-                    <>
-                      {transaction.billerNumber && (
-                        <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                          <span className="text-sm text-gray-400">Meter Number</span>
-                          <span className="text-sm text-white font-medium font-mono">{transaction.billerNumber}</span>
-                        </div>
-                      )}
-                      
-                      {transaction.billerName && (
-                        <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                          <span className="text-sm text-gray-400">Provider</span>
-                          <span className="text-sm text-white font-medium">{transaction.billerName}</span>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {/* Additional details */}
-                  {transaction.sessionId && (
-                    <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                      <span className="text-sm text-gray-400">Session ID</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-white font-medium font-mono">
-                          {transaction.sessionId.slice(0, 12)}...
-                        </span>
-                        <button
-                          onClick={() => copyToClipboard(transaction.sessionId || "")}
-                          className="p-1 hover:bg-[#2C2C2E] rounded text-gray-400 hover:text-white"
-                        >
-                          <LuCopy className="w-3 h-3" />
-                        </button>
+                      <div className="flex justify-between items-center py-4">
+                        <span className="text-white/60 text-sm">Sender Name</span>
+                        <span className="text-white text-sm font-medium text-right uppercase tracking-tight">{transaction.senderName || "N/A"}</span>
                       </div>
-                    </div>
+                      <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
+
+                      <div className="flex justify-between items-center py-4">
+                        <span className="text-white/60 text-sm">Beneficiary Details</span>
+                        <span className="text-white text-sm font-medium text-right">
+                          <span className="uppercase">{transaction.recipientName}</span>
+                          {transaction.recipientAccount ? ` (${transaction.recipientAccount})` : ""}
+                        </span>
+                      </div>
+                      <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
+
+                      <div className="flex justify-between items-center py-4">
+                        <span className="text-white/60 text-sm">Beneficiary Bank</span>
+                        <span className="text-white text-sm font-medium text-right">{transaction.recipientBank || "N/A"}</span>
+                      </div>
+                      <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
+
+                      <div className="flex justify-between items-center py-4">
+                        <span className="text-white/60 text-sm">Narration</span>
+                        <span className="text-white text-sm font-medium text-right truncate ml-4 max-w-[200px]">
+                          {transaction.description || "N/A"}
+                        </span>
+                      </div>
+                      <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
+                    </>
                   )}
 
-                  <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                    <span className="text-sm text-gray-400">Channel</span>
-                    <span className="text-sm text-white font-medium">{transaction.channel || "Mobile App"}</span>
+                  <div className="flex justify-between items-center py-4">
+                    <span className="text-white/60 text-sm">Status</span>
+                    <span className="text-[#22C55E] text-sm font-bold uppercase tracking-wider">Successful</span>
                   </div>
-
-                  <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                    <span className="text-sm text-gray-400">Location</span>
-                    <span className="text-sm text-white font-medium">{transaction.location || "Nigeria"}</span>
-                  </div>
-
-                  {transaction.description && (
-                    <div className="flex justify-between items-start py-2 border-b border-gray-800">
-                      <span className="text-sm text-gray-400">Description</span>
-                      <span className="text-sm text-white font-medium text-right max-w-[200px]">
-                        {transaction.description}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-gray-400">Status</span>
-                    <span className={`text-sm font-medium ${getStatusColor()}`}>
-                      {transaction.status === "SUCCESSFUL" ? "Successful" : transaction.status}
-                    </span>
-                  </div>
+                  <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
                 </div>
 
-                {/* Footer Note */}
-                <div className="mt-8 p-4 bg-[#2C2C2E] rounded-lg">
-                  <p className="text-xs text-gray-400 text-center leading-relaxed">
-                    Thank you for using Valarpay. For support and inquiries, contact us at support@valarpay.com or call +234-800-VALARPAY. 
-                    This is an electronic receipt and does not require a signature.
+                {/* Footer */}
+                <div className="mt-12 text-left">
+                  <p className="text-[10px] text-white/70 leading-relaxed font-light">
+                    Thank you for banking with ValarPay. For support, contact us at Support@valarpay.com, 
+                    call +2348134146906 or Head Office: C3&C4 Suite 2nd Floor Ejison Plaza 9a New Market Road Main Market Onitsha
                   </p>
                 </div>
               </div>

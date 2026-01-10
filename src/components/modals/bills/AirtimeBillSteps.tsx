@@ -160,6 +160,28 @@ const AirtimeBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <div className="px-5 py-5 border-t border-gray-200 dark:border-gray-800">
           {step === "details" ? (
             <div className="w-full flex flex-col gap-4">
+              {/* Phone Number */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] text-gray-500 dark:text-gray-400">Mobile Number</label>
+                <div className="w-full flex items-center bg-[#F4F4F5] dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm">
+                  <input
+                    value={phoneNumber}
+                    onChange={(e) => {
+                      // Only allow digits, limit to 11 characters for local numbers
+                      const cleaned = e.target.value.replace(/\D/g, "");
+                      setPhoneNumber(cleaned.slice(0, 11));
+                    }}
+                    className="w-full bg-transparent border-none outline-none text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 text-sm"
+                    placeholder="08012345678"
+                    inputMode="numeric"
+                    maxLength={11}
+                  />
+                </div>
+                {cleanPhone.length === 11 && detectingNetwork && (
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400">Detecting network...</p>
+                )}
+              </div>
+
               {/* Provider */}
               <div className="relative flex flex-col gap-1" ref={providerRef}>
                 <label className="text-[11px] text-gray-500 dark:text-gray-400">Network</label>
@@ -232,28 +254,6 @@ const AirtimeBillSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       })
                     )}
                   </div>
-                )}
-              </div>
-
-              {/* Phone Number */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[11px] text-gray-500 dark:text-gray-400">Mobile Number</label>
-                <div className="w-full flex items-center bg-[#F4F4F5] dark:bg-[#141416] border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm">
-                  <input
-                    value={phoneNumber}
-                    onChange={(e) => {
-                      // Only allow digits, limit to 11 characters for local numbers
-                      const cleaned = e.target.value.replace(/\D/g, "");
-                      setPhoneNumber(cleaned.slice(0, 11));
-                    }}
-                    className="w-full bg-transparent border-none outline-none text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 text-sm"
-                    placeholder="08012345678"
-                    inputMode="numeric"
-                    maxLength={11}
-                  />
-                </div>
-                {cleanPhone.length === 11 && detectingNetwork && (
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400">Detecting network...</p>
                 )}
               </div>
 

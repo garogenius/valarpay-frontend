@@ -13,6 +13,7 @@ import {
   withdrawCardRequest,
   setCardLimitsRequest,
   getCardTransactionsRequest,
+  updateCardSecureSettingsRequest,
 } from "./cards.apis";
 import type {
   ICreateCardPayload,
@@ -52,9 +53,13 @@ export const useGetCards = () => {
     queryFn: getCardsRequest,
   });
 
-  const responseData = data?.data?.data || data?.data;
-  const cards: IVirtualCard[] = responseData?.cards || [];
-  const count: number = responseData?.count || cards.length;
+  const responseData = data?.data?.data ?? data?.data ?? [];
+  const cards: IVirtualCard[] = Array.isArray(responseData)
+    ? (responseData as any)
+    : (responseData?.cards ?? responseData?.data ?? []);
+  const count: number = Array.isArray(responseData)
+    ? cards.length
+    : (responseData?.count ?? cards.length);
 
   return { cards, count, isPending, isError, refetch };
 };
@@ -146,6 +151,24 @@ export const useFreezeCard = (
   });
 };
 
+// Update card secure settings
+export const useUpdateCardSecureSettings = (
+  onError: (error: any) => void,
+  onSuccess: (data: any) => void
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ cardId, data }: { cardId: string; data: Record<string, any> }) =>
+      updateCardSecureSettingsRequest(cardId, data),
+    onError,
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["cards"] });
+      queryClient.invalidateQueries({ queryKey: ["card", variables.cardId] });
+      onSuccess(data);
+    },
+  });
+};
+
 // Fund card
 export const useFundCard = (
   onError: (error: any) => void,
@@ -220,6 +243,8 @@ export const useGetCardTransactions = (cardId: string, query: IGetCardTransactio
 
   return { transactions, count, limit, offset, isPending, isError };
 };
+
+
 
 
 

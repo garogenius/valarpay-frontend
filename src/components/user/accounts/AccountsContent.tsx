@@ -15,8 +15,9 @@ import { LuCopy } from "react-icons/lu";
 import CardPreview from "@/components/user/cards/CardPreview";
 import ChangePinModal from "@/components/modals/ChangePinModal";
 import BlockCardModal from "@/components/modals/BlockCardModal";
-import { useGetWalletAccounts, useCreateMultiCurrencyAccount, useCreateVirtualCard, useGetVirtualCardDetails } from "@/api/wallet/wallet.queries";
+import { useGetWalletAccounts, useCreateMultiCurrencyAccount } from "@/api/wallet/wallet.queries";
 import { WalletAccount, VirtualCard } from "@/api/wallet/wallet.types";
+import { useCreateCard, useGetCardById } from "@/api/currency/cards.queries";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
 import CustomButton from "@/components/shared/Button";
@@ -85,23 +86,23 @@ const AccountsContent: React.FC = () => {
     }
   }, []);
   
-  const { card: virtualCard } = useGetVirtualCardDetails({
-    cardId: storedCardId || undefined,
-    enabled: !!storedCardId && (selectedCurrency === "USD" || selectedCurrency === "NGN"),
-  });
+  const { card: virtualCard } = useGetCardById(
+    storedCardId || "",
+    !!storedCardId && (selectedCurrency === "USD" || selectedCurrency === "NGN")
+  );
   
   // Convert single card to array format for compatibility
   const cardsArray = useMemo(() => {
     if (virtualCard && (selectedCurrency === "USD" || selectedCurrency === "NGN")) {
       return [{
-        id: virtualCard.cardId,
-        maskedNumber: virtualCard.cardNumber?.replace(/(\d{4})\d{8}(\d{4})/, "$1****$2") || "****",
+        id: (virtualCard as any).id || (virtualCard as any).cardId,
+        maskedNumber: (virtualCard as any).cardNumber?.replace(/(\d{4})\d{8}(\d{4})/, "$1****$2") || "****",
         brand: "visa",
         cardholder: user?.fullname || "CARD HOLDER",
-        expiryMonth: virtualCard.expiryMonth,
-        expiryYear: virtualCard.expiryYear,
-        balance: 0, // Card balance not available in API
-        status: virtualCard.status || "ACTIVE",
+        expiryMonth: (virtualCard as any).expiryMonth,
+        expiryYear: (virtualCard as any).expiryYear,
+        balance: Number((virtualCard as any).balance || 0),
+        status: (virtualCard as any).status || "ACTIVE",
         isVirtual: true,
         currency: "USD",
       }];
@@ -242,7 +243,7 @@ const AccountsContent: React.FC = () => {
     refetchCards();
   };
 
-  const { mutate: createCard, isPending: creatingCard } = useCreateVirtualCard(
+  const { mutate: createCard, isPending: creatingCard } = useCreateCard(
     onCreateCardError,
     onCreateCardSuccess
   );

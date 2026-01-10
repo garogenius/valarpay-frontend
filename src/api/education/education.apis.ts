@@ -19,6 +19,16 @@ export const getEducationBillerItemsRequest = async ({
   });
 };
 
+// School fee institutions list (plan)
+export const getSchoolFeePlanRequest = async (currency: string = "NGN") => {
+  const qp = new URLSearchParams();
+  if (currency) qp.set("currency", currency);
+  return request({
+    url: `/bill/school/get-plan?${qp.toString()}`,
+    method: "get",
+  });
+};
+
 // School fee bill info (returns plans/services)
 export const getSchoolBillInfoRequest = async (billerCode: string) => {
   return request({
@@ -69,7 +79,8 @@ export const paySchoolFeeRequest = async (formdata: {
   addBeneficiary?: boolean;
 }) => {
   return request({
-    url: "/bill/school/pay",
+    // Spec: POST /api/v1/bill/education/school-fee/pay (base URL already includes /api/v1)
+    url: "/bill/education/school-fee/pay",
     method: "post",
     data: formdata,
   });

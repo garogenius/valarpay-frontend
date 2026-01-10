@@ -12,6 +12,7 @@ import {
   verifyJambBillerNumberRequest,
   payWaecRequest,
   payJambRequest,
+  getSchoolFeePlanRequest,
   getSchoolBillInfoRequest,
   verifySchoolBillerNumberRequest,
   paySchoolFeeRequest,
@@ -29,6 +30,16 @@ import type {
   SchoolBillInfo,
   SchoolFeePlan,
 } from "./education.types";
+
+export const useGetSchoolFeePlan = (currency: string = "NGN", enabled: boolean = true) => {
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["school-fee-plan", { currency }],
+    queryFn: () => getSchoolFeePlanRequest(currency),
+    enabled,
+  });
+  const institutions: any[] = data?.data?.data ?? data?.data ?? [];
+  return { institutions, isPending, isError };
+};
 
 export const useGetEducationBillers = () => {
   const { data, isPending, isError } = useQuery({

@@ -43,6 +43,9 @@ export interface ICreateVirtualCard {
   walletId: string;
   currency: "USD" | "GBP" | "EUR" | "NGN";
   cardholderName: string;
+  // New cards API requires an 8-digit PIN; kept optional here for backward compatibility.
+  // Prefer using src/api/currency/cards.* for card creation.
+  pin?: string;
 }
 
 export interface VirtualCard {

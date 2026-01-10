@@ -88,6 +88,7 @@ interface BankResponseData {
   responseMessage: string;
   sessionId: string;
   bankCode: string;
+  bankName?: string;
   accountNumber: string;
   accountName: string;
   kycLevel: string;
@@ -110,6 +111,7 @@ const SendMoneySteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [addBeneficiary, setAddBeneficiary] = useState(false);
 
   const { banks } = useGetAllBanks();
+  const lastVerifyKeyRef = useRef<string>("");
   const ngnWallet = user?.wallet?.find((w) => w.currency === "NGN");
   const availableBalance = ngnWallet?.balance || 0;
 
@@ -142,6 +144,7 @@ const SendMoneySteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const watchedAmount = Number(watch("amount"));
   const watchedDescription = watch("description");
   const watchedSessionId = watch("sessionId");
+  const effectiveBankCode = String(watchedBankCode || bankData?.bankCode || "");
 
   const { fee } = useGetTransferFee({
     currency: "NGN",
@@ -162,11 +165,34 @@ const SendMoneySteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   const onVerifyAccountSuccess = (data: any) => {
-    setBankData(data?.data?.data);
-    setValue("sessionId", data?.data?.data?.sessionId);
+    const d = data?.data?.data;
+    setBankData(d);
+    setValue("sessionId", d?.sessionId || "");
 
-    if (selectedType === "valarpay") {
-      setValue("bankCode", data?.data?.data?.bankCode);
+    const verifiedBankCode = d?.bankCode ? String(d.bankCode) : "";
+    const verifiedBankName = d?.bankName ? String(d.bankName) : "";
+
+    if (verifiedBankCode) {
+      setValue("bankCode", verifiedBankCode);
+    }
+
+    const matchedBank = verifiedBankCode
+      ? (banks || []).find((b) => String(b.bankCode) === verifiedBankCode)
+      : undefined;
+    if (matchedBank) {
+      setSelectedBank(matchedBank);
+      setBankName(matchedBank.name);
+    } else if (verifiedBankName) {
+      setBankName(verifiedBankName);
+    }
+
+    const acct = String(d?.accountNumber || watchedAccountNumber || "");
+    if (acct.length === 10) {
+      if (selectedType === "bank") {
+        lastVerifyKeyRef.current = `bank|${acct}|${verifiedBankCode || "AUTO"}`;
+      } else {
+        lastVerifyKeyRef.current = `valarpay|${acct}`;
+      }
     }
   };
 
@@ -181,28 +207,39 @@ const SendMoneySteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   useEffect(() => {
     if (watchedAccountNumber && watchedAccountNumber.length === 10) {
       if (selectedType === "valarpay") {
+        const key = `valarpay|${watchedAccountNumber}`;
+        if (lastVerifyKeyRef.current === key) return;
+        lastVerifyKeyRef.current = key;
         verifyAccount({ accountNumber: watchedAccountNumber });
       } else {
-        if (watchedBankCode) {
-          verifyAccount({
-            accountNumber: watchedAccountNumber,
-            bankCode: watchedBankCode,
-          });
-        }
+        const bankCodeToUse = String(watchedBankCode || "");
+        const key = `bank|${watchedAccountNumber}|${bankCodeToUse || "AUTO"}`;
+        if (lastVerifyKeyRef.current === key) return;
+        lastVerifyKeyRef.current = key;
+        verifyAccount(
+          bankCodeToUse
+            ? { accountNumber: watchedAccountNumber, bankCode: bankCodeToUse }
+            : { accountNumber: watchedAccountNumber }
+        );
       }
     }
   }, [watchedAccountNumber, watchedBankCode, selectedType, verifyAccount]);
 
   useEffect(() => {
     if (selectedType === "bank") {
-      if (!watchedAccountNumber || watchedAccountNumber.length !== 10 || !watchedBankCode) {
+      if (!watchedAccountNumber || watchedAccountNumber.length !== 10) {
         setBankData(null);
         setValue("sessionId", "");
+        setValue("bankCode", "");
+        setSelectedBank(undefined);
+        setBankName("");
+        lastVerifyKeyRef.current = "";
       }
     } else if (selectedType === "valarpay") {
       if (!watchedAccountNumber || watchedAccountNumber.length !== 10) {
         setBankData(null);
         setValue("sessionId", "");
+        lastVerifyKeyRef.current = "";
       }
     }
   }, [selectedType, watchedAccountNumber, watchedBankCode, setValue]);
@@ -254,7 +291,7 @@ const SendMoneySteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const canProceedEnterAccount =
     !!bankData &&
     watchedAccountNumber?.length === 10 &&
-    (selectedType === "valarpay" ? true : !!watchedBankCode);
+    (selectedType === "valarpay" ? true : !!effectiveBankCode);
 
   const canProceedEnterAmount =
     canProceedEnterAccount && !!watchedAmount && watchedAmount >= 50;

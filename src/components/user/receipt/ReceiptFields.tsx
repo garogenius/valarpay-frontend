@@ -194,65 +194,54 @@ const ReceiptContainer = () => {
 
   return (
     <div className="w-full flex justify-center">
-      <div className="w-full max-w-[520px] rounded-[26px] border border-[#2c2c2c] bg-[#0c0c0c] px-6 py-7 shadow-[0_15px_60px_rgba(0,0,0,0.65)] text-white">
-        <header className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold tracking-[0.5em] text-white">
-              VALARPAY
-            </p>
+      <div id="receipt-content" className="w-full max-w-[500px] bg-[#000000] p-8 shadow-2xl text-white font-sans">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-white rounded flex items-center justify-center text-[#f76301] font-bold text-lg">
+              V
+            </div>
+            <span className="text-white font-bold text-xl tracking-tight">VALARPAY</span>
           </div>
-          <p className="text-[11px] uppercase tracking-[0.3em] text-[#9da4b5]">
-            Beyond Banking
-          </p>
-        </header>
-
-        <div className="mt-4 flex justify-center">
-          <span className="rounded-full bg-[#ff7200] px-7 py-2 text-[11px] font-semibold uppercase tracking-[0.4em] text-[#080808] shadow-[0_10px_30px_rgba(255,114,0,0.45)]">
-            Transaction Receipt
-          </span>
+          <span className="text-white/90 text-sm font-medium">Beyond Banking</span>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-[#212121] bg-[#101010] p-4 text-sm text-[#f3f3f3]">
-          <div className="divide-y divide-dashed divide-[#1f1f1f]">
-            {displayFields.map((field, index) => (
-              <div
-                key={`${field.label}-${index}`}
-                className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-[10px] uppercase tracking-[0.45em] text-[#7c7c7c]">
-                    {field.label}
-                  </span>
-                  {field.flag === "status" ? (
-                    <span className={`text-sm font-semibold ${statusColor}`}>
-                      {field.value}
-                    </span>
-                  ) : (
-                    <p
-                      className={`text-right ${
-                        field.label === "Amount"
-                          ? "text-lg font-semibold text-white"
-                          : "text-xs text-[#efefef] break-words max-w-[60%]"
-                      }`}
-                    >
-                      {field.value}
-                    </p>
-                  )}
-                </div>
+        {/* Title */}
+        <div className="flex justify-center mb-10">
+          <div className="bg-[#f76301] px-10 py-3 rounded-xl">
+            <span className="text-black font-bold text-lg uppercase tracking-wider">Transaction Receipt</span>
+          </div>
+        </div>
+
+        {/* Content Rows */}
+        <div className="space-y-1">
+          {displayFields.map((field, index) => (
+            <div key={`${field.label}-${index}`}>
+              <div className="flex items-center justify-between py-4">
+                <span className="text-white/60 text-sm">
+                  {/* Handle the weird double Transaction Date label from screenshot if it's the type field */}
+                  {field.label === "Transaction Type" ? "Transaction Date" : field.label}
+                </span>
+                <span className={`text-sm font-medium ${
+                  field.flag === "status" ? "text-[#22C55E] font-bold" : "text-white"
+                } ${
+                  field.label === "Sender Name" || field.label === "Beneficiary Details" ? "uppercase" : ""
+                } text-right max-w-[65%] truncate`}>
+                  {field.value}
+                </span>
               </div>
-            ))}
-          </div>
+              <div className="w-full border-b border-dotted border-[#f76301] mb-1" />
+            </div>
+          ))}
         </div>
 
-        <p className="mt-6 text-[11px] leading-relaxed text-center text-[#bcbcbc]">
-          Thank you for banking with ValarPay. For support, contact us at{" "}
-          <span className="text-[#f9f9f9]">Support@valarpay.com</span>, call{" "}
-          <span className="text-[#f9f9f9]">+2348134146906</span> or visit{" "}
-          <span className="text-[#f9f9f9]">
-            C38C4 Suite 2nd Floor Eisson Plaza 9a New Market Road Main Market
-            Onitsha
-          </span>
-        </p>
+        {/* Footer */}
+        <div className="mt-12 text-left">
+          <p className="text-[10px] text-white/70 leading-relaxed font-light">
+            Thank you for banking with ValarPay. For support, contact us at <span className="text-white">Support@valarpay.com</span>, 
+            call <span className="text-white">+2348134146906</span> or Head Office: C3&C4 Suite 2nd Floor Ejison Plaza 9a New Market Road Main Market Onitsha
+          </p>
+        </div>
       </div>
     </div>
   );

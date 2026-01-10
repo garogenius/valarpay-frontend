@@ -9,11 +9,9 @@ import GetVirtualCardModal from "@/components/modals/GetVirtualCardModal";
 import VirtualCardDesign from "./card-designs/VirtualCardDesign";
 import useUserStore from "@/store/user.store";
 import {
-  useFreezeVirtualCard,
   useGetWalletAccounts,
-  useGetVirtualCardDetails,
-  useUnfreezeVirtualCard,
 } from "@/api/wallet/wallet.queries";
+import { useGetCardById, useFreezeCard } from "@/api/currency/cards.queries";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
 import ChangePinModal from "@/components/modals/ChangePinModal";
@@ -46,16 +44,13 @@ const VirtualCardSection = () => {
     setStoredCardId(localStorage.getItem("usdVirtualCardId") || "");
   }, []);
 
-  const { card } = useGetVirtualCardDetails({
-    cardId: storedCardId || undefined,
-    enabled: !!storedCardId,
-  });
+  const { card } = useGetCardById(storedCardId || "", !!storedCardId);
 
   const hasCard = !!card;
   const cardNumber = card?.cardNumber || "----";
   const expiryDate = card ? `${card.expiryMonth}/${card.expiryYear}` : "--/--";
   const cvv = card?.cvv || "---";
-  const isFrozen = (card?.status || "").toLowerCase() === "frozen";
+  const isFrozen = String(card?.status || "").toUpperCase() === "FROZEN";
 
   const onFreezeError = (error: any) => {
     const msg = error?.response?.data?.message ?? "Unable to update card";
@@ -70,9 +65,8 @@ const VirtualCardSection = () => {
     SuccessToast({ title: "Success", description: msg });
   };
 
-  const { mutate: freezeCard, isPending: freezePending } = useFreezeVirtualCard(onFreezeError, onFreezeSuccess);
-  const { mutate: unfreezeCard, isPending: unfreezePending } = useUnfreezeVirtualCard(onFreezeError, onFreezeSuccess);
-  const freezeLoading = freezePending || unfreezePending;
+  const { mutate: setFreeze, isPending: freezePending } = useFreezeCard(onFreezeError, onFreezeSuccess);
+  const freezeLoading = freezePending;
 
   if (!hasCard) {
     const canCreateUsdCard = !!usdWallet?.id;
@@ -219,11 +213,7 @@ const VirtualCardSection = () => {
             disabled={freezeLoading}
             onClick={() => {
               if (!storedCardId) return;
-              if (isFrozen) {
-                unfreezeCard(storedCardId);
-              } else {
-                freezeCard(storedCardId);
-              }
+              setFreeze({ cardId: storedCardId, freeze: isFrozen ? false : true });
             }}
             className={cn(
               "flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#2C2C2E] border border-gray-700 text-white text-sm hover:bg-[#3C3C3E] transition-colors min-w-[220px]",

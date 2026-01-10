@@ -259,7 +259,8 @@ export const createMultiCurrencyAccountRequest = async (
 
 export const createVirtualCardRequest = async (formdata: ICreateVirtualCard) => {
   return request({
-    url: "/wallet/virtual-card/create",
+    // Updated: new cards service route
+    url: "/currency/cards",
     method: "post",
     data: formdata,
   });
@@ -267,21 +268,26 @@ export const createVirtualCardRequest = async (formdata: ICreateVirtualCard) => 
 
 export const getVirtualCardDetailsRequest = (cardId: string) => {
   return request({
-    url: `/wallet/virtual-card/${cardId}`,
+    // Updated: new cards service route
+    url: `/currency/cards/${cardId}`,
     method: "get",
   });
 };
 
 export const freezeVirtualCardRequest = (cardId: string) => {
   return request({
-    url: `/wallet/virtual-card/${cardId}/freeze`,
-    method: "post",
+    // Updated: new cards service route
+    url: `/currency/cards/${cardId}/freeze`,
+    method: "patch",
+    data: { freeze: true },
   });
 };
 
 export const unfreezeVirtualCardRequest = (cardId: string) => {
   return request({
-    url: `/wallet/virtual-card/${cardId}/unfreeze`,
-    method: "post",
+    // Updated: new cards service route
+    url: `/currency/cards/${cardId}/freeze`,
+    method: "patch",
+    data: { freeze: false },
   });
 };
