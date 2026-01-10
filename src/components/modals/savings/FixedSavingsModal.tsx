@@ -23,8 +23,35 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
   const ngnWallet = wallets.find((w) => w.currency?.toUpperCase() === "NGN");
 
   const { plans, isPending: plansLoading } = useFixedDepositPlans();
-  const [selectedPlanType, setSelectedPlanType] = useState<FixedDepositPlanType>("SHORT_TERM_90");
-  const selectedPlan: FixedDepositPlan | undefined = plans.find((p: FixedDepositPlan) => p.planType === selectedPlanType) || plans[0];
+  const normalizePlan = React.useCallback((p: FixedDepositPlan) => {
+    const interestRate = Number(
+      (p as any)?.interestRatePerAnnum ?? (p as any)?.interestRate ?? 0
+    );
+    const durationDays = Number((p as any)?.tenureDays ?? (p as any)?.durationDays ?? 0);
+    const durationMonths = Number((p as any)?.tenureMonths ?? (p as any)?.durationMonths ?? 0);
+    return {
+      ...p,
+      interestRate,
+      durationDays,
+      durationMonths,
+    } as FixedDepositPlan & { interestRate: number; durationDays: number; durationMonths: number };
+  }, []);
+
+  const normalizedPlans = React.useMemo(
+    () => (Array.isArray(plans) ? plans.map((p: any) => normalizePlan(p)) : []),
+    [plans, normalizePlan]
+  );
+
+  const [selectedPlanType, setSelectedPlanType] = useState<FixedDepositPlanType>("");
+  const selectedPlan: (FixedDepositPlan & { interestRate: number; durationDays: number; durationMonths: number }) | undefined =
+    normalizedPlans.find((p) => p.planType === selectedPlanType) || normalizedPlans[0];
+
+  // Ensure we always have a selected plan type once plans load
+  useEffect(() => {
+    if (!selectedPlanType && normalizedPlans.length > 0) {
+      setSelectedPlanType(normalizedPlans[0].planType);
+    }
+  }, [normalizedPlans, selectedPlanType]);
 
   const minDeposit = selectedPlan?.minimumDeposit ?? 0;
   const [amount, setAmount] = useState<number>(minDeposit || 0);
@@ -84,6 +111,23 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
       maximumFractionDigits: 2,
     }).format(value);
   };
+
+  const formatNgn = (value: number): string =>
+    `₦${new Intl.NumberFormat("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+      Number.isFinite(value) ? value : 0
+    )}`;
+
+  const estimatedMaturity = React.useMemo(() => {
+    if (!selectedPlan) return null;
+    const principal = Number(amount);
+    const rate = Number(selectedPlan.interestRate);
+    const days = Number(selectedPlan.durationDays);
+    if (!Number.isFinite(principal) || principal <= 0) return null;
+    if (!Number.isFinite(rate) || rate <= 0) return principal;
+    if (!Number.isFinite(days) || days <= 0) return null;
+    const interest = principal * rate * (days / 365);
+    return principal + interest;
+  }, [amount, selectedPlan]);
 
   const onError = (error: unknown) => {
     handleError(error, {
@@ -241,9 +285,10 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wallets.length]);
 
-  const interestRateText = selectedPlan
-    ? `${(selectedPlan.interestRate * 100).toFixed(2)}% per annum`
-    : "N/A";
+  const interestRateText =
+    selectedPlan && Number.isFinite(selectedPlan.interestRate)
+      ? `${(Number(selectedPlan.interestRate) * 100).toFixed(2)}% per annum`
+      : "N/A";
 
   const tr = transactionResult as null | Partial<{
     principalAmount: number;
@@ -257,8 +302,8 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
 
   const displayPrincipal = tr?.principalAmount ?? amount;
   const displayPlanType = tr?.planType ?? selectedPlan?.planType;
-  const displayInterestRate = tr?.interestRate !== undefined
-    ? `${(tr.interestRate * 100).toFixed(2)}% per annum`
+  const displayInterestRate = tr?.interestRate !== undefined && tr?.interestRate !== null
+    ? `${(Number(tr.interestRate) * 100).toFixed(2)}% per annum`
     : interestRateText;
   const displayMaturityDate = tr?.maturityDate
     ? new Date(tr.maturityDate).toLocaleDateString("en-GB", { 
@@ -303,7 +348,7 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
                   {plansLoading ? (
                     <div className="text-white/60 text-sm">Loading plans...</div>
                   ) : (
-                     plans.map((p: FixedDepositPlan) => (
+                     normalizedPlans.map((p) => (
                       <button
                         key={p.planType}
                         onClick={() => {
@@ -318,10 +363,12 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-medium">{p.name}</span>
-                          <span className="text-xs">{(p.interestRate * 100).toFixed(2)}%</span>
+                          <span className="text-xs">
+                            {Number.isFinite(p.interestRate) ? `${(p.interestRate * 100).toFixed(2)}%` : "—"}
+                          </span>
                         </div>
                         <div className="text-[11px] opacity-80 mt-0.5">
-                          Min ₦{Number(p.minimumDeposit).toLocaleString()} • {p.durationDays} days
+                          Min ₦{Number(p.minimumDeposit).toLocaleString()} • {Number(p.durationDays) || 0} days
                         </div>
                       </button>
                     ))
@@ -397,14 +444,16 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
                     </div>
                     <div className="flex justify-between mb-2">
                       <span className="text-white/70 text-sm">Duration:</span>
-                      <span className="text-white font-medium text-sm">{selectedPlan.durationDays} days</span>
+                      <span className="text-white font-medium text-sm">{Number(selectedPlan.durationDays) || 0} days</span>
                     </div>
                   </>
                 )}
                 <div className="h-px bg-white/10 my-3" />
                 <div className="flex justify-between">
                   <span className="text-white/70 text-sm">Maturity Amount:</span>
-                  <span className="text-white/80 text-xs">Calculated by server</span>
+                  <span className="text-white text-sm font-medium">
+                    {estimatedMaturity === null ? "—" : formatNgn(estimatedMaturity)}
+                  </span>
                 </div>
               </div>
 
@@ -479,7 +528,7 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
                 <span className="text-white/70 text-sm">Maturity Date:</span>
                 <span className="text-white text-sm">
                   {selectedPlan
-                    ? new Date(Date.now() + selectedPlan.durationDays * 24 * 60 * 60 * 1000).toLocaleDateString("en-GB", { 
+                    ? new Date(Date.now() + Number(selectedPlan.durationDays || 0) * 24 * 60 * 60 * 1000).toLocaleDateString("en-GB", { 
                         day: "2-digit", 
                         month: "2-digit", 
                         year: "numeric" 
@@ -489,12 +538,17 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
               </div>
               <div className="flex justify-between">
                 <span className="text-white/70 text-sm">Maturity Amount:</span>
-                <span className="text-white/80 text-xs">Calculated by server</span>
+                <span className="text-white text-sm font-medium">
+                  {estimatedMaturity === null ? "—" : formatNgn(estimatedMaturity)}
+                </span>
               </div>
               {selectedPlan && (
                 <div className="flex justify-between mt-2">
                   <span className="text-white/70 text-sm">Duration:</span>
-                  <span className="text-white text-sm">{selectedPlan.durationDays} days ({selectedPlan.durationMonths || Math.round(selectedPlan.durationDays / 30)} months)</span>
+                  <span className="text-white text-sm">
+                    {Number(selectedPlan.durationDays) || 0} days (
+                    {Number(selectedPlan.durationMonths) || Math.round(Number(selectedPlan.durationDays || 0) / 30)} months)
+                  </span>
                 </div>
               )}
             </div>
@@ -568,7 +622,9 @@ const FixedSavingsModal: React.FC<FixedSavingsModalProps> = ({ isOpen, onClose }
               </div>
               <div className="flex justify-between mt-2">
                 <span className="text-white/70 text-sm">Maturity Amount:</span>
-                <span className="text-white/80 text-xs">Calculated by server</span>
+                <span className="text-white text-sm font-medium">
+                  {estimatedMaturity === null ? "—" : formatNgn(estimatedMaturity)}
+                </span>
               </div>
             </div>
 

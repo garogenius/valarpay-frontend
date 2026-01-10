@@ -160,7 +160,7 @@ const Navbar = () => {
             <FiSearch className="text-text-200 dark:text-text-400" />
             <input
               aria-label="search"
-              placeholder="Search transactions, bills or payments..."
+              placeholder="Search"
               className="bg-transparent outline-none w-full text-text-200 dark:text-text-800 placeholder-gray-500 dark:placeholder-white"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}

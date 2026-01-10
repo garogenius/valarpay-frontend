@@ -36,6 +36,10 @@ const BreakPlanModal: React.FC<BreakPlanModalProps> = ({
   const [showPinStep, setShowPinStep] = React.useState(false);
   const [showErrorModal, setShowErrorModal] = React.useState(false);
   const [errorModalData, setErrorModalData] = React.useState<{ title: string; descriptions: string[] }>({ title: "", descriptions: [] });
+  const [successBreakdown, setSuccessBreakdown] = React.useState<{
+    penalty: number;
+    payoutAmount: number;
+  } | null>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   const { plan: savingsPlan } = useGetSavingsPlanById(planType === "target" ? planId || null : null);
@@ -68,6 +72,7 @@ const BreakPlanModal: React.FC<BreakPlanModalProps> = ({
       title: "Plan Broken Successfully!",
       description: `₦${total.toLocaleString()} has been withdrawn. Penalty of ₦${penalty.toLocaleString()} applied.`,
     });
+    setSuccessBreakdown({ penalty, payoutAmount: total });
     setShowSuccess(true);
     setShowPinStep(false);
     setWalletPin("");
@@ -165,8 +170,24 @@ const BreakPlanModal: React.FC<BreakPlanModalProps> = ({
   const isSavingsPlan = plan && 'durationMonths' in plan;
   const currentAmount = plan?.totalDeposited ?? (isSavingsPlan ? (plan as SavingsPlan).currentAmount : undefined) ?? 0;
   const interestEarned = plan?.totalInterestAccrued ?? (isSavingsPlan ? (plan as SavingsPlan).interestEarned : undefined) ?? 0;
+  const penaltyRate =
+    typeof (plan as any)?.earlyWithdrawalPenaltyRate === "number"
+      ? Number((plan as any).earlyWithdrawalPenaltyRate)
+      : typeof plan?.penaltyRate === "number"
+        ? Number(plan.penaltyRate)
+        : 0;
   const penaltyRatePercent =
-    typeof plan?.penaltyRate === "number" ? Math.round(plan.penaltyRate * 1000) / 10 : undefined;
+    Number.isFinite(penaltyRate) && penaltyRate > 0 ? Math.round(penaltyRate * 1000) / 10 : undefined;
+
+  const fmt = (n: number) =>
+    `₦${new Intl.NumberFormat("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+      Number.isFinite(n) ? n : 0
+    )}`;
+
+  // Preview breakdown (estimate): most products forfeit accrued interest on early break
+  const estimatedInterestForfeited = isEarly ? Number(interestEarned || 0) : 0;
+  const estimatedPenalty = isEarly ? Number(currentAmount || 0) * Number(penaltyRate || 0) : 0;
+  const estimatedPayout = Math.max(0, Number(currentAmount || 0) - estimatedPenalty);
 
   const now = new Date();
   const maturityDate = plan?.maturityDate ? new Date(plan.maturityDate) : null;
@@ -212,7 +233,7 @@ const BreakPlanModal: React.FC<BreakPlanModalProps> = ({
                 <li>
                   Early withdrawal penalty{penaltyRatePercent !== undefined ? ` (${penaltyRatePercent}%)` : ""}
                 </li>
-                <li>Final payout is calculated by the server</li>
+                <li>Amounts below are estimates; final payout is shown after confirmation</li>
               </ul>
             </div>
           </div>
@@ -221,20 +242,26 @@ const BreakPlanModal: React.FC<BreakPlanModalProps> = ({
           <div className="flex flex-col gap-2 text-xs">
             <div className="flex items-center justify-between">
               <span className="text-white/60">Original Amount</span>
-              <span className="text-white">₦{currentAmount.toLocaleString()}</span>
+              <span className="text-white">{fmt(Number(currentAmount) || 0)}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-white/60">Interest Forfeited</span>
-              <span className="text-white">₦{interestEarned.toLocaleString()}</span>
+              <span className="text-white">
+                {fmt(Number(estimatedInterestForfeited) || 0)}
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-white/60">Penalty</span>
-              <span className="text-white">Calculated by server</span>
+              <span className="text-white">
+                {fmt(Number(estimatedPenalty) || 0)}
+              </span>
             </div>
             <div className="h-px bg-white/10 my-1" />
             <div className="flex items-center justify-between font-medium">
               <span className="text-white">You&apos;ll Receive</span>
-              <span className="text-white">Calculated by server</span>
+              <span className="text-white">
+                {fmt(Number(estimatedPayout) || 0)}
+              </span>
             </div>
           </div>
 
@@ -338,6 +365,20 @@ const BreakPlanModal: React.FC<BreakPlanModalProps> = ({
         planName={planName}
         reason={reasons.find(r => r.value === reason)?.label || ""}
         breakDate={new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')}
+        principalAmount={Number(currentAmount) || 0}
+        interestForfeited={Number(estimatedInterestForfeited) || 0}
+        penalty={Number(successBreakdown?.penalty ?? estimatedPenalty) || 0}
+        payoutAmount={Number(successBreakdown?.payoutAmount ?? estimatedPayout) || 0}
+        startDate={(plan as any)?.startDate}
+        maturityDate={(plan as any)?.maturityDate}
+        interestRatePerAnnum={
+          typeof (plan as any)?.interestRatePerAnnum === "number"
+            ? Number((plan as any).interestRatePerAnnum)
+            : typeof (plan as any)?.interestRate === "number"
+              ? Number((plan as any).interestRate)
+              : undefined
+        }
+        durationMonths={Number((plan as any)?.durationMonths) || undefined}
       />
 
       <ValidationErrorModal

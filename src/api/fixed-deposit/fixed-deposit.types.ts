@@ -1,15 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export type FixedDepositPlanType = "SHORT_TERM_90" | "MEDIUM_TERM_180" | "LONG_TERM_365" | string;
+// Backend plan types are not stable across versions (e.g. SHORT_TERM_90_DAYS)
+export type FixedDepositPlanType = string;
 
 export type FixedDepositPlan = {
   planType: FixedDepositPlanType;
   name: string;
   minimumDeposit: number;
-  interestRate: number;
-  interestRatePercentage: string;
-  durationDays: number;
-  durationMonths: number;
+  // New API fields
+  interestRatePerAnnum?: number; // e.g. 0.04
+  tenureDays?: number;
+  tenureMonths?: number;
+  description?: string;
+  earlyWithdrawalPenaltyRate?: number;
+  earlyWithdrawalMinDays?: number;
+  // Legacy/normalized fields (some UIs still read these)
+  interestRate?: number;
+  interestRatePercentage?: string;
+  durationDays?: number;
+  durationMonths?: number;
   [k: string]: any;
 };
 
@@ -22,9 +31,11 @@ export type FixedDeposit = {
   planType: FixedDepositPlanType;
   principalAmount: number;
   currency: string;
-  interestRate: number;
+  // Some backends return interestRate, others return interestRatePerAnnum
+  interestRate?: number;
+  interestRatePerAnnum?: number;
   minimumDeposit: number;
-  durationDays: number;
+  durationDays?: number;
   durationMonths?: number;
   interestPaymentFrequency: "AT_MATURITY" | "MONTHLY" | "QUARTERLY" | string;
   reinvestInterest: boolean;

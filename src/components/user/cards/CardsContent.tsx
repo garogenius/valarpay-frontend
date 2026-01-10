@@ -59,6 +59,7 @@ const CardsContent: React.FC = () => {
   const [openCreateCard, setOpenCreateCard] = React.useState(false);
   const [selectedCard, setSelectedCard] = React.useState<IVirtualCard | null>(null);
   const [cardholderNameInput, setCardholderNameInput] = React.useState("");
+  const [cardPinInput, setCardPinInput] = React.useState("");
   const [initialBalance, setInitialBalance] = React.useState<string>("");
   const [selectedCurrency, setSelectedCurrency] =
     React.useState<CardCurrency>("USD");
@@ -313,6 +314,14 @@ const CardsContent: React.FC = () => {
       return;
     }
 
+    if (!/^\d{4}$/.test(cardPinInput.trim())) {
+      ErrorToast({
+        title: "Validation Error",
+        descriptions: ["Card PIN must be exactly 4 digits."],
+      });
+      return;
+    }
+
     // Parse initial balance if provided
     const parsedInitialBalance = initialBalance.trim()
       ? parseFloat(initialBalance.trim())
@@ -343,7 +352,7 @@ const CardsContent: React.FC = () => {
       walletId: account.id,
       currency: selectedCurrency,
       cardholderName: cardholderNameInput.trim(),
-      label: cardholderNameInput.trim(),
+      pin: cardPinInput.trim(),
     };
 
     if (parsedInitialBalance !== undefined && parsedInitialBalance > 0) {
@@ -364,7 +373,8 @@ const CardsContent: React.FC = () => {
               accountNumber: account.accountNumber,
             }
           : null,
-        payload,
+        // do not log PIN
+        payload: { ...payload, pin: "********" },
       });
     }
 
@@ -852,6 +862,7 @@ const CardsContent: React.FC = () => {
             onClick={() => {
               setOpenCreateCard(false);
               setCardholderNameInput("");
+              setCardPinInput("");
               setInitialBalance("");
               setSelectedCurrency("USD");
             }}
@@ -888,6 +899,22 @@ const CardsContent: React.FC = () => {
                 />
               </div>
               <div className="flex flex-col gap-1">
+                <label className="text-white/70 text-xs">Card PIN (4 digits)</label>
+                <input
+                  inputMode="numeric"
+                  className="w-full bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-3 px-3 text-white text-sm placeholder:text-white/50 outline-none focus:border-[#f76301]"
+                  placeholder="e.g., 1234"
+                  value={cardPinInput}
+                  maxLength={4}
+                  onChange={(e) =>
+                    setCardPinInput(e.target.value.replace(/\D/g, "").slice(0, 4))
+                  }
+                />
+                <p className="text-white/50 text-[10px] mt-1">
+                  This is your card PIN (must be exactly 4 digits).
+                </p>
+              </div>
+              <div className="flex flex-col gap-1">
                 <label className="text-white/70 text-xs">
                   Initial Balance (Optional)
                 </label>
@@ -915,6 +942,7 @@ const CardsContent: React.FC = () => {
                   onClick={() => {
                     setOpenCreateCard(false);
                     setCardholderNameInput("");
+                    setCardPinInput("");
                     setInitialBalance("");
                     setSelectedCurrency("USD");
                   }}
@@ -927,6 +955,7 @@ const CardsContent: React.FC = () => {
                   disabled={
                     creatingCard ||
                     !cardholderNameInput.trim() ||
+                    !/^\d{4}$/.test(cardPinInput.trim()) ||
                     !hasCurrencyAccount(selectedCurrency)
                   }
                   isLoading={creatingCard}

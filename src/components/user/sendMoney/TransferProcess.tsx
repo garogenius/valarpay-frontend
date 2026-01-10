@@ -165,6 +165,13 @@ const TransferProcess = ({
   const watchedDescription = watch("description");
   const watchedSessionId = watch("sessionId");
 
+  const canProceedToConfirm =
+    isValid &&
+    !verifyLoading &&
+    !!bankData?.accountName &&
+    !!watchedSessionId &&
+    (selectedType !== "bank" || !!watchedBankCode);
+
   const { fee } = useGetTransferFee({
     currency: "NGN",
     amount: watchedAmount,
@@ -272,6 +279,8 @@ const TransferProcess = ({
   };
 
   const onSuccess = (responseData?: any) => {
+    // Hide processing loader
+    useGlobalModalsStore.getState().hideProcessingLoaderModal();
     SuccessToast({
       title: "Transfer successful",
       description: "Your transfer was successful",
@@ -301,28 +310,83 @@ const TransferProcess = ({
   const transferLoading = transferPending && !transferError;
 
   const onSubmit = async () => {
+    // Guard: ensure account verification is completed before proceeding
+    if (verifyLoading) {
+      ErrorToast({
+        title: "Verifying account",
+        descriptions: ["Please wait for account verification to complete."],
+      });
+      return;
+    }
+
+    if (!bankData?.accountName) {
+      ErrorToast({
+        title: "Account not verified",
+        descriptions: ["Enter valid account details and wait for verification before continuing."],
+      });
+      return;
+    }
+
+    if (selectedType === "bank" && !watchedBankCode) {
+      ErrorToast({
+        title: "Select a bank",
+        descriptions: ["Please select the recipient bank to continue."],
+      });
+      return;
+    }
+
+    if (!watchedSessionId) {
+      ErrorToast({
+        title: "Verification required",
+        descriptions: ["Unable to proceed without a valid verification session. Please verify the account again."],
+      });
+      return;
+    }
+
     setShowConfirmModal(true);
   };
 
   const handleConfirmTransaction = (walletPin: string) => {
-    if (bankData) {
-      // Show processing loader
-      useGlobalModalsStore.getState().showProcessingLoaderModal();
-      
-      setShowConfirmModal(false);
-      
-      initiateTransfer({
-        accountName: bankData?.accountName,
-        accountNumber: watchedAccountNumber,
-        amount: watchedAmount,
-        description: watchedDescription,
-        walletPin,
-        sessionId: watchedSessionId || "",
-        bankCode: watchedBankCode || "",
-        currency: "NGN",
-        ...(isBeneficiaryChecked ? { addBeneficiary: true } : {}),
+    if (!bankData?.accountName) {
+      ErrorToast({
+        title: "Account not verified",
+        descriptions: ["Please verify the account details before confirming this transfer."],
       });
+      return;
     }
+
+    if (selectedType === "bank" && !watchedBankCode) {
+      ErrorToast({
+        title: "Select a bank",
+        descriptions: ["Please select the recipient bank to continue."],
+      });
+      return;
+    }
+
+    if (!watchedSessionId) {
+      ErrorToast({
+        title: "Verification required",
+        descriptions: ["Unable to proceed without a valid verification session. Please verify the account again."],
+      });
+      return;
+    }
+
+    // Show processing loader
+    useGlobalModalsStore.getState().showProcessingLoaderModal();
+
+    setShowConfirmModal(false);
+
+    initiateTransfer({
+      accountName: bankData.accountName,
+      accountNumber: watchedAccountNumber,
+      amount: watchedAmount,
+      description: watchedDescription,
+      walletPin,
+      sessionId: watchedSessionId,
+      bankCode: watchedBankCode || "",
+      currency: "NGN",
+      ...(isBeneficiaryChecked ? { addBeneficiary: true } : {}),
+    });
   };
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -672,7 +736,7 @@ const TransferProcess = ({
                   <div className="w-full flex flex-col gap-4 mt-4">
                     <CustomButton
                       type="submit"
-                      disabled={!isValid}
+                      disabled={!canProceedToConfirm}
                       className="w-full border-2 border-primary text-white text-base 2xs:text-lg max-2xs:px-6 py-3.5"
                     >
                       {initialActionLabel || "Confirm"}{" "}
@@ -763,7 +827,7 @@ const TransferProcess = ({
                   <div className="w-full flex flex-col gap-4 mt-4">
                     <CustomButton
                       type="submit"
-                      disabled={!isValid}
+                      disabled={!canProceedToConfirm}
                       className="w-full border-2 border-primary text-white text-base 2xs:text-lg max-2xs:px-6 py-3.5"
                     >
                       {initialActionLabel || "Confirm"}{" "}

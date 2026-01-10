@@ -9,6 +9,14 @@ interface BreakPlanDetailsModalProps {
   planName: string;
   reason: string;
   breakDate: string;
+  principalAmount: number;
+  interestForfeited: number;
+  penalty: number;
+  payoutAmount: number;
+  startDate?: string;
+  maturityDate?: string;
+  interestRatePerAnnum?: number;
+  durationMonths?: number;
 }
 
 const BreakPlanDetailsModal: React.FC<BreakPlanDetailsModalProps> = ({ 
@@ -16,17 +24,28 @@ const BreakPlanDetailsModal: React.FC<BreakPlanDetailsModalProps> = ({
   onClose, 
   planName, 
   reason,
-  breakDate 
+  breakDate,
+  principalAmount,
+  interestForfeited,
+  penalty,
+  payoutAmount,
+  startDate,
+  maturityDate,
+  interestRatePerAnnum,
+  durationMonths,
 }) => {
   if (!isOpen) return null;
+  const fmt = (n: number) =>
+    `₦${new Intl.NumberFormat("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+      Number.isFinite(n) ? n : 0
+    )}`;
 
-  // Sample data
-  const transactions = [
-    { type: "Deposit", date: "12-05-2025", amount: 5000.00 },
-    { type: "Withdrawal", date: "10-05-2025", amount: 5000.00 },
-    { type: "Deposit", date: "12-05-2025", amount: 5000.00 },
-    { type: "Deposit", date: "12-05-2025", amount: 5000.00 },
-  ];
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "N/A";
+    const d = new Date(dateString);
+    if (Number.isNaN(d.getTime())) return "N/A";
+    return d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, "-");
+  };
 
   return (
     <div className="z-[999999] fixed inset-0 flex items-center justify-center">
@@ -55,18 +74,22 @@ const BreakPlanDetailsModal: React.FC<BreakPlanDetailsModalProps> = ({
           {/* Payout */}
           <div className="bg-[#ff6b6b]/10 border border-[#ff6b6b]/30 rounded-lg p-3">
             <p className="text-[#ff6b6b] text-xs mb-1">Total Payout</p>
-            <p className="text-[#ff6b6b] text-xl font-semibold">₦5,000.00</p>
+            <p className="text-[#ff6b6b] text-xl font-semibold">{fmt(payoutAmount)}</p>
           </div>
 
           {/* Breakdown */}
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="flex flex-col gap-1">
-              <span className="text-white/50">Principal Amount</span>
-              <span className="text-white">₦5,000.00</span>
+              <span className="text-white/50">Original Amount</span>
+              <span className="text-white">{fmt(principalAmount)}</span>
             </div>
             <div className="flex flex-col gap-1 text-right">
-              <span className="text-white/50">Penalty Fee</span>
-              <span className="text-[#ff6b6b]">₦5,000.00</span>
+              <span className="text-white/50">Penalty</span>
+              <span className="text-[#ff6b6b]">-{fmt(penalty)}</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-white/50">Interest Forfeited</span>
+              <span className="text-white">-{fmt(interestForfeited)}</span>
             </div>
           </div>
 
@@ -74,35 +97,23 @@ const BreakPlanDetailsModal: React.FC<BreakPlanDetailsModalProps> = ({
           <div className="grid grid-cols-2 gap-x-3 gap-y-2.5 pb-3 border-b border-white/10 text-xs">
             <div className="flex flex-col gap-0.5">
               <span className="text-white/50">Start Date</span>
-              <span className="text-white">12-05-2025</span>
+              <span className="text-white">{formatDate(startDate)}</span>
             </div>
             <div className="flex flex-col gap-0.5">
               <span className="text-white/50">Interest Maturity Date</span>
-              <span className="text-white">12-05-2025</span>
+              <span className="text-white">{formatDate(maturityDate)}</span>
             </div>
             <div className="flex flex-col gap-0.5">
               <span className="text-white/50">Interest Rate</span>
-              <span className="text-white">17% per annum</span>
+              <span className="text-white">
+                {typeof interestRatePerAnnum === "number"
+                  ? `${(interestRatePerAnnum * 100).toFixed(2)}% per annum`
+                  : "N/A"}
+              </span>
             </div>
             <div className="flex flex-col gap-0.5">
               <span className="text-white/50">Duration</span>
-              <span className="text-white">6 Months</span>
-            </div>
-          </div>
-
-          {/* Transaction History */}
-          <div>
-            <h4 className="text-white text-xs font-medium mb-2.5">Transaction History</h4>
-            <div className="flex flex-col border border-white/10 rounded-lg overflow-hidden">
-              {transactions.map((txn, i) => (
-                <div key={i} className="flex items-center justify-between py-2.5 px-3 border-b border-white/10 last:border-0">
-                  <div className="flex flex-col">
-                    <span className="text-white text-xs">{txn.type}</span>
-                    <span className="text-white/40 text-[10px]">{txn.date}</span>
-                  </div>
-                  <span className="text-white text-xs">+₦{txn.amount.toLocaleString()}</span>
-                </div>
-              ))}
+              <span className="text-white">{durationMonths ? `${durationMonths} Months` : "N/A"}</span>
             </div>
           </div>
         </div>

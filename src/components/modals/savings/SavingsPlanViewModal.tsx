@@ -65,7 +65,10 @@ const SavingsPlanViewModal: React.FC<SavingsPlanViewModalProps> = ({ isOpen, onC
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  const lockedUntil = actualPlan?.lockedUntil ? new Date(actualPlan.lockedUntil) : null;
+  // API v2 uses `isLocked` without `lockedUntil`; treat maturityDate as lock end when locked
+  const resolvedLockedUntilIso =
+    actualPlan?.lockedUntil || (actualPlan?.isLocked ? actualPlan?.maturityDate : null);
+  const lockedUntil = resolvedLockedUntilIso ? new Date(resolvedLockedUntilIso) : null;
   const maturityDate = actualPlan?.maturityDate ? new Date(actualPlan.maturityDate) : null;
   const now = new Date();
   const isLocked = lockedUntil ? now < lockedUntil : false;
@@ -199,7 +202,7 @@ const SavingsPlanViewModal: React.FC<SavingsPlanViewModalProps> = ({ isOpen, onC
               <div className="flex flex-col gap-0.5">
                 <span className="text-white/50 text-[10px]">Locked Until</span>
                 <span className="text-white text-[11px]">
-                  {actualPlan?.lockedUntil ? formatDate(actualPlan.lockedUntil) : "N/A"}
+                  {resolvedLockedUntilIso ? formatDate(resolvedLockedUntilIso) : "N/A"}
                 </span>
               </div>
               <div className="flex flex-col gap-0.5">
@@ -219,17 +222,21 @@ const SavingsPlanViewModal: React.FC<SavingsPlanViewModalProps> = ({ isOpen, onC
               <div className="flex flex-col gap-0.5">
                 <span className="text-white/50 text-[10px]">Interest Rate</span>
                 <span className="text-white text-[11px]">
-                  {actualPlan?.interestRate !== undefined 
-                    ? `${(actualPlan.interestRate * 100).toFixed(2)}% per annum` 
-                    : plan?.interestRate || "N/A"}
+                  {typeof actualPlan?.interestRatePerAnnum === "number"
+                    ? `${(actualPlan.interestRatePerAnnum * 100).toFixed(2)}% per annum`
+                    : typeof actualPlan?.interestRate === "number"
+                      ? `${(actualPlan.interestRate * 100).toFixed(2)}% per annum`
+                      : plan?.interestRate || "N/A"}
                 </span>
               </div>
               <div className="flex flex-col gap-0.5">
                 <span className="text-white/50 text-[10px]">Penalty Rate</span>
                 <span className="text-white text-[11px]">
-                  {actualPlan?.penaltyRate !== undefined 
-                    ? `${(actualPlan.penaltyRate * 100).toFixed(1)}%` 
-                    : "N/A"}
+                  {typeof actualPlan?.earlyWithdrawalPenaltyRate === "number"
+                    ? `${(actualPlan.earlyWithdrawalPenaltyRate * 100).toFixed(1)}%`
+                    : typeof actualPlan?.penaltyRate === "number"
+                      ? `${(actualPlan.penaltyRate * 100).toFixed(1)}%`
+                      : "N/A"}
                 </span>
               </div>
               {actualPlan?.minMonthlyDeposit && (
