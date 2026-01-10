@@ -97,7 +97,14 @@ const BiometricLoginModal: React.FC<Props> = ({ isOpen, onClose, identifier }) =
     const user = data?.data?.user;
 
     if (token) {
-      Cookies.set("accessToken", token, { expires: 7 });
+      // Note: This cookie is NOT HttpOnly because it's set client-side.
+      // Prefer moving auth cookie setting to the backend (HttpOnly + Secure + SameSite) for stronger security.
+      Cookies.set("accessToken", token, {
+        expires: 7,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+      });
       setUser(user);
       setIsLoggedIn(true);
       setStep("success");

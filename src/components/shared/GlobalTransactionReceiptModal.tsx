@@ -312,21 +312,6 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
                 </button>
               </div>
             </div>
-
-              {/* Download Button */}
-              <div className="mt-6">
-                <button
-                  onClick={downloadReceiptAsPNG}
-                  disabled={isDownloading}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#f76301] hover:bg-[#e55a00] text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
-                >
-                  <FiDownload className="text-base" />
-                  <span className="text-sm">
-                    {isDownloading ? "Downloading..." : "Download Receipt"}
-                  </span>
-                </button>
-              </div>
-            </div>
           </motion.div>
         </div>
       )}

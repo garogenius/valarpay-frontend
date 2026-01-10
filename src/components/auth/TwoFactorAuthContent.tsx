@@ -30,7 +30,14 @@ const TwoFactorAuthContent = () => {
   const isValid = token.length === 6 && !!authUsername;
 
   const onVerificationSuccess = (data: any) => {
-    Cookies.set("accessToken", data?.data?.accessToken);
+    // Note: This cookie is NOT HttpOnly because it's set client-side.
+    // Prefer moving auth cookie setting to the backend (HttpOnly + Secure + SameSite) for stronger security.
+    Cookies.set("accessToken", data?.data?.accessToken, {
+      expires: 7,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    });
     setUser(data?.data?.user);
     setIsLoggedIn(true);
     SuccessToast({
