@@ -246,10 +246,13 @@ const GlobalTransactionHistoryModal: React.FC<GlobalTransactionHistoryModalProps
         <!-- Header -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; width: 100%;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="width: 32px; height: 32px; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-              <span style="color: #f76301; font-weight: bold; font-size: 20px;">V</span>
-            </div>
-            <span style="font-weight: bold; font-size: 24px; letter-spacing: -0.5px;">VALARPAY</span>
+            <img
+              src="${logoBase64 || "/images/logo.png"}"
+              alt="ValarPay logo"
+              crossorigin="anonymous"
+              style="width: 32px; height: 32px; object-fit: contain; display: block;"
+            />
+            <span style="font-weight: bold; font-size: 24px; letter-spacing: -0.5px; line-height: 1;">VALARPAY</span>
           </div>
           <span style="font-size: 14px; color: rgba(255,255,255,0.9); font-weight: 500;">Beyond Banking</span>
         </div>

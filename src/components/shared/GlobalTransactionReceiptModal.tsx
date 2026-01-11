@@ -150,10 +150,14 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
             <div className="px-6 pt-5 pb-4 border-b border-white/10">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-[#f76301] rounded-sm flex items-center justify-center">
-                    <span className="text-black font-bold text-[10px]">V</span>
-                  </div>
-                  <span className="text-white font-semibold text-sm">VALARPAY</span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/images/logo.png"
+                    alt="ValarPay logo"
+                    crossOrigin="anonymous"
+                    className="w-6 h-6 object-contain"
+                  />
+                  <span className="text-white font-semibold text-sm leading-none">VALARPAY</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-white/60 text-xs">Beyond Banking</span>
@@ -180,10 +184,14 @@ const GlobalTransactionReceiptModal: React.FC<GlobalTransactionReceiptModalProps
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
-                      <span className="text-[#f76301] font-bold text-lg">V</span>
-                    </div>
-                    <span className="text-white font-bold text-xl tracking-tight">VALARPAY</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/images/logo.png"
+                      alt="ValarPay logo"
+                      crossOrigin="anonymous"
+                      className="w-8 h-8 object-contain"
+                    />
+                    <span className="text-white font-bold text-xl tracking-tight leading-none relative top-px">VALARPAY</span>
                   </div>
                   <span className="text-white/90 text-sm font-medium">Beyond Banking</span>
                 </div>

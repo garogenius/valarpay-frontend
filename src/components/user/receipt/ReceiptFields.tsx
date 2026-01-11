@@ -198,10 +198,15 @@ const ReceiptContainer = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white rounded flex items-center justify-center text-[#f76301] font-bold text-lg">
-              V
-            </div>
-            <span className="text-white font-bold text-xl tracking-tight">VALARPAY</span>
+            {/* Use real brand logo (not placeholder) */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/logo.png"
+              alt="ValarPay logo"
+              crossOrigin="anonymous"
+              className="w-8 h-8 object-contain"
+            />
+            <span className="text-white font-bold text-xl tracking-tight leading-none relative top-px">VALARPAY</span>
           </div>
           <span className="text-white/90 text-sm font-medium">Beyond Banking</span>
         </div>
