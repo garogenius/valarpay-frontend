@@ -34,7 +34,7 @@ import VerifyWalletPinModal from "@/components/modals/settings/VerifyWalletPinMo
 import SecurityPrivacyTab from "@/components/user/settings/tabs/SecurityPrivacyTab";
 import PreferencesTab from "@/components/user/settings/tabs/PreferencesTab";
 
-import { useUpdateUser } from "@/api/user/user.queries";
+import { useUpdateUser, useUploadDocument } from "@/api/user/user.queries";
 import { CURRENCY } from "@/constants/types";
 import usePaymentSettingsStore from "@/store/paymentSettings.store";
 import { isFingerprintPaymentAvailable } from "@/services/fingerprintPayment.service";
@@ -231,6 +231,8 @@ const ProfileSettingsContent = () => {
   const [showExpiryDatePicker, setShowExpiryDatePicker] = useState(false);
   const issueDatePickerRef = useRef<HTMLDivElement>(null);
   const expiryDatePickerRef = useRef<HTMLDivElement>(null);
+  const [selectedDocumentFile, setSelectedDocumentFile] = useState<File | null>(null);
+  const documentFileInputRef = useRef<HTMLInputElement>(null);
   
   // Personal tab dropdowns
   const [employmentStatusDropdownOpen, setEmploymentStatusDropdownOpen] = useState(false);
@@ -332,6 +334,87 @@ const ProfileSettingsContent = () => {
   };
   const { mutate: updateKycIdentity, isPending: savingKycIdentity, isError: savingKycIdentityError } =
     useUpdateUser(onKycIdentityUpdateError, onKycIdentityUpdateSuccess);
+
+  // Upload passport document file separately (stored in kycDocuments)
+  const onUploadDocError = (error: any) => {
+    const errorMessage = error?.response?.data?.message;
+    const descriptions = Array.isArray(errorMessage) ? errorMessage : [errorMessage || "Failed to upload document"];
+    ErrorToast({ title: "Upload Failed", descriptions });
+  };
+
+  const onUploadDocSuccess = (responseData: any) => {
+    SuccessToast({
+      title: "Document Uploaded",
+      description: responseData?.data?.message || "Your document has been uploaded successfully",
+    });
+
+    // Normalize backend response and update local store so it displays immediately
+    const raw = responseData?.data?.data ?? null;
+    const doc =
+      raw?.documentType
+        ? raw
+        : raw?.type || raw?.url
+          ? raw
+          : Array.isArray(raw?.kycDocuments)
+            ? raw.kycDocuments?.[0]
+            : Array.isArray(raw)
+              ? raw?.[0]
+              : null;
+
+    if (doc) {
+      const normalizedType = String(doc.documentType || doc.type || selectedDocumentType || "").toLowerCase();
+      const normalizedUrl = String(doc.documentUrl || doc.url || "").trim();
+      const normalizedCountry = String(doc.documentCountry || doc.country || documentCountry || "").trim();
+      const normalizedIssue = normalizeDate(String(doc.issueDate || doc.issue_date || issueDate || ""));
+      const normalizedExpiry = normalizeDate(String(doc.expiryDate || doc.expiry_date || expiryDate || ""));
+      const normalizedNumber = String(doc.documentNumber || doc.document_number || documentNumber || "").trim();
+
+      const { setUser } = useUserStore.getState();
+      const updatedUser: any = { ...(user as any) };
+      const nextKycDoc = {
+        url: normalizedUrl || undefined,
+        type: normalizedType || undefined,
+        country: normalizedCountry || undefined,
+        issue_date: normalizedIssue || undefined,
+        expiry_date: normalizedExpiry || undefined,
+        uploaded_at: doc.uploaded_at || new Date().toISOString(),
+        documentNumber: normalizedNumber || undefined,
+      };
+      if (nextKycDoc.url && nextKycDoc.type) {
+        const existing = Array.isArray(updatedUser.kycDocuments) ? updatedUser.kycDocuments : [];
+        updatedUser.kycDocuments = [nextKycDoc, ...existing];
+        setUser(updatedUser);
+      }
+
+      // Auto-sync passport identity fields (so USD creation passes even if user only uploads file)
+      if (
+        normalizedType === "passport" &&
+        normalizedNumber &&
+        normalizedCountry &&
+        normalizedIssue &&
+        normalizedExpiry
+      ) {
+        const fullName = String(user?.fullname || "").trim();
+        if (fullName) {
+          const fd = new FormData();
+          fd.append("fullName", fullName);
+          fd.append("passportNumber", normalizedNumber);
+          fd.append("passportCountry", normalizedCountry);
+          fd.append("passportIssueDate", normalizedIssue);
+          fd.append("passportExpiryDate", normalizedExpiry);
+          updateKycIdentity(fd);
+        }
+      }
+    }
+
+    setSelectedDocumentFile(null);
+    if (documentFileInputRef.current) documentFileInputRef.current.value = "";
+  };
+
+  const { mutate: uploadDocument, isPending: uploadingDoc, isError: uploadingDocError } = useUploadDocument(
+    onUploadDocError,
+    onUploadDocSuccess
+  );
 
   const handleFileUpload = () => fileInputRef.current?.click();
 
@@ -540,6 +623,49 @@ const ProfileSettingsContent = () => {
       passportIssueDate: issueDate,
       passportExpiryDate: expiryDate,
     });
+  };
+
+  const handleUploadDocumentFile = () => {
+    if (!selectedDocumentFile) {
+      ErrorToast({ title: "No File Selected", descriptions: ["Please select a file to upload"] });
+      return;
+    }
+    if (!selectedDocumentType) {
+      ErrorToast({ title: "Document Type Required", descriptions: ["Please select a document type"] });
+      return;
+    }
+
+    // Validate required fields for passport/drivers/national
+    if (
+      selectedDocumentType === "passport" ||
+      selectedDocumentType === "drivers_license" ||
+      selectedDocumentType === "national_id"
+    ) {
+      if (!documentNumber.trim() || !documentCountry.trim()) {
+        ErrorToast({ title: "Missing Information", descriptions: ["Please provide document number and country"] });
+        return;
+      }
+    }
+    // Passport additionally needs issue/expiry to be useful for multi-currency KYC
+    if (selectedDocumentType === "passport" && (!issueDate || !expiryDate)) {
+      ErrorToast({ title: "Missing Information", descriptions: ["Please provide issue date and expiry date"] });
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append("documentType", selectedDocumentType);
+    fd.append("document", selectedDocumentFile);
+    if (
+      selectedDocumentType === "passport" ||
+      selectedDocumentType === "drivers_license" ||
+      selectedDocumentType === "national_id"
+    ) {
+      fd.append("documentNumber", documentNumber.trim());
+      fd.append("documentCountry", documentCountry.trim());
+    }
+    if (issueDate) fd.append("issueDate", issueDate);
+    if (expiryDate) fd.append("expiryDate", expiryDate);
+    uploadDocument(fd);
   };
 
   const currentPhone = user?.phoneNumber || "";
@@ -1262,6 +1388,8 @@ const ProfileSettingsContent = () => {
                             setDocumentCountry("");
                             setIssueDate("");
                             setExpiryDate("");
+                            setSelectedDocumentFile(null);
+                            if (documentFileInputRef.current) documentFileInputRef.current.value = "";
                           }}
                           className="hover:opacity-80 w-full flex items-center justify-between px-4 py-2 gap-2 cursor-pointer"
                         >
@@ -1444,25 +1572,105 @@ const ProfileSettingsContent = () => {
                       )}
                     </div>
 
+                    {/* Document File (uploaded separately via upload-document) */}
+                    <div className="sm:col-span-2 flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                      <label className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start">
+                        Document File <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <div className="relative w-full">
+                        <input
+                          ref={documentFileInputRef}
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const extension = file.name.split(".").pop()?.toLowerCase();
+                              if (!extension || !["pdf", "jpg", "jpeg", "png"].includes(extension)) {
+                                ErrorToast({
+                                  title: "Invalid File Type",
+                                  descriptions: ["Please upload a PDF, JPG, or PNG file"],
+                                });
+                                return;
+                              }
+                              const maxSize = 10 * 1024 * 1024; // 10MB
+                              if (file.size > maxSize) {
+                                ErrorToast({
+                                  title: "File Too Large",
+                                  descriptions: ["Please upload a file smaller than 10MB"],
+                                });
+                                return;
+                              }
+                              setSelectedDocumentFile(file);
+                            }
+                          }}
+                          className="hidden"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => documentFileInputRef.current?.click()}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30 hover:bg-[#FF6B2C]/25 transition-colors"
+                        >
+                          <FiUpload className="text-base" />
+                          <span>{selectedDocumentFile ? selectedDocumentFile.name : "Choose File (PDF, JPG, or PNG)"}</span>
+                        </button>
+                        {selectedDocumentFile && (
+                          <div className="flex items-center gap-2 text-sm text-white/70 mt-2">
+                            <span>✓ File selected: {selectedDocumentFile.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedDocumentFile(null);
+                                if (documentFileInputRef.current) documentFileInputRef.current.value = "";
+                              }}
+                              className="text-red-400 hover:text-red-300"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="w-full">
-                    <CustomButton
-                      type="submit"
-                      disabled={
-                        savingKycIdentity ||
-                        savingKycIdentityError ||
-                        selectedDocumentType !== "passport" ||
-                        !documentNumber ||
-                        !documentCountry ||
-                        !issueDate ||
-                        !expiryDate
-                      }
-                      isLoading={savingKycIdentity && !savingKycIdentityError}
-                      className="w-full bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black font-semibold text-base sm:text-lg py-3 rounded-xl"
-                    >
-                      Save Passport Details
-                    </CustomButton>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <CustomButton
+                        type="button"
+                        onClick={handleUploadDocumentFile}
+                        disabled={
+                          uploadingDoc ||
+                          uploadingDocError ||
+                          !selectedDocumentFile ||
+                          !selectedDocumentType ||
+                          ((selectedDocumentType === "passport" ||
+                            selectedDocumentType === "drivers_license" ||
+                            selectedDocumentType === "national_id") &&
+                            (!documentNumber || !documentCountry)) ||
+                          (selectedDocumentType === "passport" && (!issueDate || !expiryDate))
+                        }
+                        isLoading={uploadingDoc && !uploadingDocError}
+                        className="w-full bg-transparent border border-[#FF6B2C]/40 text-[#FF6B2C] hover:bg-[#FF6B2C]/10 font-semibold text-base sm:text-lg py-3 rounded-xl"
+                      >
+                        Upload Document File
+                      </CustomButton>
+                      <CustomButton
+                        type="submit"
+                        disabled={
+                          savingKycIdentity ||
+                          savingKycIdentityError ||
+                          selectedDocumentType !== "passport" ||
+                          !documentNumber ||
+                          !documentCountry ||
+                          !issueDate ||
+                          !expiryDate
+                        }
+                        isLoading={savingKycIdentity && !savingKycIdentityError}
+                        className="w-full bg-[#FF6B2C] hover:bg-[#FF7A3D] text-black font-semibold text-base sm:text-lg py-3 rounded-xl"
+                      >
+                        Save Passport Details
+                      </CustomButton>
+                    </div>
                   </div>
                 </form>
               )}
