@@ -25,7 +25,8 @@ const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose, onSucces
   const bettingWallet = walletData?.data?.data;
   const bettingBalance = bettingWallet?.balance || 0;
   
-  const { platforms, isPending: platformsLoading } = useGetBettingPlatforms();
+  const { platforms, isPending: platformsLoading, isError: platformsError, refetch: refetchPlatforms } =
+    useGetBettingPlatforms();
   const { banks, isPending: banksLoading } = useGetAllBanks();
   
   const [selectedPlatform, setSelectedPlatform] = useState<BettingPlatform | null>(null);
@@ -138,13 +139,11 @@ const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose, onSucces
 
     setPendingPayload({
       amount: amountNum,
-      platform: selectedPlatform.code,
       accountNumber: accountNumber,
       accountName: accountName,
       bankCode: selectedBank.bankCode,
-      bankName: selectedBank.name,
       currency: "NGN",
-      remark: remark.trim() || undefined,
+      description: remark.trim() || `Withdrawal from betting wallet (${selectedPlatform.name})`,
     });
     setShowPinModal(true);
   };
@@ -192,6 +191,17 @@ const WithdrawModal: React.FC<WithdrawModalProps> = ({ isOpen, onClose, onSucces
                 <div className="absolute top-full left-0 right-0 mt-1 bg-[#1C1C1E] border border-gray-800 rounded-lg overflow-hidden z-10 max-h-64 overflow-y-auto">
                   {platformsLoading ? (
                     <div className="px-4 py-3 text-center text-gray-400 text-sm">Loading platforms...</div>
+                  ) : platformsError ? (
+                    <div className="px-4 py-3 text-center text-gray-400 text-sm">
+                      <p>Failed to load platforms</p>
+                      <button
+                        type="button"
+                        onClick={() => refetchPlatforms()}
+                        className="mt-2 text-[#FF6B2C] hover:text-[#FF7A3D] text-sm font-semibold"
+                      >
+                        Retry
+                      </button>
+                    </div>
                   ) : activePlatforms.length === 0 ? (
                     <div className="px-4 py-3 text-center text-gray-400 text-sm">No platforms available</div>
                   ) : (

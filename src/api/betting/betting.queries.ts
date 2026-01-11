@@ -26,12 +26,24 @@ import type {
 } from "./betting.types";
 
 export const useGetBettingPlatforms = () => {
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: ["betting-platforms"],
     queryFn: getBettingPlatformsRequest,
   });
-  const platforms: BettingPlatform[] = data?.data?.data ?? [];
-  return { platforms, isPending, isError };
+  // Support multiple backend response shapes:
+  // 1) { message, statusCode, data: [...] }
+  // 2) { message, statusCode, data: { data: [...] } }
+  // 3) [...] (array directly)
+  const body: any = data?.data ?? null;
+  const payload: any = body?.data ?? null;
+  const platforms: BettingPlatform[] = Array.isArray(body)
+    ? body
+    : Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.data)
+        ? payload.data
+        : [];
+  return { platforms, isPending, isError, error, refetch };
 };
 
 export const useGetBettingWallet = () => {

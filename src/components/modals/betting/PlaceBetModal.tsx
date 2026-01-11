@@ -20,7 +20,8 @@ const PlaceBetModal: React.FC<PlaceBetModalProps> = ({ isOpen, onClose, onSucces
   const bettingWallet = walletData?.data?.data;
   const bettingBalance = bettingWallet?.balance || 0;
   
-  const { platforms, isPending: platformsLoading } = useGetBettingPlatforms();
+  const { platforms, isPending: platformsLoading, isError: platformsError, refetch: refetchPlatforms } =
+    useGetBettingPlatforms();
   
   const [selectedPlatform, setSelectedPlatform] = useState<BettingPlatform | null>(null);
   const [showPlatformDropdown, setShowPlatformDropdown] = useState(false);
@@ -106,6 +107,10 @@ const PlaceBetModal: React.FC<PlaceBetModalProps> = ({ isOpen, onClose, onSucces
       betType: "SINGLE",
       odds: oddsNum,
       description: description.trim() || undefined,
+      metadata: {
+        platform: selectedPlatform.code,
+        platformName: selectedPlatform.name,
+      },
     });
     setShowPinModal(true);
   };
@@ -160,6 +165,17 @@ const PlaceBetModal: React.FC<PlaceBetModalProps> = ({ isOpen, onClose, onSucces
                 <div className="absolute top-full left-0 right-0 mt-1 bg-[#1C1C1E] border border-gray-800 rounded-lg overflow-hidden z-10 max-h-64 overflow-y-auto">
                   {platformsLoading ? (
                     <div className="px-4 py-3 text-center text-gray-400 text-sm">Loading platforms...</div>
+                  ) : platformsError ? (
+                    <div className="px-4 py-3 text-center text-gray-400 text-sm">
+                      <p>Failed to load platforms</p>
+                      <button
+                        type="button"
+                        onClick={() => refetchPlatforms()}
+                        className="mt-2 text-[#FF6B2C] hover:text-[#FF7A3D] text-sm font-semibold"
+                      >
+                        Retry
+                      </button>
+                    </div>
                   ) : activePlatforms.length === 0 ? (
                     <div className="px-4 py-3 text-center text-gray-400 text-sm">No platforms available</div>
                   ) : (

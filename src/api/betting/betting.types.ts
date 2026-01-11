@@ -37,12 +37,9 @@ export type BettingTransaction = {
 
 export type IFundBettingPlatform = {
   amount: number;
-  platform: string;
-  platformUserId?: string;
   currency: string;
-  remark?: string;
   description?: string;
-  walletPin?: string;
+  walletPin: string;
 };
 
 export type IFundBettingWallet = {
@@ -54,13 +51,11 @@ export type IFundBettingWallet = {
 
 export type IWithdrawBettingWallet = {
   amount: number;
-  platform: string;
   accountNumber: string;
   accountName: string;
   bankCode: string;
-  bankName?: string;
   currency: string;
-  remark?: string;
+  description?: string;
   walletPin: string;
 };
 

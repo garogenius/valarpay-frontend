@@ -141,12 +141,18 @@ export const useGetMatchedBanksByAccountNumber = (
         ? raw.data
         : [];
 
+  // `BankProps` requires additional fields used by the main banks list.
+  // Matched-banks endpoint often returns only { name, bankCode }, so we fill safe defaults.
   const matchedBanks: BankProps[] = list
     .map((b: any) => ({
       name: String(b?.name || b?.bankName || b?.bank || "").trim(),
       bankCode: String(b?.bankCode || b?.code || "").trim(),
+      routingKey: String(b?.routingKey || "").trim(),
+      logoImage: (b?.logoImage ?? b?.logo ?? null) as string | null,
+      categoryId: String(b?.categoryId || "").trim(),
+      nubanCode: (b?.nubanCode ?? null) as string | null,
     }))
-    .filter((b: any) => b?.name && b?.bankCode);
+    .filter((b: BankProps) => Boolean(b?.name && b?.bankCode));
 
   return { matchedBanks, isPending, isError };
 };
