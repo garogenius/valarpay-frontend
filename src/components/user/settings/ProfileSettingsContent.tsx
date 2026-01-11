@@ -373,54 +373,72 @@ const ProfileSettingsContent = () => {
   };
 
   const onUploadDocumentSuccess = (responseData: any) => {
-    if (responseData?.data?.data) {
+    // Normalize multiple backend response shapes:
+    // - Legacy: { documentType, documentUrl, documentCountry, issueDate, expiryDate, documentNumber }
+    // - New: { url, type, country, issue_date, expiry_date, documentNumber, uploaded_at }
+    const raw = responseData?.data?.data ?? null;
+    const doc =
+      raw?.documentType
+        ? raw
+        : raw?.type || raw?.url
+          ? raw
+          : Array.isArray(raw?.kycDocuments)
+            ? raw.kycDocuments?.[0]
+            : Array.isArray(raw)
+              ? raw?.[0]
+              : null;
+
+    const normalizeDocType = (t: any) => {
+      const v = String(t || "").toLowerCase();
+      if (v === "passport") return "passport";
+      if (v === "bank_statement") return "bank_statement";
+      if (v === "utility_bill") return "utility_bill";
+      if (v === "drivers_license") return "drivers_license";
+      if (v === "national_id") return "national_id";
+      return "";
+    };
+
+    if (doc) {
+      const normalizedType = normalizeDocType(doc.documentType || doc.type || selectedDocumentType);
+      const normalizedUrl = String(doc.documentUrl || doc.url || "").trim();
+      const normalizedCountry = String(doc.documentCountry || doc.country || "").trim();
+      const normalizedIssue = normalizeDate(String(doc.issueDate || doc.issue_date || ""));
+      const normalizedExpiry = normalizeDate(String(doc.expiryDate || doc.expiry_date || ""));
+      const normalizedNumber = String(doc.documentNumber || doc.document_number || "").trim();
+
+      // Update local user store so UI reflects immediately, even before refetch
       const { setUser } = useUserStore.getState();
-      const documentData = responseData.data.data;
-      const documentType = documentData.documentType;
-      const documentUrl = documentData.documentUrl;
-      
       const updatedUser: any = { ...user };
-      if (documentType === "passport") {
-        updatedUser.passportDocumentUrl = documentUrl;
-        updatedUser.passportIssueDate = documentData.issueDate;
-        updatedUser.passportExpiryDate = documentData.expiryDate;
-        updatedUser.passportNumber = documentData.documentNumber;
-        updatedUser.passportCountry = documentData.documentCountry;
-      } else if (documentType === "bank_statement") {
-        updatedUser.bankStatementUrl = documentUrl;
-        updatedUser.bankStatementIssueDate = documentData.issueDate;
-        updatedUser.bankStatementExpiryDate = documentData.expiryDate;
-      } else if (documentType === "utility_bill") {
-        updatedUser.utilityBillUrl = documentUrl;
-        updatedUser.utilityBillIssueDate = documentData.issueDate;
-        updatedUser.utilityBillExpiryDate = documentData.expiryDate;
-      } else if (documentType === "drivers_license") {
-        updatedUser.driversLicenseUrl = documentUrl;
-        updatedUser.driversLicenseNumber = documentData.documentNumber;
-        updatedUser.driversLicenseCountry = documentData.documentCountry;
-      } else if (documentType === "national_id") {
-        updatedUser.nationalIdUrl = documentUrl;
-        updatedUser.nationalIdNumber = documentData.documentNumber;
-        updatedUser.nationalIdCountry = documentData.documentCountry;
+      const nextKycDoc = {
+        url: normalizedUrl || undefined,
+        type: normalizedType || undefined,
+        country: normalizedCountry || undefined,
+        issue_date: normalizedIssue || undefined,
+        expiry_date: normalizedExpiry || undefined,
+        uploaded_at: doc.uploaded_at || new Date().toISOString(),
+        documentNumber: normalizedNumber || undefined,
+      };
+      if (nextKycDoc.url && nextKycDoc.type) {
+        const existing = Array.isArray(updatedUser.kycDocuments) ? updatedUser.kycDocuments : [];
+        updatedUser.kycDocuments = [nextKycDoc, ...existing];
+        setUser(updatedUser);
       }
-      setUser(updatedUser);
+
+      // Keep the saved document information visible after upload (form state)
+      if (normalizedType) {
+        setHasUserChangedDocumentType(true);
+        setSelectedDocumentType(normalizedType as any);
+        setDocumentNumber(normalizedNumber || "");
+        setDocumentCountry(normalizedCountry || "");
+        setIssueDate(normalizedIssue || "");
+        setExpiryDate(normalizedExpiry || "");
+      }
     }
     SuccessToast({
       title: "Document Uploaded!",
       description: responseData?.data?.message || "Your document has been uploaded successfully",
     });
     
-    // Keep the saved document information visible after upload
-    const documentData = responseData?.data?.data;
-    if (documentData?.documentType) {
-      setHasUserChangedDocumentType(true);
-      setSelectedDocumentType(documentData.documentType);
-      setDocumentNumber(documentData.documentNumber || "");
-      setDocumentCountry(documentData.documentCountry || "");
-      setIssueDate(normalizeDate(documentData.issueDate || ""));
-      setExpiryDate(normalizeDate(documentData.expiryDate || ""));
-    }
-
     // Clear only the file input after successful upload
     setSelectedDocumentFile(null);
     if (documentFileInputRef.current) documentFileInputRef.current.value = "";
@@ -465,6 +483,28 @@ const ProfileSettingsContent = () => {
     const u: any = user;
     if (!u) return null;
 
+    // New API shape: array of uploaded docs
+    if (Array.isArray(u.kycDocuments) && u.kycDocuments.length > 0) {
+      const docs = u.kycDocuments as any[];
+      const sorted = [...docs].sort((a, b) => {
+        const ad = new Date(a?.uploaded_at || a?.uploadedAt || a?.createdAt || 0).getTime();
+        const bd = new Date(b?.uploaded_at || b?.uploadedAt || b?.createdAt || 0).getTime();
+        return bd - ad;
+      });
+      const d = sorted[0] || null;
+      if (d?.url && d?.type) {
+        return {
+          documentType: String(d.type) as any,
+          documentUrl: String(d.url),
+          documentNumber: d?.documentNumber ? String(d.documentNumber) : undefined,
+          documentCountry: d?.country ? String(d.country) : undefined,
+          issueDate: d?.issue_date ? String(d.issue_date) : undefined,
+          expiryDate: d?.expiry_date ? String(d.expiry_date) : undefined,
+        };
+      }
+    }
+
+    // Legacy fields (older backend versions)
     if (u.passportDocumentUrl) {
       return {
         documentType: "passport",
