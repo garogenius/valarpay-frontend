@@ -65,8 +65,19 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
 
   const filteredBillers = useMemo(() => {
     const list = institutions || [];
+    const getInstitutionLabel = (b: any) =>
+      String(
+        b?.planName ||
+          b?.shortName ||
+          b?.billerName ||
+          b?.name ||
+          b?.description ||
+          b?.billerCode ||
+          b?.billerId ||
+          ""
+      ).trim();
     return billerNameFilter
-      ? list.filter((b: any) => billerNameFilter(String(b.billerName || b.name || "")))
+      ? list.filter((b: any) => billerNameFilter(getInstitutionLabel(b)))
       : list;
   }, [institutions, billerNameFilter]);
 
@@ -154,7 +165,9 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
   const { mutate: payEducation, isPending: payPending, isError: payErr } = usePaySchoolFee(onPayError, onPaySuccess);
   const paying = payPending && !payErr;
 
-  const billerLabel = String(biller?.billerName || biller?.name || "").trim();
+  const billerLabel = String(
+    biller?.planName || biller?.shortName || biller?.billerName || biller?.name || biller?.description || biller?.billerCode || ""
+  ).trim();
   const itemLabel = String(item?.itemName || item?.name || "").trim();
 
   const canNext = !!billerCode && !!item?.itemCode && customerId.length >= 3 && amount > 0;
@@ -220,7 +233,7 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
                           }}
                           className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
                         >
-                          {String(b.billerName || b.name || b.billerCode || b.billerId)}
+                          {String(b.planName || b.shortName || b.billerName || b.name || b.description || b.billerCode || b.billerId)}
                         </button>
                       ))
                     )}
