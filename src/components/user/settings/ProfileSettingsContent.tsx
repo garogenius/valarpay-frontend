@@ -390,9 +390,7 @@ const ProfileSettingsContent = () => {
       if (
         normalizedType === "passport" &&
         normalizedNumber &&
-        normalizedCountry &&
-        normalizedIssue &&
-        normalizedExpiry
+        normalizedCountry
       ) {
         const fullName = String(user?.fullname || "").trim();
         if (fullName) {
@@ -400,8 +398,7 @@ const ProfileSettingsContent = () => {
           fd.append("fullName", fullName);
           fd.append("passportNumber", normalizedNumber);
           fd.append("passportCountry", normalizedCountry);
-          fd.append("passportIssueDate", normalizedIssue);
-          fd.append("passportExpiryDate", normalizedExpiry);
+          // Backend rejects passportIssueDate/passportExpiryDate on edit-profile; do not send them here.
           updateKycIdentity(fd);
         }
       }
@@ -607,8 +604,7 @@ const ProfileSettingsContent = () => {
     formData.append("fullName", fullName);
     formData.append("passportNumber", documentNumber.trim());
     formData.append("passportCountry", documentCountry.trim());
-    formData.append("passportIssueDate", issueDate);
-    formData.append("passportExpiryDate", expiryDate);
+    // Backend rejects passportIssueDate/passportExpiryDate on edit-profile; keep locally but do not send.
     updateKycIdentity(formData);
 
     // Optimistic local update

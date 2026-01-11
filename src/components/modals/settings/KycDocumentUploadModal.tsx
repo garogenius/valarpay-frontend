@@ -170,3 +170,4 @@ const KycDocumentUploadModal: React.FC<Props> = ({ isOpen, onClose, documentType
 export default KycDocumentUploadModal;
 
 
+
