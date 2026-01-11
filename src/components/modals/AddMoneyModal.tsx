@@ -3,7 +3,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { CgClose } from "react-icons/cg";
 import CustomButton from "@/components/shared/Button";
-import { useGetAllBanks, useVerifyAccount } from "@/api/wallet/wallet.queries";
+import {
+  useGetAllBanks,
+  useGetMatchedBanksByAccountNumber,
+  useVerifyAccount,
+} from "@/api/wallet/wallet.queries";
 import useOnClickOutside from "@/hooks/useOnClickOutside";
 import SearchableDropdown from "@/components/shared/SearchableDropdown";
 import useUserStore from "@/store/user.store";
@@ -43,6 +47,16 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
   const [sessionId, setSessionId] = useState<string>("");
   const [fundAmount, setFundAmount] = useState<string>("");
   const [walletPin, setWalletPin] = useState<string>("");
+
+  const normalizedAccountNumber = String(accountNumber || "").replace(/\D/g, "").slice(0, 10);
+  const {
+    matchedBanks,
+    isPending: matchedBanksPending,
+    isError: matchedBanksError,
+  } = useGetMatchedBanksByAccountNumber(normalizedAccountNumber, tab === "account");
+
+  const bankDropdownItems: any[] =
+    matchedBanks && matchedBanks.length > 0 ? matchedBanks : banks;
 
   const canProceedCard = useMemo(() => Boolean(cardNumber && expiry && cvv && pin && cardBrand), [cardNumber, expiry, cvv, pin, cardBrand]);
   const canProceedAccount = useMemo(() => Boolean(selectedBank && accountNumber.length === 10 && accountName && sessionId), [selectedBank, accountNumber, accountName, sessionId]);
@@ -87,6 +101,24 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
     }
   };
   const { mutate: verifyAccount } = useVerifyAccount(onVerifyAccountError, onVerifyAccountSuccess);
+
+  useEffect(() => {
+    if (tab !== "account") return;
+    if (normalizedAccountNumber.length !== 10) return;
+    if (selectedBank?.bankCode) return;
+    if (!matchedBanks || matchedBanks.length !== 1) return;
+    const only = matchedBanks[0] as any;
+    setSelectedBank({ name: only.name, bankCode: String(only.bankCode) });
+    setBankOpen(false);
+  }, [tab, normalizedAccountNumber, selectedBank?.bankCode, matchedBanks]);
+
+  useEffect(() => {
+    if (tab !== "account") return;
+    if (!selectedBank?.bankCode) return;
+    if (normalizedAccountNumber.length !== 10) return;
+    // Trigger verification once we have both accountNumber and selected bank code
+    verifyAccount({ accountNumber: normalizedAccountNumber, bankCode: selectedBank.bankCode });
+  }, [tab, selectedBank?.bankCode, normalizedAccountNumber, verifyAccount]);
 
   // Reset to first step whenever modal opens
   useEffect(()=>{
@@ -389,7 +421,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
                     {bankOpen && (
                       <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-bg-600 border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-[999999] no-scrollbar">
                         <SearchableDropdown
-                          items={banks}
+                          items={bankDropdownItems}
                           searchKey="name"
                           displayFormat={(bank) => (
                             <div className="flex flex-col text-white/90">
@@ -418,13 +450,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
                         onChange={(e)=> {
                           const v = e.target.value.replace(/\D/g,"");
                           setAccountNumber(v);
-                          if (v.length === 10) {
-                            verifyAccount(
-                              selectedBank?.bankCode
-                                ? { accountNumber: v, bankCode: selectedBank.bankCode }
-                                : { accountNumber: v }
-                            );
-                          } else {
+                          if (v.length !== 10) {
                             setAccountName("");
                             setSessionId("");
                           }
@@ -434,6 +460,33 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
                     {accountName ? (
                       <div className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm text-white/90">
                         {accountName}
+                      </div>
+                    ) : null}
+                    {normalizedAccountNumber.length === 10 && !selectedBank?.bankCode ? (
+                      <div className="mt-1">
+                        {matchedBanksPending ? (
+                          <p className="text-xs text-white/60">Detecting bank…</p>
+                        ) : matchedBanksError ? (
+                          <p className="text-xs text-red-400">Couldn&apos;t detect bank automatically. Please select a bank.</p>
+                        ) : matchedBanks && matchedBanks.length > 0 ? (
+                          <div className="flex flex-wrap gap-2">
+                            {matchedBanks.slice(0, 6).map((b: any) => (
+                              <button
+                                key={String(b.bankCode)}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedBank({ name: b.name, bankCode: String(b.bankCode) });
+                                  setBankOpen(false);
+                                }}
+                                className="px-3 py-1.5 rounded-full border border-white/15 bg-white/5 text-white/85 text-xs hover:bg-white/10"
+                              >
+                                {b.name}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-white/60">No matched banks found. Please select a bank.</p>
+                        )}
                       </div>
                     ) : null}
                   </div>

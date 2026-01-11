@@ -7,12 +7,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import useUserStore from "@/store/user.store";
 import { TIER_LEVEL } from "@/constants/types";
 import BvnForm from "@/components/user/dashboard/BvnForm";
-import VerifyBvnForm from "@/components/user/dashboard/VerifyBvnForm";
 import CreatePinForm from "@/components/user/dashboard/CreatePinForm";
 import BvnFaceCaptureModal from "@/components/modals/BvnFaceCaptureModal";
 import WelcomeSuccessModal from "@/components/modals/WelcomeSuccessModal";
 import VerificationResultModal from "@/components/modals/VerificationResultModal";
-import { useBvnVerificationWithSelfie, useValidateBvnVerification } from "@/api/wallet/wallet.queries";
+import { useBvnVerificationWithSelfie } from "@/api/wallet/wallet.queries";
 import ErrorToast from "@/components/toast/ErrorToast";
 import SuccessToast from "@/components/toast/SuccessToast";
 
@@ -39,16 +38,8 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
   const [currentStep, setCurrentStep] = useState(
     (isIdentityVerified && !isPinCreated) ? 2 : (isIdentityVerified && isPinCreated) ? 2 : 1
   );
-  const [showOtpStep, setShowOtpStep] = useState(false);
-  const [bvnDetails, setBvnDetails] = useState<{
-    bvn: string;
-    verificationId: string;
-    verificationMethod: "otp" | "faceid";
-  }>({
-    bvn: "",
-    verificationId: "",
-    verificationMethod: "otp",
-  });
+  // OTP BVN verification removed – Face ID only
+  const [bvnDetails, setBvnDetails] = useState<{ bvn: string }>({ bvn: "" });
   const [showFaceCapture, setShowFaceCapture] = useState(false);
   const [capturedSelfie, setCapturedSelfie] = useState<string>("");
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
@@ -97,7 +88,7 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
   const handleVerificationResultModalClose = () => {
     setShowVerificationResultModal(false);
     if (verificationResultType === "success") {
-      // Move to PIN step directly (Face ID doesn't need OTP)
+      // Move to PIN step
       handleComplete(1);
     }
   };
@@ -139,56 +130,9 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
     }
   }, [isBvnVerified, isIdentityVerified, isPinCreated, isRequired, onSuccess, currentStep]);
 
-  // OTP Validation handlers
-  const onOtpValidationError = (error: any) => {
-    const errorMessage = error?.response?.data?.message;
-    const descriptions = Array.isArray(errorMessage) ? errorMessage : [errorMessage || "OTP validation failed"];
-    ErrorToast({ title: "Verification Failed", descriptions });
-  };
-
-  const onOtpValidationSuccess = async (data: any) => {
-    // Wait for user data to be refreshed from API before allowing progression
-    // This ensures verification is actually complete before moving to next step
-    try {
-      // Refetch user data and wait for it to complete
-      await queryClient.refetchQueries({ queryKey: ["user"] });
-      
-      // Wait a bit more to ensure user store is updated with fresh data
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Now check if verification is actually successful before proceeding
-      // The useEffect will handle moving to next step when isBvnVerified becomes true
-      // Don't immediately call handleComplete - let the useEffect handle it based on actual user data
-    } catch (error) {
-      // If refetch fails, still allow progression after a delay
-      // The mutation already invalidated queries, so data should refresh eventually
-      setTimeout(() => {
-        handleComplete(1.5);
-      }, 1000);
-    }
-  };
-
-  const { mutate: validateOtp, isPending: validatingOtp } = useValidateBvnVerification(
-    onOtpValidationError,
-    onOtpValidationSuccess
-  );
-
   const handleComplete = (step: number) => {
     if (step === 1) {
-      // Identity verified (BVN) - check if BVN OTP method was used
-      if (bvnDetails.verificationMethod === "otp" && bvnDetails.verificationId) {
-        // Show OTP step for BVN
-        setShowOtpStep(true);
-        setCurrentStep(1.5); // Intermediate step for OTP
-      } else {
-        // BVN Face ID - move to PIN step
-        setCurrentStep(2);
-      }
-      return;
-    }
-
-    if (step === 1.5) {
-      // OTP validated for BVN - move to PIN step
+      // BVN verified (Face ID) - move to PIN step
       setCurrentStep(2);
       return;
     }
@@ -267,40 +211,10 @@ const AccountVerificationModal: React.FC<AccountVerificationModalProps> = ({
                     <div className="w-full max-w-md mx-auto flex flex-col gap-4">
                       <BvnForm
                         handleComplete={handleComplete}
-                        setBvnDetails={(bvnDetails) => {
-                          setBvnDetails({
-                            ...bvnDetails,
-                            verificationMethod: bvnDetails.verificationMethod || "otp",
-                          });
-                        }}
-                        verificationMethod={bvnDetails.verificationMethod}
-                        setVerificationMethod={(method) => {
-                          setBvnDetails({ ...bvnDetails, verificationMethod: method });
-                        }}
+                        setBvnDetails={(d) => setBvnDetails(d)}
                         onFaceIdSelected={(bvn) => {
-                          setBvnDetails({ ...bvnDetails, bvn });
+                          setBvnDetails({ bvn });
                           setShowFaceCapture(true);
-                        }}
-                      />
-                    </div>
-                  </>
-                )}
-                {showOtpStep && bvnDetails.verificationId && currentStep !== 2 && (
-                  <>
-                    <div className="flex flex-col gap-3 justify-center items-center">
-                      <h2 className="text-lg sm:text-xl text-white font-semibold">
-                        Enter OTP Code
-                      </h2>
-                      <p className="w-full max-w-md text-center text-white/60 text-xs sm:text-sm">
-                        Enter the 6-digit OTP code sent to your registered phone number
-                      </p>
-                    </div>
-                    <div className="w-full max-w-md mx-auto flex flex-col h-full items-center gap-4 sm:gap-6">
-                      <VerifyBvnForm
-                        bvnDetails={bvnDetails}
-                        handleComplete={() => {
-                          // After OTP validation, move to PIN step
-                          handleComplete(1.5);
                         }}
                       />
                     </div>

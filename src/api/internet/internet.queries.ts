@@ -34,10 +34,19 @@ export const useGetInternetVariations = (
     enabled: !!payload.billerCode,
   });
 
-  // New API shape:
-  // { statusCode: 200, data: { billerCode, billerName, plans: [{ id, name, amount, ...maybe itemCode }] } }
-  const billInfo = data?.data?.data ?? data?.data ?? null;
-  const variations: any[] = Array.isArray(billInfo?.plans) ? billInfo.plans : [];
+  // Support multiple backend response shapes:
+  // 1) { statusCode, data: { billerCode, billerName, plans: [...] } }
+  // 2) { statusCode, data: [...] }  (array directly)
+  const body = data?.data ?? null;
+  const payloadData = body?.data ?? null;
+
+  const variations: any[] = Array.isArray(payloadData)
+    ? payloadData
+    : Array.isArray(payloadData?.plans)
+      ? payloadData.plans
+      : Array.isArray(body?.plans)
+        ? body.plans
+        : [];
   return { isLoading, isError, variations };
 };
 

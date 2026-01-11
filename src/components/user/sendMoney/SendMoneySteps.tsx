@@ -10,6 +10,7 @@ import {
 } from "@/utils/utilityFunctions";
 import {
   useGetAllBanks,
+  useGetMatchedBanksByAccountNumber,
   useGetTransferFee,
   useInitiateTransfer,
   useVerifyAccount,
@@ -145,6 +146,19 @@ const SendMoneySteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const watchedDescription = watch("description");
   const watchedSessionId = watch("sessionId");
   const effectiveBankCode = String(watchedBankCode || bankData?.bankCode || "");
+  const normalizedAccountNumber = String(watchedAccountNumber || "").replace(/\D/g, "").slice(0, 10);
+
+  const {
+    matchedBanks,
+    isPending: matchedBanksPending,
+    isError: matchedBanksError,
+  } = useGetMatchedBanksByAccountNumber(
+    normalizedAccountNumber,
+    selectedType === "bank"
+  );
+
+  const bankDropdownItems: BankProps[] =
+    matchedBanks && matchedBanks.length > 0 ? matchedBanks : banks;
 
   const { fee } = useGetTransferFee({
     currency: "NGN",
@@ -224,6 +238,27 @@ const SendMoneySteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       }
     }
   }, [watchedAccountNumber, watchedBankCode, selectedType, verifyAccount]);
+
+  useEffect(() => {
+    if (selectedType !== "bank") return;
+    if (normalizedAccountNumber.length !== 10) return;
+    if (String(watchedBankCode || "").trim()) return;
+    if (!matchedBanks || matchedBanks.length !== 1) return;
+
+    const only = matchedBanks[0];
+    setValue("bankCode", String(only.bankCode));
+    setSelectedBank(only);
+    setBankName(only.name);
+    setBankState(false);
+    clearErrors("bankCode");
+  }, [
+    selectedType,
+    normalizedAccountNumber,
+    watchedBankCode,
+    matchedBanks,
+    setValue,
+    clearErrors,
+  ]);
 
   useEffect(() => {
     if (selectedType === "bank") {
@@ -511,7 +546,7 @@ const SendMoneySteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           {bankState && (
             <div className="absolute top-full mt-2 w-full bg-[#1C1C1E] border border-gray-800 rounded-lg shadow-xl z-10 max-h-60 overflow-y-auto">
               <SearchableDropdown
-                items={banks || []}
+                items={bankDropdownItems || []}
                 searchKey="name"
                 displayFormat={(bank: BankProps) => (
                   <div className="flex flex-col">
@@ -557,6 +592,39 @@ const SendMoneySteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <p className="text-red-500 text-xs mt-1">{errors.accountNumber.message}</p>
         )}
       </div>
+
+      {selectedType === "bank" &&
+        normalizedAccountNumber.length === 10 &&
+        !effectiveBankCode && (
+          <div className="w-full">
+            {matchedBanksPending ? (
+              <p className="text-xs text-gray-400">Detecting bank…</p>
+            ) : matchedBanksError ? (
+              <p className="text-xs text-red-400">Couldn&apos;t detect bank automatically. Please select a bank.</p>
+            ) : matchedBanks && matchedBanks.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {matchedBanks.slice(0, 6).map((b) => (
+                  <button
+                    key={`${b.bankCode}`}
+                    type="button"
+                    onClick={() => {
+                      setValue("bankCode", String(b.bankCode));
+                      clearErrors("bankCode");
+                      setSelectedBank(b);
+                      setBankName(b.name);
+                      setBankState(false);
+                    }}
+                    className="px-3 py-1.5 rounded-full border border-white/15 bg-white/5 text-white/85 text-xs hover:bg-white/10"
+                  >
+                    {b.name}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-400">No matched banks found. Please select a bank.</p>
+            )}
+          </div>
+        )}
 
       {/* Account Verification Badge */}
       {bankData && (

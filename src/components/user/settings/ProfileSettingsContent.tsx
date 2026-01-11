@@ -23,6 +23,7 @@ import VerifyPhoneModal from "@/components/modals/settings/VerifyPhoneModal";
 import UpdateUsernameModal from "@/components/modals/settings/UpdateUsernameModal";
 import UpdateAddressModal from "@/components/modals/settings/UpdateAddressModal";
 import ChangeTransactionPinModal from "@/components/modals/settings/ChangeTransactionPinModal";
+import ForgotTransactionPinModal from "@/components/modals/settings/ForgotTransactionPinModal";
 import ChangePasswordModal from "@/components/modals/settings/ChangePasswordModal";
 import ChangePasscodeModal from "@/components/modals/settings/ChangePasscodeModal";
 import SetSecurityQuestionsModal from "@/components/modals/settings/SetSecurityQuestionsModal";
@@ -200,6 +201,7 @@ const ProfileSettingsContent = () => {
   const [openUpdateAddress, setOpenUpdateAddress] = useState(false);
 
   const [openChangePin, setOpenChangePin] = useState(false);
+  const [openForgotPin, setOpenForgotPin] = useState(false);
   const [openChangePassword, setOpenChangePassword] = useState(false);
   const [openChangePasscode, setOpenChangePasscode] = useState(false);
   const [openSetSecurity, setOpenSetSecurity] = useState(false);
@@ -213,7 +215,10 @@ const ProfileSettingsContent = () => {
   const [isFingerprintAvailable, setIsFingerprintAvailable] = useState(false);
 
   // KYC Document Upload
-  const [selectedDocumentType, setSelectedDocumentType] = useState<"passport" | "bank_statement" | "utility_bill" | "drivers_license" | "national_id" | "">("");
+  const [selectedDocumentType, setSelectedDocumentType] = useState<
+    "passport" | "bank_statement" | "utility_bill" | "drivers_license" | "national_id"
+  >("passport"); // default display: International Passport
+  const [hasUserChangedDocumentType, setHasUserChangedDocumentType] = useState(false);
   const [documentTypeDropdownOpen, setDocumentTypeDropdownOpen] = useState(false);
   const documentTypeDropdownRef = useRef<HTMLDivElement>(null);
   const [documentNumber, setDocumentNumber] = useState("");
@@ -408,6 +413,7 @@ const ProfileSettingsContent = () => {
     // Keep the saved document information visible after upload
     const documentData = responseData?.data?.data;
     if (documentData?.documentType) {
+      setHasUserChangedDocumentType(true);
       setSelectedDocumentType(documentData.documentType);
       setDocumentNumber(documentData.documentNumber || "");
       setDocumentCountry(documentData.documentCountry || "");
@@ -448,6 +454,7 @@ const ProfileSettingsContent = () => {
       | "utility_bill"
       | "drivers_license"
       | "national_id";
+    documentUrl?: string;
     documentNumber?: string;
     documentCountry?: string;
     issueDate?: string;
@@ -461,6 +468,7 @@ const ProfileSettingsContent = () => {
     if (u.passportDocumentUrl) {
       return {
         documentType: "passport",
+        documentUrl: u.passportDocumentUrl,
         documentNumber: u.passportNumber,
         documentCountry: u.passportCountry,
         issueDate: u.passportIssueDate,
@@ -470,6 +478,7 @@ const ProfileSettingsContent = () => {
     if (u.driversLicenseUrl) {
       return {
         documentType: "drivers_license",
+        documentUrl: u.driversLicenseUrl,
         documentNumber: u.driversLicenseNumber,
         documentCountry: u.driversLicenseCountry,
       };
@@ -477,6 +486,7 @@ const ProfileSettingsContent = () => {
     if (u.nationalIdUrl) {
       return {
         documentType: "national_id",
+        documentUrl: u.nationalIdUrl,
         documentNumber: u.nationalIdNumber,
         documentCountry: u.nationalIdCountry,
       };
@@ -484,6 +494,7 @@ const ProfileSettingsContent = () => {
     if (u.bankStatementUrl) {
       return {
         documentType: "bank_statement",
+        documentUrl: u.bankStatementUrl,
         issueDate: u.bankStatementIssueDate,
         expiryDate: u.bankStatementExpiryDate,
       };
@@ -491,6 +502,7 @@ const ProfileSettingsContent = () => {
     if (u.utilityBillUrl) {
       return {
         documentType: "utility_bill",
+        documentUrl: u.utilityBillUrl,
         issueDate: u.utilityBillIssueDate,
         expiryDate: u.utilityBillExpiryDate,
       };
@@ -502,7 +514,7 @@ const ProfileSettingsContent = () => {
   useEffect(() => {
     if (tab !== "kyc") return;
     if (!savedKycDocument) return;
-    if (selectedDocumentType) return; // user is actively selecting/editing
+    if (hasUserChangedDocumentType) return; // user is actively selecting/editing
     if (selectedDocumentFile) return; // don't override mid-upload
 
     setSelectedDocumentType(savedKycDocument.documentType);
@@ -510,10 +522,17 @@ const ProfileSettingsContent = () => {
     setDocumentCountry(savedKycDocument.documentCountry || "");
     setIssueDate(normalizeDate(savedKycDocument.issueDate || ""));
     setExpiryDate(normalizeDate(savedKycDocument.expiryDate || ""));
-  }, [tab, savedKycDocument, selectedDocumentType, selectedDocumentFile]);
+  }, [tab, savedKycDocument, hasUserChangedDocumentType, selectedDocumentFile]);
 
   // Handle document upload
   const handleDocumentUpload = () => {
+    if (!selectedDocumentType) {
+      ErrorToast({
+        title: "Document Type Required",
+        descriptions: ["Please select a document type to continue"],
+      });
+      return;
+    }
     if (!selectedDocumentFile) {
       ErrorToast({
         title: "No File Selected",
@@ -1179,6 +1198,53 @@ const ProfileSettingsContent = () => {
                 <p className="text-white/60 text-sm">Upload documents required for USD, GBP, or EUR account creation. Accepts JPG, PNG, or PDF.</p>
               </div>
 
+              {/* Saved document summary (so data shows on view/reopen) */}
+              {savedKycDocument && (
+                <div className="mb-6 rounded-xl border border-white/10 bg-[#1C1C1E] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-white font-semibold">
+                        Saved Document:{" "}
+                        {savedKycDocument.documentType === "passport"
+                          ? "International Passport"
+                          : savedKycDocument.documentType === "bank_statement"
+                          ? "Bank Statement"
+                          : savedKycDocument.documentType === "utility_bill"
+                          ? "Utility Bill"
+                          : savedKycDocument.documentType === "drivers_license"
+                          ? "Driver's License"
+                          : "National ID"}
+                      </p>
+                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-white/70">
+                        {savedKycDocument.documentNumber ? (
+                          <p className="truncate">Document No: {savedKycDocument.documentNumber}</p>
+                        ) : null}
+                        {savedKycDocument.documentCountry ? (
+                          <p className="truncate">
+                            Country:{" "}
+                            {COUNTRIES.find((c) => c.code === savedKycDocument.documentCountry)?.name ||
+                              savedKycDocument.documentCountry}
+                          </p>
+                        ) : null}
+                        {savedKycDocument.issueDate ? <p>Issue Date: {normalizeDate(savedKycDocument.issueDate)}</p> : null}
+                        {savedKycDocument.expiryDate ? <p>Expiry Date: {normalizeDate(savedKycDocument.expiryDate)}</p> : null}
+                      </div>
+                    </div>
+
+                    {savedKycDocument.documentUrl ? (
+                      <a
+                        href={savedKycDocument.documentUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="shrink-0 inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30 hover:bg-[#FF6B2C]/25 transition-colors"
+                      >
+                        View
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              )}
+
               {/* Document Type Dropdown */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-white/80 mb-2">
@@ -1217,6 +1283,7 @@ const ProfileSettingsContent = () => {
                         <div
                           key={doc.value}
                           onClick={() => {
+                            setHasUserChangedDocumentType(true);
                             setSelectedDocumentType(doc.value as any);
                             setDocumentTypeDropdownOpen(false);
                             // Reset form when changing document type
@@ -1521,6 +1588,7 @@ const ProfileSettingsContent = () => {
                 }
               }}
               onOpenChangePin={() => setOpenChangePin(true)}
+              onOpenForgotPin={() => setOpenForgotPin(true)}
               onOpenChangePassword={() => setOpenChangePassword(true)}
               onOpenChangePasscode={() => setOpenChangePasscode(true)}
               onOpenSetSecurity={() => setOpenSetSecurity(true)}
@@ -1601,6 +1669,7 @@ const ProfileSettingsContent = () => {
       />
 
       <ChangeTransactionPinModal isOpen={openChangePin} onClose={() => setOpenChangePin(false)} />
+      <ForgotTransactionPinModal isOpen={openForgotPin} onClose={() => setOpenForgotPin(false)} />
       <ChangePasswordModal isOpen={openChangePassword} onClose={() => setOpenChangePassword(false)} />
       <ChangePasscodeModal isOpen={openChangePasscode} onClose={() => setOpenChangePasscode(false)} />
       <SetSecurityQuestionsModal isOpen={openSetSecurity} onClose={() => setOpenSetSecurity(false)} onSubmit={() => SuccessToast({ title: "Saved", description: "Security questions have been saved successfully" })} />

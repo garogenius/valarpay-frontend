@@ -11,6 +11,7 @@ type Props = {
   biometricDeviceName: string | null;
   onToggleBiometric: () => void;
   onOpenChangePin: () => void;
+  onOpenForgotPin?: () => void;
   onOpenChangePassword: () => void;
   onOpenChangePasscode?: () => void;
   onOpenSetSecurity: () => void;
@@ -26,6 +27,7 @@ const SecurityPrivacyTab: React.FC<Props> = ({
   biometricDeviceName,
   onToggleBiometric,
   onOpenChangePin,
+  onOpenForgotPin,
   onOpenChangePassword,
   onOpenChangePasscode,
   onOpenSetSecurity,
@@ -37,8 +39,34 @@ const SecurityPrivacyTab: React.FC<Props> = ({
       <div className="w-full bg-bg-600 dark:bg-bg-1100 border border-white/10 rounded-2xl p-4 sm:p-5">
         <p className="text-white font-semibold mb-3">Security</p>
         <div className="divide-y divide-white/10">
+          <div className="py-3">
+            <button onClick={onOpenChangePin} className="w-full flex items-center justify-between gap-3 text-left">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-md bg-white/5 grid place-items-center text-white">
+                  <FiKey className="text-[#f76301]" />
+                </div>
+                <div>
+                  <p className="text-white text-sm sm:text-base font-medium">Change Transaction PIN</p>
+                  <p className="text-white/60 text-xs sm:text-sm">
+                    Secure your payments by updating your transaction PIN
+                  </p>
+                </div>
+              </div>
+              <FiChevronRight className="text-white/60" />
+            </button>
+
+            {onOpenForgotPin ? (
+              <button
+                type="button"
+                onClick={onOpenForgotPin}
+                className="mt-2 ml-11 text-xs text-[#FF6B2C] hover:underline"
+              >
+                Forgot Transaction PIN?
+              </button>
+            ) : null}
+          </div>
+
           {[
-            { icon: <FiKey className="text-[#f76301]" />, title: "Change Transaction PIN", desc: "Secure your payments by updating your transaction PIN", onClick: onOpenChangePin },
             { icon: <FiLock className="text-[#f76301]" />, title: "Change Password", desc: "Protect your account by setting a new, stronger password", onClick: onOpenChangePassword },
             ...(onOpenChangePasscode ? [{ icon: <FiLock className="text-[#f76301]" />, title: "Change Login Passcode", desc: "Update your 6-digit login passcode", onClick: onOpenChangePasscode }] : []),
             { icon: <FiShield className="text-[#f76301]" />, title: "Set Security Question", desc: "Add an extra layer of protection with a security question", onClick: onOpenSetSecurity },

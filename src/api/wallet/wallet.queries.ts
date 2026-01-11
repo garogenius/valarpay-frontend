@@ -16,6 +16,7 @@ import {
   initiateTransferRequest,
   validateBvnVerificationRequest,
   verifyAccountRequest,
+  getMatchedBanksByAccountNumber,
   bvnVerificationWithSelfieRequest,
   createAccountRequest,
   createMultiCurrencyAccountRequest,
@@ -116,6 +117,38 @@ export const useGetAllBanks = (currency: string = "NGN") => {
   const banks: BankProps[] = data?.data?.data;
 
   return { banks, isPending, isError };
+};
+
+export const useGetMatchedBanksByAccountNumber = (
+  accountNumber: string,
+  enabled: boolean = true
+) => {
+  const acct = String(accountNumber || "").replace(/\D/g, "").slice(0, 10);
+
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["matched-banks", acct],
+    queryFn: () => getMatchedBanksByAccountNumber(acct),
+    enabled: enabled && acct.length === 10,
+    retry: 1,
+  });
+
+  const raw = data?.data?.data ?? data?.data ?? null;
+  const list: any[] = Array.isArray(raw)
+    ? raw
+    : Array.isArray(raw?.banks)
+      ? raw.banks
+      : Array.isArray(raw?.data)
+        ? raw.data
+        : [];
+
+  const matchedBanks: BankProps[] = list
+    .map((b: any) => ({
+      name: String(b?.name || b?.bankName || b?.bank || "").trim(),
+      bankCode: String(b?.bankCode || b?.code || "").trim(),
+    }))
+    .filter((b: any) => b?.name && b?.bankCode);
+
+  return { matchedBanks, isPending, isError };
 };
 
 export const useChangeWalletPin = (

@@ -255,18 +255,24 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...
               </div>
             ) : (
-              (variations || []).map((v) => (
-                <button
-                  key={String((v as any).id ?? (v as any).itemCode ?? (v as any).name)}
-                  type="button"
-                  onClick={() => {
-                    setPlan(v);
-                    setPlanOpen(false);
-                  }}
-                  className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
-                >
-                  {String((v as any).name || "")}
-                </button>
+              (variations && variations.length > 0 ? (
+                variations.map((v) => (
+                  <button
+                    key={String((v as any).id ?? (v as any).itemCode ?? (v as any).item_code ?? (v as any).name ?? (v as any).shortName ?? (v as any).short_name)}
+                    type="button"
+                    onClick={() => {
+                      setPlan(v);
+                      setPlanOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
+                  >
+                    {String((v as any).name || (v as any).planName || (v as any).shortName || (v as any).short_name || "")}
+                  </button>
+                ))
+              ) : (
+                <div className="p-4 text-gray-500 dark:text-gray-400 text-sm">
+                  No plans found for this provider.
+                </div>
               ))
             )}
           </div>

@@ -16,6 +16,7 @@ import {
 } from "@/utils/utilityFunctions";
 import {
   useGetAllBanks,
+  useGetMatchedBanksByAccountNumber,
   useGetTransferFee,
   useInitiateTransfer,
   useVerifyAccount,
@@ -167,6 +168,20 @@ const TransferProcess = ({
   const watchedDescription = watch("description");
   const watchedSessionId = watch("sessionId");
   const effectiveBankCode = String(watchedBankCode || bankData?.bankCode || "");
+  const normalizedAccountNumber = String(watchedAccountNumber || "").replace(/\D/g, "").slice(0, 10);
+
+  const {
+    matchedBanks,
+    isPending: matchedBanksPending,
+    isError: matchedBanksError,
+  } = useGetMatchedBanksByAccountNumber(
+    normalizedAccountNumber,
+    selectedType === "bank"
+  );
+
+  // Prefer matched banks list when available; fall back to full list
+  const bankDropdownItems: BankProps[] =
+    matchedBanks && matchedBanks.length > 0 ? matchedBanks : banks;
 
   const { fee } = useGetTransferFee({
     currency: "NGN",
@@ -267,6 +282,28 @@ const TransferProcess = ({
       }
     }
   }, [watchedAccountNumber, watchedBankCode, selectedType, verifyAccount]);
+
+  // If we have exactly one matched bank and user hasn't selected one, auto-select it.
+  useEffect(() => {
+    if (selectedType !== "bank") return;
+    if (normalizedAccountNumber.length !== 10) return;
+    if (String(watchedBankCode || "").trim()) return;
+    if (!matchedBanks || matchedBanks.length !== 1) return;
+
+    const only = matchedBanks[0];
+    setValue("bankCode", String(only.bankCode));
+    setSelectedBank(only);
+    setBankName(only.name);
+    setBankState(false);
+    clearErrors("bankCode");
+  }, [
+    selectedType,
+    normalizedAccountNumber,
+    watchedBankCode,
+    matchedBanks,
+    setValue,
+    clearErrors,
+  ]);
 
   // Reset verified data when inputs are incomplete or change
   useEffect(() => {
@@ -626,7 +663,7 @@ const TransferProcess = ({
                   {bankState && (
                     <div className="absolute top-full my-2.5 px-1 py-2 overflow-y-auto h-fit max-h-60 w-full bg-dark-primary border dark:bg-bg-1100 border-gray-300 dark:border-border-600 rounded-md shadow-md z-10 no-scrollbar">
                       <SearchableDropdown
-                        items={banks}
+                        items={bankDropdownItems}
                         searchKey="name"
                         displayFormat={(bank) => (
                           <div className="flex flex-col text-text-700 dark:text-text-1000">
@@ -698,6 +735,45 @@ const TransferProcess = ({
                     <FiCheckCircle className="text-green-500 text-lg" />
                     <p className="text-white text-sm font-medium">{bankData?.accountName}</p>
                   </div>
+
+                {selectedType === "bank" &&
+                  normalizedAccountNumber.length === 10 &&
+                  !effectiveBankCode && (
+                    <div className="w-full mt-2">
+                      {matchedBanksPending ? (
+                        <p className="text-[11px] text-text-700 dark:text-text-1000">
+                          Detecting bank…
+                        </p>
+                      ) : matchedBanksError ? (
+                        <p className="text-[11px] text-text-2700">
+                          Couldn&apos;t detect bank automatically. Please select a bank.
+                        </p>
+                      ) : matchedBanks && matchedBanks.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {matchedBanks.slice(0, 6).map((b) => (
+                            <button
+                              key={`${b.bankCode}`}
+                              type="button"
+                              onClick={() => {
+                                setValue("bankCode", String(b.bankCode));
+                                clearErrors("bankCode");
+                                setSelectedBank(b);
+                                setBankName(b.name);
+                                setBankState(false);
+                              }}
+                              className="px-3 py-1.5 rounded-full border border-white/15 bg-white/5 text-white/85 text-xs hover:bg-white/10"
+                            >
+                              {b.name}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-text-700 dark:text-text-1000">
+                          No matched banks found. Please select a bank.
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
