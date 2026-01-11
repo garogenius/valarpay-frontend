@@ -323,6 +323,17 @@ const ProfileSettingsContent = () => {
   const { mutate: update, isPending: updatePending, isError: updateError } = useUpdateUser(onError, onSuccess);
   const updateLoading = updatePending && !updateError;
 
+  // Update passport identity fields after document upload (required for USD account creation)
+  const onKycIdentityUpdateError = (error: any) => {
+    const errorMessage = error?.response?.data?.message;
+    const descriptions = Array.isArray(errorMessage) ? errorMessage : [errorMessage || "Failed to save passport details"];
+    ErrorToast({ title: "KYC Update Failed", descriptions });
+  };
+  const onKycIdentityUpdateSuccess = () => {
+    SuccessToast({ title: "KYC Updated", description: "Passport details saved successfully" });
+  };
+  const { mutate: updateKycIdentity } = useUpdateUser(onKycIdentityUpdateError, onKycIdentityUpdateSuccess);
+
   const handleFileUpload = () => fileInputRef.current?.click();
 
   const handleFileSelected = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -432,6 +443,32 @@ const ProfileSettingsContent = () => {
         setDocumentCountry(normalizedCountry || "");
         setIssueDate(normalizedIssue || "");
         setExpiryDate(normalizedExpiry || "");
+      }
+
+      // IMPORTANT: also persist passport identity fields on the user profile (backend requires these for USD account creation)
+      if (
+        normalizedType === "passport" &&
+        normalizedNumber &&
+        normalizedCountry &&
+        normalizedIssue &&
+        normalizedExpiry
+      ) {
+        const fd = new FormData();
+        fd.append("passportNumber", normalizedNumber);
+        fd.append("passportCountry", normalizedCountry);
+        fd.append("passportIssueDate", normalizedIssue);
+        fd.append("passportExpiryDate", normalizedExpiry);
+        updateKycIdentity(fd);
+
+        // Optimistically update local user store so UI reflects immediately
+        const { setUser } = useUserStore.getState();
+        setUser({
+          ...(user as any),
+          passportNumber: normalizedNumber,
+          passportCountry: normalizedCountry,
+          passportIssueDate: normalizedIssue,
+          passportExpiryDate: normalizedExpiry,
+        });
       }
     }
     SuccessToast({

@@ -13,6 +13,8 @@ export interface IUpdateUser {
   expectedMonthlyInflow?: number;
   passportNumber?: string;
   passportCountry?: string;
+  passportIssueDate?: string;
+  passportExpiryDate?: string;
   // Business account fields
   businessName?: string;
   companyRegistrationNumber?: string;
