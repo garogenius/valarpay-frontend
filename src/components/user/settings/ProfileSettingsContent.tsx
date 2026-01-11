@@ -30,6 +30,7 @@ import SetSecurityQuestionsModal from "@/components/modals/settings/SetSecurityQ
 import LinkedAccountsModal from "@/components/modals/settings/LinkedAccountsModal";
 import DeleteAccountModal from "@/components/modals/settings/DeleteAccountModal";
 import VerifyWalletPinModal from "@/components/modals/settings/VerifyWalletPinModal";
+import KycDocumentUploadModal from "@/components/modals/settings/KycDocumentUploadModal";
 
 import SecurityPrivacyTab from "@/components/user/settings/tabs/SecurityPrivacyTab";
 import PreferencesTab from "@/components/user/settings/tabs/PreferencesTab";
@@ -231,8 +232,7 @@ const ProfileSettingsContent = () => {
   const [showExpiryDatePicker, setShowExpiryDatePicker] = useState(false);
   const issueDatePickerRef = useRef<HTMLDivElement>(null);
   const expiryDatePickerRef = useRef<HTMLDivElement>(null);
-  const [selectedDocumentFile, setSelectedDocumentFile] = useState<File | null>(null);
-  const documentFileInputRef = useRef<HTMLInputElement>(null);
+  const [openKycDocumentUpload, setOpenKycDocumentUpload] = useState(false);
   
   // Personal tab dropdowns
   const [employmentStatusDropdownOpen, setEmploymentStatusDropdownOpen] = useState(false);
@@ -407,8 +407,6 @@ const ProfileSettingsContent = () => {
       }
     }
 
-    setSelectedDocumentFile(null);
-    if (documentFileInputRef.current) documentFileInputRef.current.value = "";
   };
 
   const { mutate: uploadDocument, isPending: uploadingDoc, isError: uploadingDocError } = useUploadDocument(
@@ -624,8 +622,8 @@ const ProfileSettingsContent = () => {
     });
   };
 
-  const handleUploadDocumentFile = () => {
-    if (!selectedDocumentFile) {
+  const handleUploadDocumentFile = (file: File | null) => {
+    if (!file) {
       ErrorToast({ title: "No File Selected", descriptions: ["Please select a file to upload"] });
       return;
     }
@@ -653,7 +651,7 @@ const ProfileSettingsContent = () => {
 
     const fd = new FormData();
     fd.append("documentType", selectedDocumentType);
-    fd.append("document", selectedDocumentFile);
+    fd.append("document", file);
     if (
       selectedDocumentType === "passport" ||
       selectedDocumentType === "drivers_license" ||
@@ -1388,8 +1386,6 @@ const ProfileSettingsContent = () => {
                             setDocumentCountry("");
                             setIssueDate("");
                             setExpiryDate("");
-                            setSelectedDocumentFile(null);
-                            if (documentFileInputRef.current) documentFileInputRef.current.value = "";
                           }}
                           className="hover:opacity-80 w-full flex items-center justify-between px-4 py-2 gap-2 cursor-pointer"
                         >
@@ -1572,63 +1568,20 @@ const ProfileSettingsContent = () => {
                       )}
                     </div>
 
-                    {/* Document File (uploaded separately via upload-document) */}
+                    {/* Document File (selected in modal; upload happens via upload-document) */}
                     <div className="sm:col-span-2 flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
                       <label className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start">
                         Document File <span className="text-red-500 ml-1">*</span>
                       </label>
                       <div className="relative w-full">
-                        <input
-                          ref={documentFileInputRef}
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const extension = file.name.split(".").pop()?.toLowerCase();
-                              if (!extension || !["pdf", "jpg", "jpeg", "png"].includes(extension)) {
-                                ErrorToast({
-                                  title: "Invalid File Type",
-                                  descriptions: ["Please upload a PDF, JPG, or PNG file"],
-                                });
-                                return;
-                              }
-                              const maxSize = 10 * 1024 * 1024; // 10MB
-                              if (file.size > maxSize) {
-                                ErrorToast({
-                                  title: "File Too Large",
-                                  descriptions: ["Please upload a file smaller than 10MB"],
-                                });
-                                return;
-                              }
-                              setSelectedDocumentFile(file);
-                            }
-                          }}
-                          className="hidden"
-                        />
                         <button
                           type="button"
-                          onClick={() => documentFileInputRef.current?.click()}
+                          onClick={() => setOpenKycDocumentUpload(true)}
                           className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30 hover:bg-[#FF6B2C]/25 transition-colors"
                         >
                           <FiUpload className="text-base" />
-                          <span>{selectedDocumentFile ? selectedDocumentFile.name : "Choose File (PDF, JPG, or PNG)"}</span>
+                          <span>Choose File (PDF, JPG, PNG)</span>
                         </button>
-                        {selectedDocumentFile && (
-                          <div className="flex items-center gap-2 text-sm text-white/70 mt-2">
-                            <span>✓ File selected: {selectedDocumentFile.name}</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedDocumentFile(null);
-                                if (documentFileInputRef.current) documentFileInputRef.current.value = "";
-                              }}
-                              className="text-red-400 hover:text-red-300"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -1637,11 +1590,10 @@ const ProfileSettingsContent = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <CustomButton
                         type="button"
-                        onClick={handleUploadDocumentFile}
+                        onClick={() => setOpenKycDocumentUpload(true)}
                         disabled={
                           uploadingDoc ||
                           uploadingDocError ||
-                          !selectedDocumentFile ||
                           !selectedDocumentType ||
                           ((selectedDocumentType === "passport" ||
                             selectedDocumentType === "drivers_license" ||
@@ -1814,6 +1766,23 @@ const ProfileSettingsContent = () => {
           }
           setOpenVerifyPinForFingerprint(false);
         }}
+      />
+
+      <KycDocumentUploadModal
+        isOpen={openKycDocumentUpload}
+        onClose={() => setOpenKycDocumentUpload(false)}
+        documentTypeLabel={
+          selectedDocumentType === "passport"
+            ? "International Passport"
+            : selectedDocumentType === "bank_statement"
+              ? "Bank Statement"
+              : selectedDocumentType === "utility_bill"
+                ? "Utility Bill"
+                : selectedDocumentType === "drivers_license"
+                  ? "Driver's License"
+                  : "National ID"
+        }
+        onSubmit={({ file }) => handleUploadDocumentFile(file)}
       />
     </>
   );
