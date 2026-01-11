@@ -37,7 +37,19 @@ export const useGetSchoolFeePlan = (currency: string = "NGN", enabled: boolean =
     queryFn: () => getSchoolFeePlanRequest(currency),
     enabled,
   });
-  const institutions: any[] = data?.data?.data ?? data?.data ?? [];
+  // Support multiple backend response shapes:
+  // 1) { statusCode, data: [...] }
+  // 2) { statusCode, data: { data: [...] } }
+  // 3) [...] (array directly)
+  const body: any = data?.data ?? null;
+  const payload: any = body?.data ?? null;
+  const institutions: any[] = Array.isArray(body)
+    ? body
+    : Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.data)
+        ? payload.data
+        : [];
   return { institutions, isPending, isError };
 };
 
@@ -67,8 +79,17 @@ export const useGetSchoolBillInfo = (billerCode: string) => {
     queryFn: () => getSchoolBillInfoRequest(billerCode),
     enabled: !!billerCode,
   });
-  const billInfo: SchoolBillInfo | null = data?.data?.data ?? data?.data ?? null;
-  const plans: SchoolFeePlan[] = billInfo?.plans ?? [];
+  // Support multiple backend response shapes:
+  // 1) { statusCode, data: { billerCode, billerName, plans: [...] } }
+  // 2) { statusCode, data: { data: { billerCode, billerName, plans: [...] } } }
+  const body: any = data?.data ?? null;
+  const payload: any = body?.data ?? null;
+  const billInfo: SchoolBillInfo | null =
+    payload && !Array.isArray(payload)
+      ? (payload?.billerCode ? payload : payload?.data ?? null)
+      : null;
+  const rawPlans: any = billInfo?.plans ?? [];
+  const plans: any[] = Array.isArray(rawPlans) ? rawPlans : [];
   return { billInfo, plans, isPending, isError };
 };
 

@@ -71,18 +71,27 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
   }, [institutions, billerNameFilter]);
 
   // Schools: returned shape: { id, name, amount, billerCode }
-  const billerCode = String(biller?.billerCode || biller?.billerId || "");
+  const billerCode = String(biller?.billerCode || biller?.code || biller?.billerId || "");
   // Use school bill info endpoint to get plans/services
   const { plans, isPending: itemsPending, isError: itemsError } = useGetSchoolBillInfo(billerCode);
   const itemsLoading = itemsPending && !itemsError;
   
   // Map plans to items format for compatibility
-  const items = plans.map((plan: any) => ({
-    itemCode: plan.itemCode || `${billerCode}-${plan.name?.toUpperCase().replace(/\s+/g, "-") || plan.id}`,
-    itemName: plan.name,
-    name: plan.name,
-    amount: plan.amount,
-  }));
+  const items = plans.map((plan: any) => {
+    const planName = String(plan?.name || plan?.planName || plan?.itemName || "").trim();
+    // Prefer backend-provided itemCode; otherwise fall back to a stable derivation.
+    const derivedItemCode =
+      plan?.itemCode ||
+      plan?.code ||
+      (plan?.id != null ? `${billerCode}-${String(plan.id)}` : `${billerCode}-${planName.toUpperCase().replace(/\s+/g, "-")}`);
+    return {
+      itemCode: String(derivedItemCode),
+      itemName: planName,
+      name: planName,
+      amount: Number(plan?.amount) || 0,
+      _raw: plan,
+    };
+  });
 
   const onVerifyError = (error: any) => {
     const errorMessage = error?.response?.data?.message;
@@ -201,6 +210,12 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
                           onClick={() => {
                             setBiller(b);
                             setItem(null);
+                            setServiceOpen(false);
+                            setCustomerId("");
+                            setVerifiedCustomerName("");
+                            setWalletPin("");
+                            // clear amount until service picked (or verify response overrides)
+                            setAmountText("");
                             setInstitutionOpen(false);
                           }}
                           className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
@@ -232,6 +247,10 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
                       <div className="p-4 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
                         <SpinnerLoader width={18} height={18} color="#FF6B2C" /> Loading...
                       </div>
+                    ) : (items || []).length === 0 ? (
+                      <div className="p-4 text-gray-500 dark:text-gray-400 text-sm">
+                        No services found for this institution
+                      </div>
                     ) : (
                       (items || []).map((it: any) => (
                         <button
@@ -240,6 +259,8 @@ const EducationBillSteps: React.FC<{ onClose: () => void; billerNameFilter?: (na
                           onClick={() => {
                             setItem(it);
                             if (it.amount) setAmountText(String(it.amount));
+                            setVerifiedCustomerName("");
+                            setWalletPin("");
                             setServiceOpen(false);
                           }}
                           className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
