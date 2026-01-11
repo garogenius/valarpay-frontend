@@ -1057,40 +1057,9 @@ const ProfileContent = () => {
       return;
     }
 
-    // Get dates from user data (bank statement fields not in form schema)
-    const currentFormData = watch();
-    let issueDate = normalizeDate((user as any)?.bankStatementIssueDate || "");
-    let expiryDate = normalizeDate((user as any)?.bankStatementExpiryDate || "");
-
-    if (!issueDate || !expiryDate) {
-      ErrorToast({
-        title: "Missing Information",
-        descriptions: ["Please provide both issue date and expiry date in the form before uploading"],
-      });
-      return;
-    }
-
-    // Ensure dates are in YYYY-MM-DD format
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(issueDate)) {
-      ErrorToast({
-        title: "Invalid Date Format",
-        descriptions: ["Issue date must be in YYYY-MM-DD format"],
-      });
-      return;
-    }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(expiryDate)) {
-      ErrorToast({
-        title: "Invalid Date Format",
-        descriptions: ["Expiry date must be in YYYY-MM-DD format"],
-      });
-      return;
-    }
-
     const formData = new FormData();
     formData.append("document", data.file);
     formData.append("documentType", "bank_statement");
-    formData.append("issueDate", issueDate);
-    formData.append("expiryDate", expiryDate);
 
     // Call the new upload-document API
     uploadDocument(formData);
@@ -1108,40 +1077,9 @@ const ProfileContent = () => {
       return;
     }
 
-    // Get dates from form or user data
-    const currentFormData = watch();
-    let issueDate = normalizeDate((user as any)?.utilityBillIssueDate || "");
-    let expiryDate = normalizeDate((user as any)?.utilityBillExpiryDate || "");
-
-    if (!issueDate || !expiryDate) {
-      ErrorToast({
-        title: "Missing Information",
-        descriptions: ["Please provide both issue date and expiry date in the form before uploading"],
-      });
-      return;
-    }
-
-    // Ensure dates are in YYYY-MM-DD format
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(issueDate)) {
-      ErrorToast({
-        title: "Invalid Date Format",
-        descriptions: ["Issue date must be in YYYY-MM-DD format"],
-      });
-      return;
-    }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(expiryDate)) {
-      ErrorToast({
-        title: "Invalid Date Format",
-        descriptions: ["Expiry date must be in YYYY-MM-DD format"],
-      });
-      return;
-    }
-
     const formData = new FormData();
     formData.append("document", data.file);
     formData.append("documentType", "utility_bill");
-    formData.append("issueDate", issueDate);
-    formData.append("expiryDate", expiryDate);
 
     // Call the new upload-document API
     uploadDocument(formData);
@@ -2921,7 +2859,9 @@ const ProfileContent = () => {
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
                   <div>
                     <h3 className="text-white font-semibold text-lg mb-2">Bank Statement</h3>
-                    <p className="text-white/60 text-sm">Enter bank statement details and upload the document</p>
+                    <p className="text-white/60 text-sm">
+                      Upload a bank statement document. This is used to satisfy proof of address requirements for multi-currency accounts.
+                    </p>
                   </div>
                   
                   <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
@@ -3039,34 +2979,6 @@ const ProfileContent = () => {
                     <CustomButton
                       type="button"
                       onClick={async () => {
-                        const currentData = watch();
-                        let issueDate = normalizeDate((user as any)?.bankStatementIssueDate || "");
-                        let expiryDate = normalizeDate((user as any)?.bankStatementExpiryDate || "");
-
-                        if (!issueDate || !expiryDate) {
-                          ErrorToast({
-                            title: "Missing Information",
-                            descriptions: ["Please provide both issue date and expiry date"],
-                          });
-                          return;
-                        }
-
-                        // Ensure dates are in YYYY-MM-DD format
-                        if (!/^\d{4}-\d{2}-\d{2}$/.test(issueDate)) {
-                          ErrorToast({
-                            title: "Invalid Date Format",
-                            descriptions: ["Issue date must be in YYYY-MM-DD format"],
-                          });
-                          return;
-                        }
-                        if (!/^\d{4}-\d{2}-\d{2}$/.test(expiryDate)) {
-                          ErrorToast({
-                            title: "Invalid Date Format",
-                            descriptions: ["Expiry date must be in YYYY-MM-DD format"],
-                          });
-                          return;
-                        }
-
                         // Check if document exists - if not, user must upload via modal first
                          if (!(user as any)?.bankStatementUrl) {
                           ErrorToast({
@@ -3085,8 +2997,6 @@ const ProfileContent = () => {
                           const formData = new FormData();
                           formData.append("document", file);
                           formData.append("documentType", "bank_statement");
-                          formData.append("issueDate", issueDate);
-                          formData.append("expiryDate", expiryDate);
                           // Only send required fields - no extra fields
 
                           uploadDocument(formData);
@@ -3110,7 +3020,9 @@ const ProfileContent = () => {
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
                   <div>
                     <h3 className="text-white font-semibold text-lg mb-2">Utilities Bill</h3>
-                    <p className="text-white/60 text-sm">Enter utilities bill details and upload the document</p>
+                    <p className="text-white/60 text-sm">
+                      Upload a utility bill document. This is used to satisfy proof of address requirements for multi-currency accounts.
+                    </p>
                   </div>
                   
                   <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
@@ -3225,33 +3137,6 @@ const ProfileContent = () => {
                     <CustomButton
                       type="button"
                       onClick={async () => {
-                        let issueDate = normalizeDate((user as any)?.utilityBillIssueDate || "");
-                        let expiryDate = normalizeDate((user as any)?.utilityBillExpiryDate || "");
-
-                        if (!issueDate || !expiryDate) {
-                          ErrorToast({
-                            title: "Missing Information",
-                            descriptions: ["Please provide both issue date and expiry date"],
-                          });
-                          return;
-                        }
-
-                        // Ensure dates are in YYYY-MM-DD format
-                        if (!/^\d{4}-\d{2}-\d{2}$/.test(issueDate)) {
-                          ErrorToast({
-                            title: "Invalid Date Format",
-                            descriptions: ["Issue date must be in YYYY-MM-DD format"],
-                          });
-                          return;
-                        }
-                        if (!/^\d{4}-\d{2}-\d{2}$/.test(expiryDate)) {
-                          ErrorToast({
-                            title: "Invalid Date Format",
-                            descriptions: ["Expiry date must be in YYYY-MM-DD format"],
-                          });
-                          return;
-                        }
-
                         // Check if document exists - if not, user must upload via modal first
                         if (!(user as any)?.utilityBillUrl) {
                           ErrorToast({
@@ -3270,8 +3155,6 @@ const ProfileContent = () => {
                           const formData = new FormData();
                           formData.append("document", file);
                           formData.append("documentType", "utility_bill");
-                          formData.append("issueDate", issueDate);
-                          formData.append("expiryDate", expiryDate);
                           // Only send required fields - no extra fields
 
                           uploadDocument(formData);

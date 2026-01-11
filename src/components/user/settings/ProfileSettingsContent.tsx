@@ -584,10 +584,9 @@ const ProfileSettingsContent = () => {
   // Save passport KYC via edit-profile (backend uses these fields for multi-currency accounts)
   const handleDocumentUpload = () => {
     if (selectedDocumentType !== "passport") {
-      ErrorToast({
-        title: "Not Supported Yet",
-        descriptions: ["Please use International Passport for USD/GBP/EUR account creation."],
-      });
+      // For bank_statement / utility_bill the backend expects only the uploaded file (no metadata).
+      // For these document types, users should use the "Upload Document File" button below.
+      toast.success("Upload the document file using the 'Upload Document File' button below.", { duration: 3500 });
       return;
     }
     const fullName = String(user?.fullname || "").trim();
@@ -1291,7 +1290,8 @@ const ProfileSettingsContent = () => {
               <div className="mb-6">
                 <h3 className="text-white font-semibold text-lg mb-2">KYC Information</h3>
                 <p className="text-white/60 text-sm">
-                  Enter your International Passport details. This information is required for USD, GBP, or EUR account creation.
+                  Upload your KYC documents for multi-currency accounts. For USD account creation you typically need:
+                  International Passport details + at least one proof of address (Bank Statement or Utility Bill).
                 </p>
               </div>
 
