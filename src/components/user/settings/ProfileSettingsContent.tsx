@@ -790,6 +790,29 @@ const ProfileSettingsContent = () => {
 
                         <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
                           <label className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start">
+                            Company Registration Number
+                          </label>
+                          <div className="relative w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                            <input
+                              className="disabled:opacity-60 w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
+                              placeholder="RC0123456"
+                              type="text"
+                              value={(user as any)?.companyRegistrationNumber || ""}
+                              readOnly
+                              disabled
+                            />
+                            <button
+                              type="button"
+                              disabled
+                              className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 grid place-items-center rounded-md bg-[#FF6B2C]/15 text-[#FF6B2C] border border-[#FF6B2C]/30 opacity-60 cursor-not-allowed"
+                            >
+                              <FiEdit2 className="text-xs" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                          <label className="w-full text-sm font-medium text-text-200 dark:text-text-800 mb-0 flex items-start">
                             Representative Name
                           </label>
                           <div className="relative w-full flex gap-2 justify-center items-center bg-bg-2400 dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">

@@ -620,6 +620,49 @@ const TransferProcess = ({
               onSubmit={handleSubmit(onSubmit)}
               noValidate
             >
+              <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
+                <label
+                  className="w-full text-sm text-text-200 dark:text-text-800 mb-1 flex items-start"
+                  htmlFor={"accountNumber"}
+                >
+                  Account Number
+                </label>
+                <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
+                  <input
+                    className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
+                    placeholder={
+                      selectedType === "valarpay"
+                        ? "Enter Valarpay Account Number"
+                        : "Enter Bank Account Number"
+                    }
+                    required={true}
+                    type="number"
+                    {...register("accountNumber")}
+                    onKeyDown={handleNumericKeyDown}
+                    onPaste={handleNumericPaste}
+                  />
+
+                  {verifyLoading && watchedAccountNumber.length === 10 && (
+                    <SpinnerLoader width={20} height={20} color="#f76301" />
+                  )}
+
+                  {watchedAccountNumber && !verifyLoading && (
+                    <Image
+                      onClick={onBackPressClick}
+                      src={images.airtime.backPress}
+                      alt="backPress"
+                      className="cursor-pointer"
+                    />
+                  )}
+                </div>
+
+                {errors?.accountNumber?.message ? (
+                  <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
+                    {errors?.accountNumber?.message}
+                  </p>
+                ) : null}
+              </div>
+
               {selectedType === "bank" && (
                 <div
                   ref={dropdownRef}
@@ -629,7 +672,7 @@ const TransferProcess = ({
                     className="w-full text-sm text-text-200 dark:text-text-800 mb-1 flex items-start"
                     htmlFor={"bankCode"}
                   >
-                    Select Banks
+                    Select Recipient Bank
                   </label>
                   <div
                     onClick={() => {
@@ -685,48 +728,6 @@ const TransferProcess = ({
                   )}
                 </div>
               )}
-              <div className="flex flex-col justify-center items-center gap-1 w-full text-black dark:text-white">
-                <label
-                  className="w-full text-sm text-text-200 dark:text-text-800 mb-1 flex items-start"
-                  htmlFor={"accountNumber"}
-                >
-                  Account Number
-                </label>
-                <div className="w-full flex gap-2 justify-center items-center bg-white dark:bg-bg-2100 border border-border-600 rounded-lg py-4 px-3">
-                  <input
-                    className="w-full bg-transparent p-0 border-none outline-none text-base text-text-200 dark:text-white placeholder:text-text-200 dark:placeholder:text-text-1000 placeholder:text-sm"
-                    placeholder={
-                      selectedType === "valarpay"
-                        ? "Enter Valarpay Account Number"
-                        : "Enter Bank Account Number"
-                    }
-                    required={true}
-                    type="number"
-                    {...register("accountNumber")}
-                    onKeyDown={handleNumericKeyDown}
-                    onPaste={handleNumericPaste}
-                  />
-
-                  {verifyLoading && watchedAccountNumber.length === 10 && (
-                    <SpinnerLoader width={20} height={20} color="#f76301" />
-                  )}
-
-                  {watchedAccountNumber && !verifyLoading && (
-                    <Image
-                      onClick={onBackPressClick}
-                      src={images.airtime.backPress}
-                      alt="backPress"
-                      className="cursor-pointer"
-                    />
-                  )}
-                </div>
-
-                {errors?.accountNumber?.message ? (
-                  <p className="flex self-start text-red-500 font-semibold mt-0.5 text-sm">
-                    {errors?.accountNumber?.message}
-                  </p>
-                ) : null}
-              </div>
 
               {/* Account verification badge - shows for both valarpay and bank */}
               {bankData && (
