@@ -103,7 +103,11 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
 
   const toJpegDataUrl = (dataUrl: string): Promise<string> =>
     new Promise((resolve) => {
-      const img = new Image();
+      if (typeof window === "undefined") {
+        resolve(dataUrl);
+        return;
+      }
+      const img = document.createElement("img");
       img.crossOrigin = "anonymous";
       img.onload = () => {
         const canvas = document.createElement("canvas");
