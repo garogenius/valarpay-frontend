@@ -437,16 +437,30 @@ const ProfileSettingsContent = () => {
     const formData = new FormData();
     formData.append("fullName", data.fullname);
     formData.append("phoneNumber", data.phoneNumber || "");
+
+    // Normalize date of birth to YYYY-MM-DD for backend validation
+    const normalizedDob = normalizeDate(data.dateOfBirth || "");
+    if (normalizedDob) formData.append("dateOfBirth", normalizedDob);
+
+    // Map employment status to API expected values
+    const employmentStatusNormalized =
+      data.employmentStatus === "self-employed" ? "self_employed" : data.employmentStatus;
+
     if (isBusinessAccount && data.businessName) formData.append("businessName", data.businessName);
     if (data.address) formData.append("address", data.address);
     if (data.city) formData.append("city", data.city);
     if (data.state) formData.append("state", data.state);
     if (data.postalCode) formData.append("postalCode", data.postalCode);
-    if (data.employmentStatus) formData.append("employmentStatus", data.employmentStatus);
+    if (employmentStatusNormalized) formData.append("employmentStatus", employmentStatusNormalized);
     if (data.occupation) formData.append("occupation", data.occupation);
     if (data.primaryPurpose) formData.append("primaryPurpose", data.primaryPurpose);
     if (data.sourceOfFunds) formData.append("sourceOfFunds", data.sourceOfFunds);
     if (data.expectedMonthlyInflow) formData.append("expectedMonthlyInflow", data.expectedMonthlyInflow.toString());
+
+    // Include passport info when available (required for multi-currency KYC)
+    if (documentNumber) formData.append("passportNumber", documentNumber.trim());
+    if (documentCountry) formData.append("passportCountry", documentCountry.trim());
+
     if (selectedFile) formData.append("profile-image", selectedFile);
     update(formData);
   };
