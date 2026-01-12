@@ -101,7 +101,27 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
     }
   };
 
-  const capturePhoto = () => {
+  const toJpegDataUrl = (dataUrl: string): Promise<string> =>
+    new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/jpeg", 0.92));
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+
+  const capturePhoto = async () => {
     const video = videoRef.current;
     if (video) {
       const canvas = document.createElement("canvas");
@@ -112,9 +132,10 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
         ctx.drawImage(video, 0, 0);
-        const base64Image = canvas.toDataURL("image/png");
-        setPreviewUrl(base64Image);
-        setSelfieImage(base64Image);
+        const pngDataUrl = canvas.toDataURL("image/png");
+        const jpegDataUrl = await toJpegDataUrl(pngDataUrl);
+        setPreviewUrl(jpegDataUrl);
+        setSelfieImage(jpegDataUrl);
         stopCamera();
       }
     }
@@ -123,11 +144,19 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      if (!file.type.startsWith("image/")) {
+        ErrorToast({
+          title: "Invalid File",
+          descriptions: ["Please upload an image file (JPEG, PNG, JPG)."],
+        });
+        return;
+      }
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
         const result = reader.result as string;
-        setPreviewUrl(result);
-        setSelfieImage(result);
+        const jpegDataUrl = await toJpegDataUrl(result);
+        setPreviewUrl(jpegDataUrl);
+        setSelfieImage(jpegDataUrl);
       };
       reader.readAsDataURL(file);
     }
@@ -235,7 +264,7 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
     }
 
     verifyWithSelfie({
-      bvn,
+      bvn: bvn.trim(),
       selfieImage,
       dateOfBirth: formatDateForAPI(dateOfBirth),
     });
