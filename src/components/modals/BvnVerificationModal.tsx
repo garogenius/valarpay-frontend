@@ -171,7 +171,7 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
     isPending: selfiePending,
   } = useBvnVerificationWithSelfie(onFaceIdError, onFaceIdSuccess);
 
-  const handleVerifyWithFaceId = () => {
+  const handleVerifyWithFaceId = async () => {
     if (!bvn || bvn.length !== 11) {
       ErrorToast({
         title: "Invalid BVN",
@@ -188,9 +188,22 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
       return;
     }
 
+    let payloadImage = selfieImage;
+    if (!payloadImage.startsWith("data:image/")) {
+      ErrorToast({
+        title: "Invalid Selfie",
+        descriptions: ["Selfie must be an image (JPEG/PNG/WebP). Please recapture."],
+      });
+      return;
+    }
+    // Force JPEG data URL to match backend expectation
+    if (!payloadImage.startsWith("data:image/jpeg")) {
+      payloadImage = await toJpegDataUrl(payloadImage);
+    }
+
     verifyWithSelfie({
       bvn: bvn.trim(),
-      selfieImage,
+      selfieImage: payloadImage,
     });
   };
 
