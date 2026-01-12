@@ -141,10 +141,11 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
   };
 
   const formatDateForAPI = (date: Date): string => {
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
+    // API expects YYYY-MM-DD
     const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   // Face ID + Selfie flow
