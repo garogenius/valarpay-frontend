@@ -11,13 +11,9 @@ import {
   handleNumericKeyDown,
   handleNumericPaste,
 } from "@/utils/utilityFunctions";
-import { useBvnVerificationWithSelfie, useCreateAccount } from "@/api/wallet/wallet.queries";
-import useUserStore from "@/store/user.store";
+import { useBvnVerificationWithSelfie } from "@/api/wallet/wallet.queries";
 import { FaCamera, FaUpload, FaTimes } from "react-icons/fa";
 import Image from "next/image";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import useOnClickOutside from "@/hooks/useOnClickOutside";
 
 interface BvnVerificationModalProps {
   isOpen: boolean;
@@ -25,40 +21,23 @@ interface BvnVerificationModalProps {
   onSuccess?: () => void;
 }
 
-type VerificationMethod = "otp" | "faceid" | null;
-
 const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
 }) => {
-  const { user } = useUserStore();
   const [bvn, setBvn] = useState("");
-  const [verificationMethod, setVerificationMethod] = useState<VerificationMethod>(null);
   const [selfieImage, setSelfieImage] = useState<string>("");
-  const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
-  const datePickerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useOnClickOutside(datePickerRef as React.RefObject<HTMLElement>, () => {
-    setShowDatePicker(false);
-  });
-
-  const ngnWallet = user?.wallet?.find((w) => w.currency === "NGN");
-  const hasNgnWallet = !!ngnWallet;
 
   const resetForm = () => {
     setBvn("");
-    setVerificationMethod(null);
     setSelfieImage("");
-    setDateOfBirth(null);
     setPreviewUrl("");
-    setShowDatePicker(false);
     stopCamera();
   };
 
@@ -166,21 +145,6 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
     }
   };
 
-  const handleDateChange = (date: Date | null) => {
-    if (date) {
-      setDateOfBirth(date);
-      setShowDatePicker(false);
-    }
-  };
-
-  const formatDateForAPI = (date: Date): string => {
-    // API expects YYYY-MM-DD
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
   // Face ID + Selfie flow
   const onFaceIdError = (error: any) => {
     const errorMessage = error?.response?.data?.message;
@@ -207,41 +171,6 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
     isPending: selfiePending,
   } = useBvnVerificationWithSelfie(onFaceIdError, onFaceIdSuccess);
 
-  // OTP / Create Account flow
-  const onCreateAccountError = (error: any) => {
-    const errorMessage = error?.response?.data?.message;
-    const descriptions = Array.isArray(errorMessage)
-      ? errorMessage
-      : [errorMessage];
-    
-    // Handle 406 - wallet already exists
-    if (error?.response?.status === 406) {
-      ErrorToast({
-        title: "Wallet Already Exists",
-        descriptions: ["You already have an NGN wallet. No need to create another one."],
-      });
-    } else {
-      ErrorToast({
-        title: "Account Creation Failed",
-        descriptions,
-      });
-    }
-  };
-
-  const onCreateAccountSuccess = (data: any) => {
-    SuccessToast({
-      title: "Account Created Successfully",
-      description: data?.data?.message || "Your account has been created successfully.",
-    });
-    handleClose();
-    onSuccess?.();
-  };
-
-  const {
-    mutate: createAccount,
-    isPending: createAccountPending,
-  } = useCreateAccount(onCreateAccountError, onCreateAccountSuccess);
-
   const handleVerifyWithFaceId = () => {
     if (!bvn || bvn.length !== 11) {
       ErrorToast({
@@ -259,44 +188,14 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
       return;
     }
 
-    if (!dateOfBirth) {
-      ErrorToast({
-        title: "Date of Birth Required",
-        descriptions: ["Please select your date of birth"],
-      });
-      return;
-    }
-
     verifyWithSelfie({
       bvn: bvn.trim(),
       selfieImage,
-      dateOfBirth: formatDateForAPI(dateOfBirth),
     });
   };
 
-  const handleVerifyWithOtp = () => {
-    if (!bvn || bvn.length !== 11) {
-      ErrorToast({
-        title: "Invalid BVN",
-        descriptions: ["BVN must be exactly 11 digits"],
-      });
-      return;
-    }
-
-    if (hasNgnWallet) {
-      ErrorToast({
-        title: "Wallet Already Exists",
-        descriptions: ["You already have an NGN wallet. No need to create another one."],
-      });
-      return;
-    }
-
-    createAccount({ bvn });
-  };
-
-  const isLoading = selfiePending || createAccountPending;
-  const canProceedWithFaceId = bvn.length === 11 && !!selfieImage && !!dateOfBirth;
-  const canProceedWithOtp = bvn.length === 11 && !hasNgnWallet;
+  const isLoading = selfiePending;
+  const canProceedWithFaceId = bvn.length === 11 && !!selfieImage;
 
   if (!isOpen) return null;
 
@@ -350,51 +249,8 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
             </p>
           </div>
 
-          {/* Verification Method Selection */}
-          {bvn.length === 11 && !verificationMethod && (
-            <div className="mb-6 space-y-3">
-              <p className="text-sm text-gray-300 mb-3">Choose verification method:</p>
-              
-              <button
-                onClick={() => setVerificationMethod("faceid")}
-                className="w-full bg-[#2C2C2E] border border-gray-700 rounded-lg px-4 py-4 text-left hover:bg-[#3A3A3C] transition-colors"
-                disabled={isLoading}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-[#FF6B2C]/20 flex items-center justify-center">
-                    <FaCamera className="text-[#FF6B2C] text-lg" />
-                  </div>
-                  <div>
-                    <p className="text-white font-medium">Verify with Face ID</p>
-                    <p className="text-xs text-gray-400">Capture selfie and provide date of birth</p>
-                  </div>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setVerificationMethod("otp")}
-                className="w-full bg-[#2C2C2E] border border-gray-700 rounded-lg px-4 py-4 text-left hover:bg-[#3A3A3C] transition-colors"
-                disabled={isLoading || hasNgnWallet}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-[#FF6B2C]/20 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-[#FF6B2C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-white font-medium">Verify with OTP</p>
-                    <p className="text-xs text-gray-400">
-                      {hasNgnWallet ? "Wallet already exists" : "Create account with BVN verification"}
-                    </p>
-                  </div>
-                </div>
-              </button>
-            </div>
-          )}
-
-          {/* Face ID Flow */}
-          {verificationMethod === "faceid" && (
+          {/* Face verification flow (always used) */}
+          {bvn.length === 11 && (
             <div className="space-y-4 mb-6">
               {/* Selfie Capture */}
               <div>
@@ -475,37 +331,6 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
                 )}
               </div>
 
-              {/* Date of Birth */}
-              <div>
-                <label className="block text-sm text-gray-300 mb-2">Date of Birth</label>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setShowDatePicker(!showDatePicker)}
-                    className="w-full bg-[#2C2C2E] border border-gray-700 rounded-lg px-4 py-3 text-left text-white"
-                    disabled={isLoading}
-                  >
-                    {dateOfBirth
-                      ? formatDateForAPI(dateOfBirth)
-                      : "Select Date of Birth (DD-MM-YYYY)"}
-                  </button>
-                  {showDatePicker && (
-                    <div ref={datePickerRef} className="absolute z-10 mt-1">
-                      <DatePicker
-                        selected={dateOfBirth}
-                        onChange={handleDateChange}
-                        inline
-                        showYearDropdown
-                        scrollableYearDropdown
-                        yearDropdownItemNumber={100}
-                        dropdownMode="select"
-                        openToDate={new Date(2000, 0, 1)}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
               {/* Verify Button */}
               <CustomButton
                 onClick={handleVerifyWithFaceId}
@@ -513,43 +338,9 @@ const BvnVerificationModal: React.FC<BvnVerificationModalProps> = ({
                 isLoading={isLoading}
                 className="w-full"
               >
-                Verify with Face ID
+                Verify with Face
               </CustomButton>
             </div>
-          )}
-
-          {/* OTP Flow */}
-          {verificationMethod === "otp" && (
-            <div className="mb-6">
-              <p className="text-sm text-gray-400 mb-4">
-                Click below to create your account. An OTP will be sent to the phone number linked to your BVN.
-              </p>
-              <CustomButton
-                onClick={handleVerifyWithOtp}
-                disabled={!canProceedWithOtp || isLoading}
-                isLoading={isLoading}
-                className="w-full"
-              >
-                Verify with OTP
-              </CustomButton>
-            </div>
-          )}
-
-          {/* Back Button */}
-          {verificationMethod && (
-            <button
-              onClick={() => {
-                setVerificationMethod(null);
-                setSelfieImage("");
-                setPreviewUrl("");
-                setDateOfBirth(null);
-                stopCamera();
-              }}
-              className="w-full mt-3 bg-[#2C2C2E] text-white px-4 py-3 rounded-lg hover:bg-[#3A3A3C] transition-colors"
-              disabled={isLoading}
-            >
-              Back
-            </button>
           )}
         </motion.div>
       </div>
