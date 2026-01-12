@@ -56,14 +56,16 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const providerLabel = useMemo(() => {
     if (!provider) return "";
+    const fromBillerName = String((provider as any).billerName || "").trim();
+    if (fromBillerName) return fromBillerName;
+    const fromBillerCode = String((provider as any).billerCode || "").trim();
+    if (fromBillerCode) return fromBillerCode;
     const fromPlanName = String((provider as any).planName || "").trim();
     if (fromPlanName) return fromPlanName;
     const fromShortName = String((provider as any).shortName || "").trim();
     if (fromShortName) return fromShortName;
     const fromDesc = String((provider as any).description || "").trim();
     if (fromDesc) return fromDesc;
-    const fromBillerCode = String((provider as any).billerCode || "").trim();
-    if (fromBillerCode) return fromBillerCode;
     return "Internet";
   }, [provider]);
 
@@ -199,9 +201,7 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   }}
                   className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
                 >
-                  {String((p as any).billerCode || "").trim() ||
-                    String((p as any).name || "").split(" ")[0] ||
-                    "Internet"}
+                  {String((p as any).billerName || p?.billerCode || "").trim() || "Internet"}
                 </button>
               ))
             )}
