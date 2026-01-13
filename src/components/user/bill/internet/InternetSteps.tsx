@@ -82,9 +82,14 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const amount = useMemo(() => {
     if (!plan) return 0;
-    // Try payAmount first, then amount as fallback
-    const payAmount = Number((plan as any).payAmount || 0);
-    const baseAmount = Number((plan as any).amount || 0);
+    // Try payAmount first, then amount as fallback (support alt keys)
+    const payAmount = Number(
+      (plan as any).payAmount ??
+        (plan as any).pay_amount ??
+        (plan as any).payamount ??
+        0
+    );
+    const baseAmount = Number((plan as any).amount ?? 0);
     const finalAmount = payAmount > 0 ? payAmount : baseAmount;
     return Number.isFinite(finalAmount) ? finalAmount : 0;
   }, [plan]);
@@ -205,7 +210,14 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   }}
                   className="w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1E] transition-colors"
                 >
-                  {String((p as any).billerName || p?.billerCode || "").trim() || "Internet"}
+                  {String(
+                    (p as any).planName ||
+                      (p as any).billerName ||
+                      (p as any).biller_code ||
+                      (p as any).billerCode ||
+                      (p as any).shortName ||
+                      ""
+                  ).trim() || "Internet"}
                 </button>
               ))
             )}
