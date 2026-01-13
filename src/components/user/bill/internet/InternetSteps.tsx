@@ -56,14 +56,15 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const providerLabel = useMemo(() => {
     if (!provider) return "";
-    const fromBillerName = String((provider as any).billerName || "").trim();
-    if (fromBillerName) return fromBillerName;
-    const fromBillerCode = String((provider as any).billerCode || "").trim();
-    if (fromBillerCode) return fromBillerCode;
+    // Prioritize planName first as requested
     const fromPlanName = String((provider as any).planName || "").trim();
     if (fromPlanName) return fromPlanName;
-    const fromShortName = String((provider as any).shortName || "").trim();
+    const fromBillerName = String((provider as any).biller_name || (provider as any).billerName || "").trim();
+    if (fromBillerName) return fromBillerName;
+    const fromShortName = String((provider as any).short_name || (provider as any).shortName || "").trim();
     if (fromShortName) return fromShortName;
+    const fromBillerCode = String((provider as any).biller_code || (provider as any).billerCode || "").trim();
+    if (fromBillerCode) return fromBillerCode;
     const fromDesc = String((provider as any).description || "").trim();
     if (fromDesc) return fromDesc;
     return "Internet";
@@ -81,8 +82,11 @@ const InternetSteps: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const amount = useMemo(() => {
     if (!plan) return 0;
-    const base = Number((plan as any).amount || 0);
-    return Number.isFinite(base) ? base : 0;
+    // Try payAmount first, then amount as fallback
+    const payAmount = Number((plan as any).payAmount || 0);
+    const baseAmount = Number((plan as any).amount || 0);
+    const finalAmount = payAmount > 0 ? payAmount : baseAmount;
+    return Number.isFinite(finalAmount) ? finalAmount : 0;
   }, [plan]);
 
   const formatNgn = (v: number) =>
